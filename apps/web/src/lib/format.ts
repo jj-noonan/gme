@@ -7,6 +7,13 @@ export function formatClock(hhmm: string): string {
   return `${hour12}:${String(m).padStart(2, "0")}${suffix}`;
 }
 
+/** Same as formatClock, but from minutes-since-midnight. */
+export function formatClockFromMinutes(totalMinutes: number): string {
+  const h = Math.floor(totalMinutes / 60) % 24;
+  const m = totalMinutes % 60;
+  return formatClock(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+}
+
 export function stationName(code: StationCode): string {
   return STATIONS.find((s) => s.code === code)?.name ?? code;
 }

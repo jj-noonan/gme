@@ -64,7 +64,7 @@ export function TodayBoard({
 
   return (
     <div className="board-list">
-      <BoardHeader />
+      <BoardHeader showTrack />
       {upcomingRows.map((row, i) => {
         const isRecommended =
           direction === "N"
@@ -81,6 +81,9 @@ export function TodayBoard({
             status={statusFor(statuses, row.trainNumber)}
             highlighted={isRecommended}
             band={bands[i]}
+            showTrack
+            userLocation={userLocation}
+            nowMinutes={nowMinutes}
           />
         );
       })}

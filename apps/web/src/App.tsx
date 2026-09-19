@@ -40,8 +40,12 @@ export function App() {
         {rows && activeTab === "S_TODAY" && (
           <TodayBoard rows={rows} direction="S" statuses={statuses} userLocation={location} />
         )}
-        {rows && activeTab === "N_TIMETABLE" && <TimetableBoard rows={rows} direction="N" />}
-        {rows && activeTab === "S_TIMETABLE" && <TimetableBoard rows={rows} direction="S" />}
+        {rows && activeTab === "N_TIMETABLE" && (
+          <TimetableBoard rows={rows} direction="N" userLocation={location} />
+        )}
+        {rows && activeTab === "S_TIMETABLE" && (
+          <TimetableBoard rows={rows} direction="S" userLocation={location} />
+        )}
       </main>
     </div>
   );

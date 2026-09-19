@@ -1,29 +1,90 @@
 import { describe, expect, it } from "vitest";
-import { reshapeAmtrakerResponse, type AmtrakerResponse } from "./statusReshape.js";
+import { minutesBetweenISO, reshapeAmtrakerResponse, type AmtrakerResponse } from "./statusReshape.js";
 
-function stop(code: string, overrides: Partial<Record<string, string>> = {}) {
+/** Shaped like a real Amtraker station stop (see statusReshape.ts for field notes). */
+function stop(code: string, overrides: Partial<Record<string, string | null>> = {}) {
   return {
     code,
     schArr: null,
     schDep: null,
-    estArr: null,
-    estDep: null,
-    postArr: null,
-    postDep: null,
-    arrCmnt: null,
-    depCmnt: null,
+    arr: null,
+    dep: null,
+    status: null,
+    platform: null,
     ...overrides,
   };
 }
 
+describe("minutesBetweenISO", () => {
+  it("returns null when either side is missing", () => {
+    expect(minutesBetweenISO(null, "2026-09-19T09:00:00-05:00")).toBeNull();
+    expect(minutesBetweenISO("2026-09-19T09:00:00-05:00", null)).toBeNull();
+  });
+
+  it("computes a positive delta for a late train", () => {
+    expect(minutesBetweenISO("2026-09-19T13:55:00-05:00", "2026-09-19T14:06:00-05:00")).toBe(11);
+  });
+
+  it("computes a negative delta for an early train", () => {
+    expect(minutesBetweenISO("2026-09-19T15:48:00-05:00", "2026-09-19T15:13:00-05:00")).toBe(-35);
+  });
+
+  it("handles differing timezone offsets", () => {
+    expect(minutesBetweenISO("2026-09-19T12:00:00-05:00", "2026-09-19T13:00:00-04:00")).toBe(0);
+  });
+});
+
 describe("reshapeAmtrakerResponse", () => {
-  it("keeps a tracked train that is present in the feed", () => {
+  it("derives lateness from scheduled vs expected departure", () => {
     const response: AmtrakerResponse = {
-      "48": [{ trainNum: "48", stations: [stop("ALB", { estArr: "04:10P" }), stop("NYP")] }],
+      "69": [
+        {
+          trainNum: "69",
+          stations: [
+            stop("NYP", {
+              schDep: "2026-09-19T08:15:00-04:00",
+              dep: "2026-09-19T08:27:00-04:00",
+              status: "Departed",
+              platform: "7",
+            }),
+          ],
+        },
+      ],
     };
-    const [status] = reshapeAmtrakerResponse(response, [48], false);
-    expect(status.isTracked).toBe(true);
-    expect(status.perStation[0]).toMatchObject({ stationCode: "ALB", estimated: "04:10P" });
+    const [status] = reshapeAmtrakerResponse(response, [69], false);
+    expect(status.perStation[0]).toMatchObject({
+      stationCode: "NYP",
+      delayMinutes: 12,
+      stopStatus: "Departed",
+      track: "7",
+    });
+  });
+
+  it("falls back to arrival timing for a terminal stop with no departure", () => {
+    const response: AmtrakerResponse = {
+      "68": [
+        {
+          trainNum: "68",
+          stations: [
+            stop("NYP", {
+              schArr: "2026-09-19T22:15:00-04:00",
+              arr: "2026-09-19T22:10:00-04:00",
+              status: "Enroute",
+            }),
+          ],
+        },
+      ],
+    };
+    const [status] = reshapeAmtrakerResponse(response, [68], false);
+    expect(status.perStation[0].delayMinutes).toBe(-5);
+  });
+
+  it("treats an empty platform string as no track assigned yet", () => {
+    const response: AmtrakerResponse = {
+      "69": [{ trainNum: "69", stations: [stop("NYP", { platform: "" })] }],
+    };
+    const [status] = reshapeAmtrakerResponse(response, [69], false);
+    expect(status.perStation[0].track).toBeNull();
   });
 
   it("marks a tracked train not yet in the feed as untracked-today rather than dropping it", () => {
@@ -36,7 +97,6 @@ describe("reshapeAmtrakerResponse", () => {
       "48": [{ trainNum: "48", stations: [stop("ALB"), stop("NYP")] }],
       "448": [{ trainNum: "448", stations: [stop("ALB"), stop("BOS")] }],
     };
-    // Only 48 is in the tracked list — 448 (the Boston section) is excluded by construction.
     const statuses = reshapeAmtrakerResponse(response, [48], false);
     expect(statuses.map((s) => s.trainNumber)).toEqual([48]);
   });

@@ -24,10 +24,16 @@ export interface ScheduleRow {
 
 export interface StationStatus {
   stationCode: string;
-  scheduled: string | null;
-  estimated: string | null;
-  actual: string | null;
-  comment: string | null;
+  /** ISO timestamp as scheduled. */
+  scheduledDeparture: string | null;
+  /** ISO timestamp: actual once past, estimated while upcoming. */
+  expectedDeparture: string | null;
+  /** Positive = late, negative = early, null = no live timing. */
+  delayMinutes: number | null;
+  /** "Departed" | "Enroute" | "Station" */
+  stopStatus: string | null;
+  /** Track/platform, when Amtrak has assigned one yet. */
+  track: string | null;
 }
 
 export interface TrainStatus {

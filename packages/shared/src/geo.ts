@@ -11,6 +11,12 @@ export const ASSUMED_NYC_TRANSIT_MINUTES = 50;
 /** Door-to-door buffer baked into every trip time, matching the original hand-built sheet. */
 export const TRIP_BUFFER_MINUTES = 15;
 
+/**
+ * Slack on top of the NYC subway estimate. Smaller than the drive-side buffer
+ * because Penn Station is walk-in — you're not parking a car.
+ */
+export const NYC_STATION_BUFFER_MINUTES = 10;
+
 /** Rough average speed for the rural VT/NY roads around these stations. Tune freely. */
 export const DEFAULT_AVG_DRIVE_MPH = 42;
 

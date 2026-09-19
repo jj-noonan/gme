@@ -1,16 +1,24 @@
 import type { StationStatus, TrainStatus } from "./types.js";
 
-/** Minimal shape of what we read off Amtraker's `/v3/trains` response. */
+/**
+ * What Amtraker's `/v3/trains` actually returns per station stop.
+ *
+ * Note this differs from the project handoff notes, which described
+ * `estArr`/`estDep`/`postArr`/`postDep` and plain-English `*Cmnt` strings.
+ * None of those exist in the live feed: timing is `schArr`/`schDep`
+ * (scheduled) vs `arr`/`dep` (actual once past, estimated while upcoming),
+ * and the comment fields are always empty in practice.
+ */
 export interface AmtrakerStationStop {
   code: string;
   schArr: string | null;
   schDep: string | null;
-  estArr: string | null;
-  estDep: string | null;
-  postArr: string | null;
-  postDep: string | null;
-  arrCmnt: string | null;
-  depCmnt: string | null;
+  arr: string | null;
+  dep: string | null;
+  /** "Departed" | "Enroute" | "Station" */
+  status: string | null;
+  /** Track/platform. Rarely populated — Amtrak assigns it close to departure. */
+  platform: string | null;
 }
 
 export interface AmtrakerTrain {
@@ -21,13 +29,28 @@ export interface AmtrakerTrain {
 /** Keyed by train number (as a string) → active journeys for that number today. */
 export type AmtrakerResponse = Record<string, AmtrakerTrain[]>;
 
+/** Whole minutes between two ISO timestamps, or null if either is missing. */
+export function minutesBetweenISO(from: string | null, to: string | null): number | null {
+  if (!from || !to) return null;
+  const a = Date.parse(from);
+  const b = Date.parse(to);
+  if (Number.isNaN(a) || Number.isNaN(b)) return null;
+  return Math.round((b - a) / 60_000);
+}
+
 function toStationStatus(stop: AmtrakerStationStop): StationStatus {
+  // Departure timing is what matters where you board; fall back to arrival
+  // for terminal stops, which have no departure.
+  const delayMinutes =
+    minutesBetweenISO(stop.schDep, stop.dep) ?? minutesBetweenISO(stop.schArr, stop.arr);
+
   return {
     stationCode: stop.code,
-    scheduled: stop.schArr ?? stop.schDep ?? null,
-    estimated: stop.estArr ?? stop.estDep ?? null,
-    actual: stop.postArr ?? stop.postDep ?? null,
-    comment: stop.arrCmnt ?? stop.depCmnt ?? null,
+    scheduledDeparture: stop.schDep ?? stop.schArr ?? null,
+    expectedDeparture: stop.dep ?? stop.arr ?? null,
+    delayMinutes,
+    stopStatus: stop.status || null,
+    track: stop.platform || null,
   };
 }
 

@@ -8,6 +8,14 @@
   --amber: #f5b400;
   --rule: #332d1e;
   --header-ink: #8a8062;
+
+  /* Shared column widths so the header placard lines up with the rows.
+     These must be rem, not em: the header sits at a smaller font-size, so
+     em would resolve to a different pixel width there than in the rows. */
+  --col-leave: 4.7rem;
+  --col-depart: 5.8rem;
+  --col-track: 2.6rem;
+  --col-status: 9.6rem;
 }
 
 * {
@@ -115,17 +123,29 @@ body {
   margin-bottom: 2px;
 }
 
+.board-header__leave {
+  flex: 0 0 auto;
+  width: var(--col-leave);
+  color: var(--amber);
+}
+
 .board-header__time {
   flex: 0 0 auto;
-  width: 4.2em;
+  width: var(--col-depart);
 }
 
 .board-header__main {
   flex: 1 1 auto;
 }
 
+.board-header__track {
+  flex: 0 0 auto;
+  width: var(--col-track);
+}
+
 .board-header__status {
   flex: 0 0 auto;
+  width: var(--col-status);
 }
 
 .board-row {
@@ -148,8 +168,46 @@ body {
   box-shadow: inset 0 0 0 1px rgba(245, 180, 0, 0.15);
 }
 
+.board-row__leave {
+  flex: 0 0 auto;
+  width: var(--col-leave);
+}
+
 .board-row__time {
   flex: 0 0 auto;
+  width: var(--col-depart);
+}
+
+.board-row__track {
+  flex: 0 0 auto;
+  width: var(--col-track);
+}
+
+/* The leave-by time is the actionable number, so it gets the amber. */
+.board-row__leave .flap-tile__face {
+  color: var(--amber);
+}
+
+/* Column labels: hidden on wide screens where the header bar covers it,
+   shown inline once rows stack on narrow screens. */
+.board-row__minilabel {
+  display: none;
+  font-family: "Oswald", sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--header-ink);
+  margin-right: 0.35rem;
+}
+
+/* A train you can no longer reach in time still shows, but reads as spent. */
+.board-row--missed {
+  opacity: 0.45;
+}
+
+.board-row--missed .board-row__leave .flap-tile__face {
+  color: var(--header-ink);
+  text-decoration: line-through;
 }
 
 .board-row__arrival {
@@ -179,6 +237,7 @@ body {
 
 .board-row__status {
   flex: 0 0 auto;
+  width: var(--col-status);
   margin-left: auto;
 }
 
@@ -243,15 +302,55 @@ body {
   }
 }
 
-@media (max-width: 480px) {
+/* Five flap columns need roughly 700px; below that the row becomes a
+   stacked card and the column labels move inline onto each field. */
+@media (max-width: 700px) {
+  .board-header {
+    display: none;
+  }
+
   .board-row {
     flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.35rem 1.1rem;
+    padding: 0.7rem 0.75rem;
   }
+
+  .board-row__minilabel {
+    display: inline;
+  }
+
+  /* Stacked cards size to content rather than the desktop column grid. */
+  .board-row__leave,
+  .board-row__time,
+  .board-row__track,
   .board-row__status {
-    margin-left: 0;
-    flex-basis: 100%;
+    width: auto;
   }
-  .board-header__status {
+
+  .board-row__main {
+    flex-basis: 100%;
+    order: 3;
+  }
+
+  .board-row__track {
+    order: 4;
+  }
+
+  .board-row__status {
+    order: 5;
     margin-left: auto;
+  }
+}
+
+/* Phone: shrink the flap cells so a 22-character train name still fits. */
+@media (max-width: 430px) {
+  .flap-tile {
+    width: 0.66em;
+  }
+
+  .board-row__train .flap-tile,
+  .board-row__status .flap-tile {
+    font-size: 0.92rem;
   }
 }
