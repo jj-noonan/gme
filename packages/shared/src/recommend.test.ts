@@ -1,7 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { pickNorthboundRecommendation, pickSouthboundRecommendation } from "./recommend.js";
+import { minutesBetweenClockTimes, pickNorthboundRecommendation, pickSouthboundRecommendation } from "./recommend.js";
 import { STATIONS } from "./stations.js";
 import type { ScheduleRow } from "./types.js";
+
+describe("minutesBetweenClockTimes", () => {
+  it("computes a same-day duration (Adirondack 69, NYP-ALB)", () => {
+    expect(minutesBetweenClockTimes("08:15", "11:45")).toBe(3 * 60 + 30);
+  });
+
+  it("wraps past midnight (Empire 245, NYP 11:25P - ALB 1:56A)", () => {
+    expect(minutesBetweenClockTimes("23:25", "01:56")).toBe(2 * 60 + 31);
+  });
+
+  it("is zero for identical times", () => {
+    expect(minutesBetweenClockTimes("10:00", "10:00")).toBe(0);
+  });
+});
 
 function row(overrides: Partial<ScheduleRow>): ScheduleRow {
   return {

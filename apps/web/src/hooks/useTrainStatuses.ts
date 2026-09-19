@@ -10,13 +10,19 @@ export function useTrainStatuses(enabled: boolean) {
     if (!enabled) return;
 
     let cancelled = false;
+    const fetchOnce = () =>
+      fetch(`${STATUS_API_URL}/status`).then((res) => {
+        if (!res.ok) throw new Error(`status-api responded ${res.status}`);
+        return res.json() as Promise<{ statuses: TrainStatus[] }>;
+      });
+
+    // The status-api scales to zero, so the first request after idle can
+    // occasionally lose a race with the machine cold-starting. One retry
+    // covers that without doing anything special for a genuinely-down API.
     const fetchStatuses = () => {
-      fetch(`${STATUS_API_URL}/status`)
-        .then((res) => {
-          if (!res.ok) throw new Error(`status-api responded ${res.status}`);
-          return res.json();
-        })
-        .then((data: { statuses: TrainStatus[] }) => {
+      fetchOnce()
+        .catch(() => new Promise((resolve) => setTimeout(resolve, 2000)).then(fetchOnce))
+        .then((data) => {
           if (!cancelled) {
             setStatuses(data.statuses);
             setError(null);

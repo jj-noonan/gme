@@ -1,5 +1,6 @@
 import {
   matchesDay,
+  parseHHMM,
   pickNorthboundRecommendation,
   pickSouthboundRecommendation,
   type Coordinate,
@@ -8,6 +9,8 @@ import {
   type TrainStatus,
 } from "@gme/shared";
 import { useMemo } from "react";
+import { computeRowBands } from "../lib/rowBands.js";
+import { BoardHeader } from "./BoardHeader.js";
 import { TrainRow } from "./TrainRow.js";
 
 function statusFor(statuses: TrainStatus[], trainNumber: number): TrainStatus | undefined {
@@ -45,13 +48,24 @@ export function TodayBoard({
     return rec ? { trainNumber: rec.row.trainNumber, stationCode: rec.row.stationCode } : null;
   }, [todaysRows, direction, userLocation, nowMinutes]);
 
+  // Already-departed trains aren't useful on the "today" board — the
+  // Timetable tabs are the reference view for the full schedule.
+  const upcomingRows = todaysRows.filter((r) => parseHHMM(r.scheduledDeparture) >= nowMinutes);
+
   if (todaysRows.length === 0) {
     return <p className="board-empty">No trains running today.</p>;
   }
 
+  if (upcomingRows.length === 0) {
+    return <p className="board-empty">No more trains today.</p>;
+  }
+
+  const bands = computeRowBands(upcomingRows);
+
   return (
     <div className="board-list">
-      {todaysRows.map((row, i) => {
+      <BoardHeader />
+      {upcomingRows.map((row, i) => {
         const isRecommended =
           direction === "N"
             ? recommended === row.trainNumber
@@ -66,6 +80,7 @@ export function TodayBoard({
             row={row}
             status={statusFor(statuses, row.trainNumber)}
             highlighted={isRecommended}
+            band={bands[i]}
           />
         );
       })}

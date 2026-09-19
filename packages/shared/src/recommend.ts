@@ -7,6 +7,13 @@ export function parseHHMM(time: string): number {
   return h * 60 + m;
 }
 
+/** Minutes from `start` to `end`, both "HH:MM" clock times, wrapping past midnight. */
+export function minutesBetweenClockTimes(start: string, end: string): number {
+  const s = parseHHMM(start);
+  const e = parseHHMM(end);
+  return e >= s ? e - s : e + 24 * 60 - s;
+}
+
 /**
  * Northbound (NYP -> VT/NY): single origin, so there's no station choice —
  * just the next train you can still reach NYP in time to catch, assuming

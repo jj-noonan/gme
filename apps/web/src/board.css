@@ -1,10 +1,13 @@
 :root {
-  --board-bg: #0c0b08;
-  --tile-bg: #1c1a15;
-  --tile-bg-active: #2b2717;
-  --ink: #e8e1d0;
-  --amber: #f4c542;
-  --rule: #3a3527;
+  --board-bg: #080705;
+  --tile-bg: #17150f;
+  --tile-bg-active: #241f13;
+  --flap-face: #131210;
+  --flap-face-active: #1e1a10;
+  --ink: #eee6d3;
+  --amber: #f5b400;
+  --rule: #332d1e;
+  --header-ink: #8a8062;
 }
 
 * {
@@ -31,19 +34,23 @@ body {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  /* Subtle vignette so the board reads as a lit case, not a flat rectangle. */
+  background: radial-gradient(ellipse at 50% -10%, #1a170f 0%, var(--board-bg) 65%);
 }
 
 .tab-bar {
   display: flex;
   flex: 0 0 auto;
   border-bottom: 2px solid var(--rule);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .tab {
   flex: 1 1 0;
+  position: relative;
   padding: 0.9rem 0.5rem;
   background: var(--tile-bg);
-  color: var(--ink);
+  color: var(--header-ink);
   border: none;
   border-right: 1px solid var(--rule);
   font-family: "Oswald", sans-serif;
@@ -60,6 +67,17 @@ body {
 .tab--active {
   background: var(--tile-bg-active);
   color: var(--amber);
+}
+
+.tab--active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--amber);
+  box-shadow: 0 0 6px rgba(245, 180, 0, 0.7);
 }
 
 .board-main {
@@ -83,22 +101,63 @@ body {
   gap: 2px;
 }
 
+.board-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.3rem 0.75rem 0.4rem;
+  color: var(--header-ink);
+  font-family: "Oswald", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 2px;
+}
+
+.board-header__time {
+  flex: 0 0 auto;
+  width: 4.2em;
+}
+
+.board-header__main {
+  flex: 1 1 auto;
+}
+
+.board-header__status {
+  flex: 0 0 auto;
+}
+
 .board-row {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.6rem 0.75rem;
+  padding: 0.55rem 0.75rem;
   background: var(--tile-bg);
   border-left: 4px solid transparent;
+}
+
+/* Alternating band per train number — same physical train, several stops. */
+.board-row--band {
+  background: #1a1710;
 }
 
 .board-row--recommended {
   background: var(--tile-bg-active);
   border-left-color: var(--amber);
+  box-shadow: inset 0 0 0 1px rgba(245, 180, 0, 0.15);
 }
 
 .board-row__time {
   flex: 0 0 auto;
+}
+
+.board-row__arrival {
+  margin-top: 0.2rem;
+  font-family: "Oswald", sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+  color: var(--header-ink);
 }
 
 .board-row__main {
@@ -125,18 +184,44 @@ body {
 
 .flap-text {
   display: inline-flex;
+  gap: 1px;
 }
 
 .flap-tile {
   display: inline-block;
-  width: 0.68em;
-  perspective: 200px;
+  width: 0.72em;
+  perspective: 240px;
 }
 
 .flap-tile__face {
+  position: relative;
   display: block;
+  padding: 0.05em 0;
+  background: var(--flap-face);
+  border-radius: 1px;
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  font-weight: 700;
+  text-align: center;
   transform-style: preserve-3d;
   will-change: transform;
+}
+
+/* The crease where a physical flap card folds in half. */
+.flap-tile__face::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.55);
+  transform: translateY(-0.5px);
+}
+
+.board-row--recommended .flap-tile__face {
+  background: var(--flap-face-active);
 }
 
 .flap-tile--flipping .flap-tile__face {
@@ -165,5 +250,8 @@ body {
   .board-row__status {
     margin-left: 0;
     flex-basis: 100%;
+  }
+  .board-header__status {
+    margin-left: auto;
   }
 }

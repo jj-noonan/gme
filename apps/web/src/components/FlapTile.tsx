@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 const FLIP_DURATION_MS = 360;
 
-export function FlapTile({ char }: { char: string }) {
+export function FlapTile({ char, delayMs = 0 }: { char: string; delayMs?: number }) {
   const [display, setDisplay] = useState(char);
   const [flipping, setFlipping] = useState(false);
   const prevChar = useRef(char);
@@ -14,13 +14,16 @@ export function FlapTile({ char }: { char: string }) {
     const timeout = setTimeout(() => {
       setDisplay(char);
       setFlipping(false);
-    }, FLIP_DURATION_MS / 2);
+    }, delayMs + FLIP_DURATION_MS / 2);
     return () => clearTimeout(timeout);
-  }, [char]);
+  }, [char, delayMs]);
 
   return (
     <span className={`flap-tile${flipping ? " flap-tile--flipping" : ""}`}>
-      <span className="flap-tile__face">{display === " " ? " " : display}</span>
+      <span
+        className="flap-tile__face"
+        style={flipping ? { animationDelay: `${delayMs}ms` } : undefined}
+      >{display === " " ? " " : display}</span>
     </span>
   );
 }

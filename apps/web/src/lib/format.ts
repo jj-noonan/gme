@@ -10,3 +10,10 @@ export function formatClock(hhmm: string): string {
 export function stationName(code: StationCode): string {
   return STATIONS.find((s) => s.code === code)?.name ?? code;
 }
+
+/** Matches the original timetable's own duration notation, e.g. "5H 10M". */
+export function formatDuration(totalMinutes: number): string {
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}H ${minutes}M`;
+}
