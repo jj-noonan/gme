@@ -16,12 +16,23 @@ export function useTrainStatuses(enabled: boolean) {
         return res.json() as Promise<{ statuses: TrainStatus[] }>;
       });
 
-    // The status-api scales to zero, so the first request after idle can
-    // occasionally lose a race with the machine cold-starting. One retry
-    // covers that without doing anything special for a genuinely-down API.
+    // The status-api scales to zero. A cold-start (observed up to ~4-5s) can
+    // lose the race and surface as a 503, sometimes more than once if the
+    // machine was already mid-restart. A couple of backed-off retries covers
+    // that without doing anything special for a genuinely-down API.
+    const RETRY_DELAYS_MS = [1500, 3000, 5000];
+    const fetchWithRetries = async (attempt = 0): Promise<{ statuses: TrainStatus[] }> => {
+      try {
+        return await fetchOnce();
+      } catch (err) {
+        if (attempt >= RETRY_DELAYS_MS.length) throw err;
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
+        return fetchWithRetries(attempt + 1);
+      }
+    };
+
     const fetchStatuses = () => {
-      fetchOnce()
-        .catch(() => new Promise((resolve) => setTimeout(resolve, 2000)).then(fetchOnce))
+      fetchWithRetries()
         .then((data) => {
           if (!cancelled) {
             setStatuses(data.statuses);
