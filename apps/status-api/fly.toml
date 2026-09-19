@@ -18,4 +18,4 @@ primary_region = "ewr"
   memory = "256mb"
 
 [env]
-  ALLOWED_ORIGINS = "https://jj-noonan.github.io,http://localhost:5173"
+  ALLOWED_ORIGINS = "https://greenmountain.express,https://www.greenmountain.express,https://jj-noonan.github.io,http://localhost:5173"
