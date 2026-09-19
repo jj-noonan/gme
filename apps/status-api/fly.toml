@@ -27,4 +27,8 @@ primary_region = "ewr"
   memory = "256mb"
 
 [env]
-  ALLOWED_ORIGINS = "https://greenmountain.express,https://www.greenmountain.express,https://jj-noonan.github.io,http://localhost:5173"
+  # http:// variants are temporary: GitHub Pages' HTTPS cert for the custom
+  # domain hasn't finished provisioning yet, so the site is still being
+  # served over plain HTTP. Remove the http:// entries once HTTPS is
+  # confirmed and enforced (see README).
+  ALLOWED_ORIGINS = "https://greenmountain.express,https://www.greenmountain.express,http://greenmountain.express,http://www.greenmountain.express,https://jj-noonan.github.io,http://localhost:5173"
