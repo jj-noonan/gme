@@ -1,0 +1,546 @@
+{
+  "asOf": "2026-09-09",
+  "source": "https://drive.google.com/file/d/1KmoTRXmW4Iro9_ogeCI5BL4luw-Ie3cZ/view (hand-assembled from content.amtrak.com timetable PDFs)",
+  "rows": [
+    {
+      "trainNumber": 63,
+      "service": "MAPLE LEAF",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "07:15",
+      "scheduledArrival": "10:10"
+    },
+    {
+      "trainNumber": 69,
+      "service": "ADIRONDACK",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "08:15",
+      "scheduledArrival": "11:45"
+    },
+    {
+      "trainNumber": 69,
+      "service": "ADIRONDACK",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "WHL",
+      "scheduledDeparture": "08:15",
+      "scheduledArrival": "13:19"
+    },
+    {
+      "trainNumber": 69,
+      "service": "ADIRONDACK",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "FED",
+      "scheduledDeparture": "08:15",
+      "scheduledArrival": "12:56"
+    },
+    {
+      "trainNumber": 281,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "10:20",
+      "scheduledArrival": "13:15"
+    },
+    {
+      "trainNumber": 1233,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "FR/SU/MO",
+      "stationCode": "ALB",
+      "scheduledDeparture": "11:06",
+      "scheduledArrival": "13:50"
+    },
+    {
+      "trainNumber": 233,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "SU-FR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "11:20",
+      "scheduledArrival": "13:51"
+    },
+    {
+      "trainNumber": 56,
+      "service": "VERMONTER",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "BRA",
+      "scheduledDeparture": "11:33",
+      "scheduledArrival": "16:56"
+    },
+    {
+      "trainNumber": 56,
+      "service": "VERMONTER",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "BLF",
+      "scheduledDeparture": "11:33",
+      "scheduledArrival": "17:26"
+    },
+    {
+      "trainNumber": 283,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "13:20",
+      "scheduledArrival": "16:10"
+    },
+    {
+      "trainNumber": 291,
+      "service": "ETHAN ALLEN",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "14:19",
+      "scheduledArrival": "17:04"
+    },
+    {
+      "trainNumber": 291,
+      "service": "ETHAN ALLEN",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "FED",
+      "scheduledDeparture": "14:19",
+      "scheduledArrival": "18:17"
+    },
+    {
+      "trainNumber": 291,
+      "service": "ETHAN ALLEN",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "CNV",
+      "scheduledDeparture": "14:19",
+      "scheduledArrival": "19:08"
+    },
+    {
+      "trainNumber": 291,
+      "service": "ETHAN ALLEN",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "RUD",
+      "scheduledDeparture": "14:19",
+      "scheduledArrival": "19:45"
+    },
+    {
+      "trainNumber": 235,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "15:15",
+      "scheduledArrival": "17:47"
+    },
+    {
+      "trainNumber": 49,
+      "service": "LAKE SHORE",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "15:40",
+      "scheduledArrival": "19:05"
+    },
+    {
+      "trainNumber": 237,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "16:45",
+      "scheduledArrival": "19:10"
+    },
+    {
+      "trainNumber": 239,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "MO-WE",
+      "stationCode": "ALB",
+      "scheduledDeparture": "17:47",
+      "scheduledArrival": "20:28"
+    },
+    {
+      "trainNumber": 239,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "TH/FR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "17:47",
+      "scheduledArrival": "20:33"
+    },
+    {
+      "trainNumber": 241,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "18:46",
+      "scheduledArrival": "21:15"
+    },
+    {
+      "trainNumber": 243,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "21:30",
+      "scheduledArrival": "23:59"
+    },
+    {
+      "trainNumber": 245,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "23:25",
+      "scheduledArrival": "01:56"
+    },
+    {
+      "trainNumber": 233,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "SA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "11:20",
+      "scheduledArrival": "13:54"
+    },
+    {
+      "trainNumber": 54,
+      "service": "VERMONTER",
+      "direction": "N",
+      "daysRaw": "SA/SU",
+      "stationCode": "BRA",
+      "scheduledDeparture": "11:20",
+      "scheduledArrival": "16:56"
+    },
+    {
+      "trainNumber": 54,
+      "service": "VERMONTER",
+      "direction": "N",
+      "daysRaw": "SA/SU",
+      "stationCode": "BLF",
+      "scheduledDeparture": "11:20",
+      "scheduledArrival": "17:26"
+    },
+    {
+      "trainNumber": 239,
+      "service": "EMPIRE",
+      "direction": "N",
+      "daysRaw": "SA/SU",
+      "stationCode": "ALB",
+      "scheduledDeparture": "17:47",
+      "scheduledArrival": "20:33"
+    },
+    {
+      "trainNumber": 230,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "05:00",
+      "scheduledArrival": "07:20"
+    },
+    {
+      "trainNumber": 232,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "05:55",
+      "scheduledArrival": "08:15"
+    },
+    {
+      "trainNumber": 234,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "06:50",
+      "scheduledArrival": "09:21"
+    },
+    {
+      "trainNumber": 236,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "08:15",
+      "scheduledArrival": "10:45"
+    },
+    {
+      "trainNumber": 280,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "10:05",
+      "scheduledArrival": "12:45"
+    },
+    {
+      "trainNumber": 240,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "11:19",
+      "scheduledArrival": "13:49"
+    },
+    {
+      "trainNumber": 238,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "THFR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "12:00",
+      "scheduledArrival": "14:40"
+    },
+    {
+      "trainNumber": 238,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "SU-WE,SA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "12:10",
+      "scheduledArrival": "14:45"
+    },
+    {
+      "trainNumber": 290,
+      "service": "ETHAN ALLEN",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "RUD",
+      "scheduledDeparture": "11:06",
+      "scheduledArrival": "16:27"
+    },
+    {
+      "trainNumber": 290,
+      "service": "ETHAN ALLEN",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "CNV",
+      "scheduledDeparture": "11:24",
+      "scheduledArrival": "16:27"
+    },
+    {
+      "trainNumber": 290,
+      "service": "ETHAN ALLEN",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "FED",
+      "scheduledDeparture": "12:13",
+      "scheduledArrival": "16:27"
+    },
+    {
+      "trainNumber": 290,
+      "service": "ETHAN ALLEN",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "13:49",
+      "scheduledArrival": "16:27"
+    },
+    {
+      "trainNumber": 284,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "SU-WE,SA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "13:05",
+      "scheduledArrival": "15:45"
+    },
+    {
+      "trainNumber": 284,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "THFR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "13:20",
+      "scheduledArrival": "15:55"
+    },
+    {
+      "trainNumber": 55,
+      "service": "VERMONTER",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "BLF",
+      "scheduledDeparture": "12:30",
+      "scheduledArrival": "18:45"
+    },
+    {
+      "trainNumber": 55,
+      "service": "VERMONTER",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "BRA",
+      "scheduledDeparture": "13:02",
+      "scheduledArrival": "18:45"
+    },
+    {
+      "trainNumber": 48,
+      "service": "LAKE SHORE",
+      "direction": "S",
+      "daysRaw": "SU-WE,SA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "16:10",
+      "scheduledArrival": "18:42"
+    },
+    {
+      "trainNumber": 48,
+      "service": "LAKE SHORE",
+      "direction": "S",
+      "daysRaw": "THFR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "16:15",
+      "scheduledArrival": "18:47"
+    },
+    {
+      "trainNumber": 244,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "ALB",
+      "scheduledDeparture": "16:30",
+      "scheduledArrival": "19:05"
+    },
+    {
+      "trainNumber": 1246,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "SUMOFR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "17:14",
+      "scheduledArrival": "19:51"
+    },
+    {
+      "trainNumber": 68,
+      "service": "ADIRONDACK",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "FED",
+      "scheduledDeparture": "17:33",
+      "scheduledArrival": "22:15"
+    },
+    {
+      "trainNumber": 68,
+      "service": "ADIRONDACK",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "WHL",
+      "scheduledDeparture": "17:07",
+      "scheduledArrival": "22:15"
+    },
+    {
+      "trainNumber": 68,
+      "service": "ADIRONDACK",
+      "direction": "S",
+      "daysRaw": "MO-FR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "19:35",
+      "scheduledArrival": "22:15"
+    },
+    {
+      "trainNumber": 64,
+      "service": "MAPLE LEAF",
+      "direction": "S",
+      "daysRaw": "SU-WE,SA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "18:35",
+      "scheduledArrival": "21:16"
+    },
+    {
+      "trainNumber": 64,
+      "service": "MAPLE LEAF",
+      "direction": "S",
+      "daysRaw": "THFR",
+      "stationCode": "ALB",
+      "scheduledDeparture": "18:40",
+      "scheduledArrival": "21:21"
+    },
+    {
+      "trainNumber": 230,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "04:55",
+      "scheduledArrival": "07:15"
+    },
+    {
+      "trainNumber": 240,
+      "service": "EMPIRE",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "11:10",
+      "scheduledArrival": "13:40"
+    },
+    {
+      "trainNumber": 290,
+      "service": "ETHAN ALLEN",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "RUD",
+      "scheduledDeparture": "11:06",
+      "scheduledArrival": "16:32"
+    },
+    {
+      "trainNumber": 290,
+      "service": "ETHAN ALLEN",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "CNV",
+      "scheduledDeparture": "11:24",
+      "scheduledArrival": "16:32"
+    },
+    {
+      "trainNumber": 290,
+      "service": "ETHAN ALLEN",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "FED",
+      "scheduledDeparture": "12:13",
+      "scheduledArrival": "16:32"
+    },
+    {
+      "trainNumber": 290,
+      "service": "ETHAN ALLEN",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "13:59",
+      "scheduledArrival": "16:32"
+    },
+    {
+      "trainNumber": 57,
+      "service": "VERMONTER",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "BLF",
+      "scheduledDeparture": "12:30",
+      "scheduledArrival": "19:01"
+    },
+    {
+      "trainNumber": 57,
+      "service": "VERMONTER",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "BRA",
+      "scheduledDeparture": "13:02",
+      "scheduledArrival": "19:01"
+    },
+    {
+      "trainNumber": 68,
+      "service": "ADIRONDACK",
+      "direction": "S",
+      "daysRaw": "SUSA",
+      "stationCode": "ALB",
+      "scheduledDeparture": "19:40",
+      "scheduledArrival": "22:15"
+    }
+  ]
+}

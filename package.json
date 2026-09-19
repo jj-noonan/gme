@@ -1,0 +1,26 @@
+{
+  "name": "gme",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "predev:web": "npm run build:schedule",
+    "dev:web": "npm run dev -w apps/web",
+    "dev:status-api": "npm run dev -w apps/status-api",
+    "prebuild:web": "npm run build:schedule",
+    "build:web": "npm run build -w apps/web",
+    "build:schedule": "node scripts/build-schedule.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
