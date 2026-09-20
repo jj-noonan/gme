@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { boardingStationCode, computeLeaveBy, leadMinutes, leaveByMinutes } from "./leaveBy.js";
+import {
+  arrivalLegMinutes,
+  boardingStationCode,
+  changeStationCode,
+  computeLeaveBy,
+  doorArrivalMinutes,
+  leadMinutes,
+  leaveByMinutes,
+} from "./leaveBy.js";
 import { STATIONS } from "./stations.js";
 import type { ScheduleRow } from "./types.js";
 
@@ -18,6 +26,39 @@ function row(overrides: Partial<ScheduleRow> = {}): ScheduleRow {
 
 const RUD = STATIONS.find((s) => s.code === "RUD")!;
 
+describe("arrivalLegMinutes / doorArrivalMinutes", () => {
+  it("northbound: drives from the arrival station to the Rutland house", () => {
+    const toRutland = arrivalLegMinutes(row({ direction: "N", stationCode: "RUD" }));
+    const toAlbany = arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }));
+    // Getting off at Rutland is basically already home; Albany is ~2h away.
+    expect(toRutland).toBeLessThan(15);
+    expect(toAlbany).toBeGreaterThan(90);
+  });
+
+  it("southbound: a flat cross-town hop, independent of which station you boarded", () => {
+    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "RUD" }))).toBe(50);
+    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "ALB" }))).toBe(50);
+  });
+
+  it("adds the last leg onto the train's arrival time", () => {
+    const r = row({ direction: "S", scheduledArrival: "16:27" });
+    expect(doorArrivalMinutes(r, 50)).toBe(17 * 60 + 17);
+  });
+
+  it("wraps past midnight", () => {
+    // Empire 245 reaches ALB at 01:56; a 2h drive lands at 03:56.
+    expect(doorArrivalMinutes(row({ scheduledArrival: "23:30" }), 60)).toBe(30);
+  });
+
+  it("always yields whole minutes", () => {
+    for (const station of STATIONS) {
+      const r = row({ direction: "N", stationCode: station.code });
+      expect(Number.isInteger(arrivalLegMinutes(r))).toBe(true);
+      expect(Number.isInteger(doorArrivalMinutes(r, arrivalLegMinutes(r)))).toBe(true);
+    }
+  });
+});
+
 describe("boardingStationCode", () => {
   it("is NYP for northbound, since that's where you actually get on", () => {
     expect(boardingStationCode(row({ direction: "N", stationCode: "ALB" }))).toBe("NYP");
@@ -25,6 +66,11 @@ describe("boardingStationCode", () => {
 
   it("is the tracked station for southbound", () => {
     expect(boardingStationCode(row({ direction: "S", stationCode: "RUD" }))).toBe("RUD");
+  });
+
+  it("changeStationCode is the opposite end — where you get off", () => {
+    expect(changeStationCode(row({ direction: "N", stationCode: "ALB" }))).toBe("ALB");
+    expect(changeStationCode(row({ direction: "S", stationCode: "RUD" }))).toBe("NYP");
   });
 });
 

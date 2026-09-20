@@ -7,7 +7,7 @@ import {
   type Coordinate,
 } from "./geo.js";
 import { parseHHMM } from "./recommend.js";
-import { STATIONS } from "./stations.js";
+import { RUTLAND_HOME, STATIONS } from "./stations.js";
 import type { Direction, ScheduleRow, StationCode } from "./types.js";
 
 const MINUTES_PER_DAY = 24 * 60;
@@ -20,6 +20,14 @@ const MINUTES_PER_DAY = 24 * 60;
  */
 export function boardingStationCode(row: ScheduleRow): StationCode | "NYP" {
   return row.direction === "N" ? "NYP" : row.stationCode;
+}
+
+/**
+ * Where you get *off* the train and change modes — onto a car heading north,
+ * onto the subway heading south. The middle of a door-to-door trip.
+ */
+export function changeStationCode(row: ScheduleRow): StationCode | "NYP" {
+  return row.direction === "N" ? row.stationCode : "NYP";
 }
 
 /**
@@ -78,4 +86,27 @@ export function computeLeaveBy(
   const missed = departure - lead < nowMinutes;
 
   return { minutes, leadMinutes: lead, missed };
+}
+
+/**
+ * The last leg: from where the train drops you to the far-end door. No buffer
+ * — buffers exist so you catch a train, not so you get off one.
+ *
+ * Both ends are fixed places, deliberately independent of live location: the
+ * rider's phone is at the *departure* end, so it can't say how far the arrival
+ * station is from the other home.
+ */
+export function arrivalLegMinutes(row: ScheduleRow): number {
+  if (row.direction === "N") {
+    // Off the train in VT/NY, then drive to the house.
+    return Math.round(driveMinutesToStation(RUTLAND_HOME, row.stationCode) ?? 0);
+  }
+  // Off the train at NYP, then across town to the apartment.
+  return ASSUMED_NYC_TRANSIT_MINUTES;
+}
+
+/** Clock time you actually get to the door, as minutes since midnight. */
+export function doorArrivalMinutes(row: ScheduleRow, legMinutes: number): number {
+  const raw = Math.round(parseHHMM(row.scheduledArrival) + legMinutes);
+  return ((raw % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
 }

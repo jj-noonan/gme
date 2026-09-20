@@ -197,15 +197,11 @@ body {
   overflow: hidden;
 }
 
-.trip__track,
 .trip__status {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-}
-
-.trip__status {
   margin-left: auto;
 }
 
@@ -218,14 +214,6 @@ body {
   color: var(--header-ink);
 }
 
-.trip__label {
-  font-family: "Oswald", sans-serif;
-  font-size: 0.62rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--header-ink);
-  margin-right: 0.3rem;
-}
 
 /* The leave-by time is the one actionable number. */
 .trip__leg:first-child .flap-tile__face {
@@ -260,13 +248,15 @@ body {
   text-align: center;
 }
 
-/* The crease where a physical flap card folds in half. */
+/* The crease where a physical flap card folds in half. Kept faint and inset
+   from the edges — at full width and strength it cut through the middle of
+   the glyphs and hurt legibility. */
 .flap-tile__face::after {
   content: "";
   position: absolute;
-  inset: 50% 0 auto 0;
+  inset: 50% 1px auto 1px;
   height: 1px;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(0, 0, 0, 0.22);
 }
 
 .trip--recommended .flap-tile__face {

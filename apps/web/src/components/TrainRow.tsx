@@ -1,6 +1,9 @@
 import {
+  arrivalLegMinutes,
   boardingStationCode,
+  changeStationCode,
   computeLeaveBy,
+  doorArrivalMinutes,
   minutesBetweenClockTimes,
   type Coordinate,
   type ScheduleRow,
@@ -25,9 +28,9 @@ function statusLabel(row: ScheduleRow, status: TrainStatus | undefined): string 
   if (stop.stopStatus === "Departed") return "DEPARTED";
 
   const delay = stop.delayMinutes;
-  // `== null` (not `=== null`) and the NaN guard both matter: if the API ever
-  // drifts out of shape again, this must degrade to "SCHEDULED" rather than
-  // rendering "NAN MIN EARLY" on the board.
+  // `== null` (not `=== null`) and the finite check both matter: if the API
+  // ever drifts out of shape again, this must degrade to "SCHEDULED" rather
+  // than rendering "NAN MIN EARLY" on the board.
   if (delay == null || !Number.isFinite(delay)) {
     return stop.stopStatus?.toUpperCase() ?? "SCHEDULED";
   }
@@ -40,7 +43,7 @@ export function TrainRow({
   status,
   highlighted,
   showDays,
-  showTrack,
+  live,
   band,
   userLocation,
   nowMinutes,
@@ -49,8 +52,8 @@ export function TrainRow({
   status?: TrainStatus;
   highlighted?: boolean;
   showDays?: boolean;
-  /** Track only exists on live data, so it's a Today-tab concern. */
-  showTrack?: boolean;
+  /** Today tabs only — the timetable is a static reference with no live data. */
+  live?: boolean;
   band?: boolean;
   userLocation: Coordinate;
   /** Omit on the timetable tabs — nothing is "missed" on a reference schedule. */
@@ -58,11 +61,8 @@ export function TrainRow({
 }) {
   const leaveBy = computeLeaveBy(row, userLocation, nowMinutes ?? -Infinity);
   const trainMinutes = minutesBetweenClockTimes(row.scheduledDeparture, row.scheduledArrival);
-  const stop = showTrack ? boardingStop(row, status) : undefined;
-
-  const boardCode = boardingStationCode(row);
-  const arriveCode = row.direction === "N" ? row.stationCode : "NYP";
-  const approach = row.direction === "N" ? "Subway" : "Drive";
+  const lastLeg = arrivalLegMinutes(row);
+  const doorArrival = doorArrivalMinutes(row, lastLeg);
 
   const classes = [
     "trip",
@@ -76,23 +76,26 @@ export function TrainRow({
   return (
     <article className={classes}>
       <div className="trip__legs">
+        {/* Leave the door; catch this train at this station. */}
         <div className="trip__leg">
           <FlapText text={formatClockFromMinutes(leaveBy.minutes)} />
           <div className="trip__sub">
-            {approach} {formatDuration(leaveBy.leadMinutes)}
+            {boardingStationCode(row)} {formatClock(row.scheduledDeparture)}
           </div>
         </div>
 
+        {/* Get off the train here, and what the ride cost you. */}
         <div className="trip__leg">
-          <FlapText text={boardCode} />
-          <div className="trip__sub">Board {formatClock(row.scheduledDeparture)}</div>
-        </div>
-
-        <div className="trip__leg">
-          <FlapText text={formatClock(row.scheduledArrival)} />
+          <FlapText text={changeStationCode(row)} />
           <div className="trip__sub">
-            {arriveCode} {"·"} {formatDuration(trainMinutes)}
+            {formatClock(row.scheduledArrival)} {"·"} {formatDuration(trainMinutes)}
           </div>
+        </div>
+
+        {/* Through the far door, and what the last leg cost. */}
+        <div className="trip__leg">
+          <FlapText text={formatClockFromMinutes(doorArrival)} />
+          <div className="trip__sub">+{formatDuration(lastLeg)}</div>
         </div>
       </div>
 
@@ -100,16 +103,8 @@ export function TrainRow({
         <span className="trip__train">
           <FlapText text={`${row.service} ${row.trainNumber}`} />
         </span>
-        {showTrack && (
-          <span className="trip__track">
-            <span className="trip__label">Trk</span>
-            <FlapText text={stop?.track ?? "—"} width={2} />
-          </span>
-        )}
         {showDays && <span className="trip__days">{row.daysRaw}</span>}
-        {/* Status is a live-data concern, same as track. On the timetable it
-            would be a constant "SCHEDULED" on every row. */}
-        {showTrack && (
+        {live && (
           <span className="trip__status">
             <FlapText text={statusLabel(row, status)} />
           </span>

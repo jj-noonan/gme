@@ -86,7 +86,7 @@ export function TodayBoard({
             status={statusFor(statuses, row.trainNumber)}
             highlighted={isRecommended}
             band={bands[i]}
-            showTrack
+            live
             userLocation={userLocation}
             nowMinutes={nowMinutes}
           />
