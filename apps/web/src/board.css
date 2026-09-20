@@ -2,21 +2,21 @@
   /* Monochrome amber on black, the departure-board palette. Hierarchy comes
      from brightness within one hue rather than from different colors —
      a real board only has one lamp color to work with. */
-  --board-bg: #050504;
-  --tile-bg: #121110;
-  --tile-bg-active: #241d0c;
-  --flap-face: #0d0d0b;
-  --flap-face-active: #1b1509;
+  --board-bg: #000000;
+  --tile-bg: #0d0d0d;
+  --tile-bg-active: #1e1e1e;
+  --flap-face: #090909;
+  --flap-face-active: #191919;
   /* Primary content. */
   --ink: #ffc42e;
   /* The actionable bits: leave-by, recommended row, active tab. */
   --amber: #ffe57a;
-  --rule: #2e2612;
+  --rule: #262626;
   /* Station names and day codes: present, but below the times. */
-  --ink-dim: #c9a34a;
+  --ink-dim: #d4a62c;
   /* Small labels and secondary timings, dimmest tier. Kept at ~4.9:1 on the
      row background so the 0.65rem text still clears WCAG AA. */
-  --header-ink: #a58747;
+  --header-ink: #ab8726;
 
   /* Shared column widths so the header placard lines up with the rows.
      These must be rem, not em: the header sits at a smaller font-size, so
@@ -52,7 +52,7 @@ body {
   height: 100dvh;
   overflow: hidden;
   /* Subtle vignette so the board reads as a lit case, not a flat rectangle. */
-  background: radial-gradient(ellipse at 50% -10%, #17130a 0%, var(--board-bg) 65%);
+  background: radial-gradient(ellipse at 50% -10%, #141414 0%, var(--board-bg) 70%);
 }
 
 .tab-bar {
@@ -168,7 +168,7 @@ body {
 
 /* Alternating band per train number — same physical train, several stops. */
 .board-row--band {
-  background: #191612;
+  background: #141414;
 }
 
 .board-row--recommended {
@@ -269,7 +269,7 @@ body {
   border-radius: 1px;
   box-shadow:
     0 1px 0 rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 196, 46, 0.05);
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
   font-weight: 700;
   text-align: center;
   transform-style: preserve-3d;
