@@ -76,7 +76,7 @@ export function TrainRow({
         <span className="board-row__minilabel">Depart</span>
         <FlapText text={formatClock(row.scheduledDeparture)} width={6} />
         <div className="board-row__arrival">
-          {formatClock(row.scheduledArrival)} {"·"} {formatDuration(durationMinutes)}
+          Arr {formatClock(row.scheduledArrival)} {"·"} {formatDuration(durationMinutes)}
         </div>
       </div>
 
