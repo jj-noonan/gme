@@ -1,11 +1,10 @@
-export function BoardHeader({ showTrack }: { showTrack?: boolean }) {
+/** Column placard above the trip list. Shown at every width. */
+export function BoardHeader() {
   return (
     <div className="board-header">
-      <div className="board-header__leave">Leave</div>
-      <div className="board-header__time">Depart</div>
-      <div className="board-header__main">Train</div>
-      {showTrack && <div className="board-header__track">Trk</div>}
-      <div className="board-header__status">Status</div>
+      <div className="board-header__col">Depart</div>
+      <div className="board-header__col">Board</div>
+      <div className="board-header__col">Arrive</div>
     </div>
   );
 }

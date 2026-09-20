@@ -1,5 +1,3 @@
-import { STATIONS, type StationCode } from "@gme/shared";
-
 export function formatClock(hhmm: string): string {
   const [h, m] = hhmm.split(":").map(Number);
   const suffix = h >= 12 ? "P" : "A";
@@ -14,13 +12,14 @@ export function formatClockFromMinutes(totalMinutes: number): string {
   return formatClock(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
 }
 
-export function stationName(code: StationCode): string {
-  return STATIONS.find((s) => s.code === code)?.name ?? code;
-}
-
-/** Matches the original timetable's own duration notation, e.g. "5H 10M". */
+/**
+ * Timetable-style duration, e.g. "5H 10M". Drops an empty half so a round
+ * hour reads "1H" rather than "1H 0M", and under an hour reads "45M".
+ */
 export function formatDuration(totalMinutes: number): string {
   const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+  const minutes = Math.round(totalMinutes % 60);
+  if (hours === 0) return `${minutes}M`;
+  if (minutes === 0) return `${hours}H`;
   return `${hours}H ${minutes}M`;
 }

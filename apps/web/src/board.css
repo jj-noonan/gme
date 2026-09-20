@@ -1,30 +1,19 @@
 :root {
-  /* Monochrome amber on black, the departure-board palette. Hierarchy comes
-     from brightness within one hue rather than from different colors —
-     a real board only has one lamp color to work with. */
+  /* Amber on black. Every dark value is a neutral grey — amber is the only
+     hue on the board, so hierarchy comes from brightness, not colour. */
   --board-bg: #000000;
-  --tile-bg: #0d0d0d;
-  --tile-bg-active: #1e1e1e;
-  --flap-face: #090909;
-  --flap-face-active: #191919;
-  /* Primary content. */
-  --ink: #ffc42e;
-  /* The actionable bits: leave-by, recommended row, active tab. */
-  --amber: #ffe57a;
-  --rule: #262626;
-  /* Station names and day codes: present, but below the times. */
-  --ink-dim: #d4a62c;
-  /* Small labels and secondary timings, dimmest tier. Kept at ~4.9:1 on the
-     row background so the 0.65rem text still clears WCAG AA. */
-  --header-ink: #ab8726;
+  --tile-bg: #101010;
+  --tile-bg-band: #171717;
+  --tile-bg-active: #232323;
+  --flap-face: #0a0a0a;
+  --flap-face-active: #1c1c1c;
+  --rule: #2e2e2e;
 
-  /* Shared column widths so the header placard lines up with the rows.
-     These must be rem, not em: the header sits at a smaller font-size, so
-     em would resolve to a different pixel width there than in the rows. */
-  --col-leave: 4.7rem;
-  --col-depart: 5.8rem;
-  --col-track: 2.6rem;
-  --col-status: 9.6rem;
+  /* Three brightness tiers, all the same amber hue. */
+  --ink: #ffc93c;
+  --amber: #fff1a8;
+  --ink-dim: #e0b347;
+  --header-ink: #c39a3d;
 }
 
 * {
@@ -51,15 +40,15 @@ body {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  /* Subtle vignette so the board reads as a lit case, not a flat rectangle. */
-  background: radial-gradient(ellipse at 50% -10%, #141414 0%, var(--board-bg) 70%);
+  background: var(--board-bg);
 }
+
+/* ---------- tabs ---------- */
 
 .tab-bar {
   display: flex;
   flex: 0 0 auto;
   border-bottom: 2px solid var(--rule);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
 .tab {
@@ -89,17 +78,18 @@ body {
 .tab--active::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: auto 0 0 0;
   height: 3px;
   background: var(--amber);
-  box-shadow: 0 0 8px rgba(255, 229, 122, 0.55);
 }
+
+/* ---------- board surface ---------- */
 
 .board-main {
   flex: 1 1 auto;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   padding: 0.5rem;
 }
 
@@ -109,146 +99,145 @@ body {
   text-align: center;
   font-family: "Oswald", sans-serif;
   letter-spacing: 0.05em;
-  opacity: 0.8;
+  color: var(--ink-dim);
 }
 
 .board-list {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  /* A board panel rather than a full-bleed stretch on wide screens. */
+  width: 100%;
+  max-width: 960px;
+  margin-inline: auto;
 }
 
 .board-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.3rem 0.75rem 0.4rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  /* +4px on the left to clear the tiles' border-left, so the column labels
+     sit directly over their columns. */
+  padding: 0.35rem 0.75rem 0.45rem calc(0.75rem + 4px);
   color: var(--header-ink);
   font-family: "Oswald", sans-serif;
-  font-size: 0.65rem;
-  letter-spacing: 0.14em;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   border-bottom: 1px solid var(--rule);
   margin-bottom: 2px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--board-bg);
 }
 
-.board-header__leave {
-  flex: 0 0 auto;
-  width: var(--col-leave);
-  color: var(--amber);
-}
+/* ---------- trip tile ---------- */
 
-.board-header__time {
-  flex: 0 0 auto;
-  width: var(--col-depart);
-}
-
-.board-header__main {
-  flex: 1 1 auto;
-}
-
-.board-header__track {
-  flex: 0 0 auto;
-  width: var(--col-track);
-}
-
-.board-header__status {
-  flex: 0 0 auto;
-  width: var(--col-status);
-}
-
-.board-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.55rem 0.75rem;
+.trip {
   background: var(--tile-bg);
   border-left: 4px solid transparent;
+  padding: 0.6rem 0.75rem;
+  /* Lets the browser skip layout and paint for offscreen tiles. The list is
+     thousands of flap cells, so this is what keeps touch scrolling smooth. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 112px;
 }
 
-/* Alternating band per train number — same physical train, several stops. */
-.board-row--band {
-  background: #141414;
+.trip--band {
+  background: var(--tile-bg-band);
 }
 
-.board-row--recommended {
+.trip--recommended {
   background: var(--tile-bg-active);
   border-left-color: var(--amber);
-  box-shadow: inset 0 0 0 1px rgba(255, 229, 122, 0.18);
 }
 
-.board-row__leave {
-  flex: 0 0 auto;
-  width: var(--col-leave);
+.trip--missed {
+  opacity: 0.6;
 }
 
-.board-row__time {
-  flex: 0 0 auto;
-  width: var(--col-depart);
+.trip__legs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  align-items: start;
 }
 
-.board-row__track {
-  flex: 0 0 auto;
-  width: var(--col-track);
+.trip__leg {
+  min-width: 0;
+  overflow: hidden;
 }
 
-/* The leave-by time is the actionable number, so it gets the amber. */
-.board-row__leave .flap-tile__face {
-  color: var(--amber);
-}
-
-/* Column labels: hidden on wide screens where the header bar covers it,
-   shown inline once rows stack on narrow screens. */
-.board-row__minilabel {
-  display: none;
+.trip__sub {
+  margin-top: 0.2rem;
   font-family: "Oswald", sans-serif;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trip__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* The train name yields first when the row is tight; everything to its
+   right is short and fixed-size. */
+.trip__train {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.trip__track,
+.trip__status {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.trip__status {
+  margin-left: auto;
+}
+
+.trip__days {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-family: "Oswald", sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--header-ink);
+}
+
+.trip__label {
+  font-family: "Oswald", sans-serif;
+  font-size: 0.62rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--header-ink);
-  margin-right: 0.35rem;
+  margin-right: 0.3rem;
 }
 
-/* A train you can no longer reach in time still shows, but reads as spent. */
-.board-row--missed {
-  opacity: 0.45;
+/* The leave-by time is the one actionable number. */
+.trip__leg:first-child .flap-tile__face {
+  color: var(--amber);
 }
 
-.board-row--missed .board-row__leave .flap-tile__face {
+.trip--missed .trip__leg:first-child .flap-tile__face {
   color: var(--header-ink);
   text-decoration: line-through;
 }
 
-.board-row__arrival {
-  margin-top: 0.2rem;
-  font-family: "Oswald", sans-serif;
-  font-size: 0.65rem;
-  letter-spacing: 0.05em;
-  color: var(--header-ink);
-}
-
-.board-row__main {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.board-row__meta {
-  display: flex;
-  gap: 0.75rem;
-  font-family: "Oswald", sans-serif;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  color: var(--ink-dim);
-}
-
-.board-row__status {
-  flex: 0 0 auto;
-  width: var(--col-status);
-  margin-left: auto;
-}
+/* ---------- split-flap cells ---------- */
 
 .flap-text {
   display: inline-flex;
@@ -267,33 +256,29 @@ body {
   padding: 0.05em 0;
   background: var(--flap-face);
   border-radius: 1px;
-  box-shadow:
-    0 1px 0 rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.045);
   font-weight: 700;
   text-align: center;
-  transform-style: preserve-3d;
-  will-change: transform;
 }
 
 /* The crease where a physical flap card folds in half. */
 .flap-tile__face::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
+  inset: 50% 0 auto 0;
   height: 1px;
   background: rgba(0, 0, 0, 0.55);
-  transform: translateY(-0.5px);
 }
 
-.board-row--recommended .flap-tile__face {
+.trip--recommended .flap-tile__face {
   background: var(--flap-face-active);
 }
 
+/* will-change only while actually flipping: applying it to every cell
+   promotes thousands of compositor layers and wrecks scroll performance. */
 .flap-tile--flipping .flap-tile__face {
   animation: flap 360ms ease-in-out;
+  will-change: transform;
+  transform-style: preserve-3d;
 }
 
 @keyframes flap {
@@ -311,55 +296,51 @@ body {
   }
 }
 
-/* Five flap columns need roughly 700px; below that the row becomes a
-   stacked card and the column labels move inline onto each field. */
-@media (max-width: 700px) {
-  .board-header {
-    display: none;
-  }
-
-  .board-row {
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 0.35rem 1.1rem;
-    padding: 0.7rem 0.75rem;
-  }
-
-  .board-row__minilabel {
-    display: inline;
-  }
-
-  /* Stacked cards size to content rather than the desktop column grid. */
-  .board-row__leave,
-  .board-row__time,
-  .board-row__track,
-  .board-row__status {
-    width: auto;
-  }
-
-  .board-row__main {
-    flex-basis: 100%;
-    order: 3;
-  }
-
-  .board-row__track {
-    order: 4;
-  }
-
-  .board-row__status {
-    order: 5;
-    margin-left: auto;
+@media (prefers-reduced-motion: reduce) {
+  .flap-tile--flipping .flap-tile__face {
+    animation: none;
   }
 }
 
-/* Phone: shrink the flap cells so a 22-character train name still fits. */
-@media (max-width: 430px) {
-  .flap-tile {
-    width: 0.66em;
+/* ---------- narrow screens ---------- */
+
+@media (max-width: 560px) {
+  .board-main {
+    padding: 0.35rem;
   }
 
-  .board-row__train .flap-tile,
-  .board-row__status .flap-tile {
-    font-size: 0.92rem;
+  .board-header {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem 0.4rem calc(0.6rem + 4px);
+  }
+
+  .trip {
+    padding: 0.55rem 0.6rem;
+  }
+
+  .trip__legs {
+    gap: 0.4rem;
+  }
+
+  .flap-tile {
+    width: 0.66em;
+    font-size: 0.95rem;
+  }
+
+  .trip__sub {
+    font-size: 0.64rem;
+  }
+
+  .trip__meta {
+    gap: 0.45rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .flap-tile {
+    width: 0.62em;
+    font-size: 0.86rem;
   }
 }

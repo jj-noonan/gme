@@ -1,6 +1,6 @@
 import {
+  computeLeaveBy,
   matchesDay,
-  parseHHMM,
   pickNorthboundRecommendation,
   pickSouthboundRecommendation,
   type Coordinate,
@@ -48,9 +48,14 @@ export function TodayBoard({
     return rec ? { trainNumber: rec.row.trainNumber, stationCode: rec.row.stationCode } : null;
   }, [todaysRows, direction, userLocation, nowMinutes]);
 
-  // Already-departed trains aren't useful on the "today" board — the
-  // Timetable tabs are the reference view for the full schedule.
-  const upcomingRows = todaysRows.filter((r) => parseHHMM(r.scheduledDeparture) >= nowMinutes);
+  // Show only trips you could still actually make: a train you can no longer
+  // reach in time is no more useful than one that already left. This filters
+  // strictly more than "hasn't departed yet" — southbound leads are long
+  // (a ~2h drive to Albany), so those drop off well before departure.
+  // The Timetable tabs remain the full reference view.
+  const upcomingRows = todaysRows.filter(
+    (r) => !computeLeaveBy(r, userLocation, nowMinutes).missed,
+  );
 
   if (todaysRows.length === 0) {
     return <p className="board-empty">No trains running today.</p>;
@@ -64,7 +69,7 @@ export function TodayBoard({
 
   return (
     <div className="board-list">
-      <BoardHeader showTrack />
+      <BoardHeader />
       {upcomingRows.map((row, i) => {
         const isRecommended =
           direction === "N"
