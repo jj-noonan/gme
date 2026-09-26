@@ -54,12 +54,7 @@ Shore's Boston-section trains never leaking into NYP-facing data).
   URL, and set `VITE_STATUS_API_URL` when building `apps/web` to point at
   the deployed Fly URL.
 - Custom domain: `greenmountain.express` (DNS + GitHub Pages custom domain
-  are both set). **TODO once HTTPS is confirmed enforced on GitHub Pages:**
-  remove the `http://` entries from `ALLOWED_ORIGINS` in
-  `apps/status-api/fly.toml` and redeploy — they're only there because the
-  site was still being served over plain HTTP while the cert provisioned,
-  and a stale `http://` entry is an unnecessary CORS allowance once
-  everything redirects to HTTPS.
+  are both set, HTTPS is enforced with a valid cert).
 
 ## Known shortcuts
 
