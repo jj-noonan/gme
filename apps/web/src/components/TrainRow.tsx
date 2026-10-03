@@ -11,11 +11,21 @@ import {
   type TrainStatus,
 } from "@gme/shared";
 import { formatClock, formatClockFromMinutes, formatDuration } from "../lib/format.js";
+import type { IconName } from "../lib/icons.js";
 import { FlapText } from "./FlapText.js";
+import { Icon } from "./Icon.js";
 
 /** The stop where you actually board — NYP northbound, the tracked station southbound. */
 function boardingStop(row: ScheduleRow, status: TrainStatus | undefined): StationStatus | undefined {
   return status?.perStation.find((s) => s.stationCode === boardingStationCode(row));
+}
+
+function statusIcon(label: string): IconName {
+  if (label === "ON TIME") return "on-time";
+  if (label === "NO LIVE DATA") return "scheduled";
+  if (label.includes("CANCEL")) return "cancelled";
+  if (label.includes("LATE")) return "delayed";
+  return "scheduled";
 }
 
 function statusLabel(row: ScheduleRow, status: TrainStatus | undefined): string {
@@ -59,6 +69,7 @@ export function TrainRow({
   /** Omit on the timetable tabs — nothing is "missed" on a reference schedule. */
   nowMinutes?: number;
 }) {
+  const label = statusLabel(row, status);
   const leaveBy = computeLeaveBy(row, userLocation, nowMinutes ?? -Infinity);
   const trainMinutes = minutesBetweenClockTimes(row.scheduledDeparture, row.scheduledArrival);
   const lastLeg = arrivalLegMinutes(row);
@@ -106,7 +117,8 @@ export function TrainRow({
         {showDays && <span className="trip__days">{row.daysRaw}</span>}
         {live && (
           <span className="trip__status">
-            <FlapText text={statusLabel(row, status)} />
+            <Icon name={statusIcon(label)} size={16} />
+            <FlapText text={label} />
           </span>
         )}
       </div>

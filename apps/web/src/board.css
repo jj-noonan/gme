@@ -344,3 +344,7 @@ body {
 .board-header__col svg {
   flex: none;
 }
+
+.trip__status {
+  gap: 0.3rem;
+}
