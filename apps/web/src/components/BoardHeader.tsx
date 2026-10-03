@@ -1,4 +1,4 @@
-import { Icon } from "./Icon";
+import { Icon } from "./Icon.js";
 
 /** Column placard above the trip list. Shown at every width. */
 export function BoardHeader() {

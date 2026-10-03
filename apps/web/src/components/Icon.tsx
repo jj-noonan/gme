@@ -1,4 +1,4 @@
-import { ICONS, type IconName } from "../lib/icons";
+import { ICONS, type IconName } from "../lib/icons.js";
 
 /**
  * Line icon from the GME set. Color comes from `currentColor`.
