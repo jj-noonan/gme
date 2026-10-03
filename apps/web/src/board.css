@@ -334,3 +334,13 @@ body {
     font-size: 0.86rem;
   }
 }
+
+.board-header__col {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.board-header__col svg {
+  flex: none;
+}
