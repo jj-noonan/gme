@@ -103,6 +103,9 @@ body {
 }
 
 .board-list {
+  /* Width of the route block (NYP → ALB), so the middle column is a fixed
+     track centred on the board; text inside it stays left-aligned. */
+  --mid: 6.75rem;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -114,7 +117,7 @@ body {
 
 .board-header {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr var(--mid) 1fr;
   gap: 0.6rem;
   /* +4px on the left to clear the tiles' border-left, so the column labels
      sit directly over their columns. */
@@ -159,7 +162,7 @@ body {
 
 .trip__legs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr var(--mid) 1fr;
   gap: 0.6rem;
   align-items: start;
 }
@@ -171,6 +174,12 @@ body {
 
 .trip__leg:last-child {
   text-align: right;
+}
+
+.trip__route {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .trip__leg:last-child .flap-text {
@@ -186,6 +195,13 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.trip__leg:last-child .trip__sub {
+  justify-content: flex-end;
 }
 
 .trip__meta {
@@ -303,6 +319,10 @@ body {
 /* ---------- narrow screens ---------- */
 
 @media (max-width: 560px) {
+  .board-list {
+    --mid: 6.1rem;
+  }
+
   .board-main {
     padding: 0.35rem;
   }
@@ -337,6 +357,10 @@ body {
 }
 
 @media (max-width: 380px) {
+  .board-list {
+    --mid: 5.5rem;
+  }
+
   .flap-tile {
     width: 0.62em;
     font-size: 0.86rem;

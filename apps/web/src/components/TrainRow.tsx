@@ -5,6 +5,7 @@ import {
   computeLeaveBy,
   doorArrivalMinutes,
   minutesBetweenClockTimes,
+  parseHHMM,
   type Coordinate,
   type ScheduleRow,
   type StationStatus,
@@ -45,7 +46,21 @@ function statusLabel(row: ScheduleRow, status: TrainStatus | undefined): string 
     return stop.stopStatus?.toUpperCase() ?? "SCHEDULED";
   }
   if (Math.abs(delay) <= 2) return "ON TIME";
-  return delay > 0 ? `${delay} MIN LATE` : `${-delay} MIN EARLY`;
+  const was = formatClock(row.scheduledDeparture);
+  return delay > 0 ? `${delay} MIN LATE FROM ${was}` : `${-delay} MIN EARLY FROM ${was}`;
+}
+
+/** Minutes the boarding stop is running late (negative = early); 0 with no usable live data. */
+function liveDelayMinutes(row: ScheduleRow, status: TrainStatus | undefined): number {
+  if (!status || status.stale || !status.isTracked) return 0;
+  const delay = boardingStop(row, status)?.delayMinutes;
+  return delay != null && Number.isFinite(delay) ? delay : 0;
+}
+
+const MINUTES_PER_DAY = 24 * 60;
+
+function wrapMinutes(minutes: number): number {
+  return ((Math.round(minutes) % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
 }
 
 export function TrainRow({
@@ -73,7 +88,15 @@ export function TrainRow({
   const leaveBy = computeLeaveBy(row, userLocation, nowMinutes ?? -Infinity);
   const trainMinutes = minutesBetweenClockTimes(row.scheduledDeparture, row.scheduledArrival);
   const lastLeg = arrivalLegMinutes(row);
-  const doorArrival = doorArrivalMinutes(row, lastLeg);
+
+  // Train and door times track the live delay; the leave-by time stays on the
+  // schedule, so a late train grows the total rather than moving your alarm.
+  const delay = liveDelayMinutes(row, status);
+  const trainDeparts = wrapMinutes(parseHHMM(row.scheduledDeparture) + delay);
+  const trainArrives = wrapMinutes(parseHHMM(row.scheduledArrival) + delay);
+  const doorArrival = wrapMinutes(trainArrives + lastLeg);
+  const totalMinutes = leaveBy.leadMinutes + delay + trainMinutes + lastLeg;
+  const firstLegIcon: IconName = row.direction === "N" ? "train" : "drive";
 
   const classes = [
     "trip",
@@ -87,26 +110,34 @@ export function TrainRow({
   return (
     <article className={classes}>
       <div className="trip__legs">
-        {/* Leave the door; catch this train at this station. */}
+        {/* Leave the door. */}
         <div className="trip__leg">
           <FlapText text={formatClockFromMinutes(leaveBy.minutes)} />
           <div className="trip__sub">
-            {boardingStationCode(row)} {formatClock(row.scheduledDeparture)}
+            <Icon name={firstLegIcon} size={16} />
+            {formatDuration(leaveBy.leadMinutes)}
           </div>
         </div>
 
-        {/* Get off the train here, and what the ride cost you. */}
+        {/* The train itself: where it runs, and when it really does. */}
         <div className="trip__leg">
-          <FlapText text={changeStationCode(row)} />
+          <div className="trip__route">
+            <FlapText text={boardingStationCode(row)} />
+            <Icon name="arrow-right" size={20} />
+            <FlapText text={changeStationCode(row)} />
+          </div>
           <div className="trip__sub">
-            {formatClock(row.scheduledArrival)} {"·"} {formatDuration(trainMinutes)}
+            {formatClockFromMinutes(trainDeparts)} / {formatClockFromMinutes(trainArrives)}
           </div>
         </div>
 
-        {/* Through the far door, and what the last leg cost. */}
+        {/* Through the far door, and what the whole trip cost. */}
         <div className="trip__leg">
           <FlapText text={formatClockFromMinutes(doorArrival)} />
-          <div className="trip__sub">+{formatDuration(lastLeg)}</div>
+          <div className="trip__sub">
+            <Icon name="leave-by" size={16} />
+            {formatDuration(totalMinutes)}
+          </div>
         </div>
       </div>
 
