@@ -35,6 +35,11 @@ describe("arrivalLegMinutes / doorArrivalMinutes", () => {
     expect(toAlbany).toBeGreaterThan(90);
   });
 
+  it("northbound: prefers a routed drive time when one is given", () => {
+    expect(arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }), 97.6)).toBe(98);
+    expect(arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }), null)).toBeGreaterThan(90);
+  });
+
   it("southbound: a flat cross-town hop, independent of which station you boarded", () => {
     expect(arrivalLegMinutes(row({ direction: "S", stationCode: "RUD" }))).toBe(50);
     expect(arrivalLegMinutes(row({ direction: "S", stationCode: "ALB" }))).toBe(50);

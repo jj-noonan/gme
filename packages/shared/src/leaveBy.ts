@@ -94,12 +94,15 @@ export function computeLeaveBy(
  *
  * Both ends are fixed places, deliberately independent of live location: the
  * rider's phone is at the *departure* end, so it can't say how far the arrival
- * station is from the other home.
+ * station is from the other home. `homeDriveMinutes`, when given, is a routed
+ * drive time for the northbound leg (see /drive-home in status-api).
  */
-export function arrivalLegMinutes(row: ScheduleRow): number {
+export function arrivalLegMinutes(row: ScheduleRow, homeDriveMinutes?: number | null): number {
   if (row.direction === "N") {
-    // Off the train in VT/NY, then drive to the house.
-    return Math.round(driveMinutesToStation(RUTLAND_HOME, row.stationCode) ?? 0);
+    // Off the train in VT/NY, then drive to the house — a routed, traffic-aware
+    // time when we have one, the straight-line estimate otherwise.
+    const estimate = driveMinutesToStation(RUTLAND_HOME, row.stationCode);
+    return Math.round(homeDriveMinutes ?? estimate ?? 0);
   }
   // Off the train at NYP, then across town to the apartment.
   return ASSUMED_NYC_TRANSIT_MINUTES;

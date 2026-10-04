@@ -1,5 +1,6 @@
+import { parseHHMM } from "./recommend.js";
 import { STATIONS } from "./stations.js";
-import type { StationCode } from "./types.js";
+import type { ScheduleRow, StationCode } from "./types.js";
 
 /**
  * One drive from a tracked station to the Rutland house, starting at a local
@@ -51,4 +52,23 @@ export function slotDepartAt(departAt: string): string {
   const minute = Number(departAt.slice(14, 16));
   const slotted = minute - (minute % DRIVE_SLOT_MINUTES);
   return `${departAt.slice(0, 14)}${String(slotted).padStart(2, "0")}`;
+}
+
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+/**
+ * The drive home for a northbound row running on `day` (read off the local
+ * clock, assumed Eastern like the rest of the app). Null southbound — that
+ * trip ends with the subway, not a drive. Uses the scheduled arrival: a late
+ * train rarely moves the drive into a different traffic picture, and tracking
+ * live delay would re-key the lookup every minute.
+ */
+export function homeDriveLeg(row: ScheduleRow, day: Date): HomeDriveLeg | null {
+  if (row.direction !== "N") return null;
+  const overnight = parseHHMM(row.scheduledArrival) < parseHHMM(row.scheduledDeparture);
+  const arrival = new Date(day.getFullYear(), day.getMonth(), day.getDate() + (overnight ? 1 : 0));
+  const date = `${arrival.getFullYear()}-${pad2(arrival.getMonth() + 1)}-${pad2(arrival.getDate())}`;
+  return { stationCode: row.stationCode, departAt: `${date}T${row.scheduledArrival}` };
 }

@@ -70,6 +70,7 @@ export function TrainRow({
   showDays,
   live,
   band,
+  homeDriveMinutes,
   userLocation,
   nowMinutes,
 }: {
@@ -80,6 +81,8 @@ export function TrainRow({
   /** Today tabs only — the timetable is a static reference with no live data. */
   live?: boolean;
   band?: boolean;
+  /** Routed station → house drive for a northbound row, when status-api has one. */
+  homeDriveMinutes?: number;
   userLocation: Coordinate;
   /** Omit on the timetable tabs — nothing is "missed" on a reference schedule. */
   nowMinutes?: number;
@@ -87,7 +90,7 @@ export function TrainRow({
   const label = statusLabel(row, status);
   const leaveBy = computeLeaveBy(row, userLocation, nowMinutes ?? -Infinity);
   const trainMinutes = minutesBetweenClockTimes(row.scheduledDeparture, row.scheduledArrival);
-  const lastLeg = arrivalLegMinutes(row);
+  const lastLeg = arrivalLegMinutes(row, homeDriveMinutes);
 
   // Train and door times track the live delay; the leave-by time stays on the
   // schedule, so a late train grows the total rather than moving your alarm.
