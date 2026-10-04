@@ -15,13 +15,12 @@ export const STATIONS: Station[] = [
 export const NYP_COORDINATE = { lat: 40.7506, lon: -73.9935 };
 
 /**
- * The Rutland-side home end of these trips (Jones Donuts, the reference point
- * the original timetable's drive times were measured from). Used for the far
- * end of a journey, where the rider's live location can't help: heading north
- * from NYC, the drive that matters is station → house, not station → wherever
- * the phone currently is.
+ * The default vt-location: Jones Donuts, the reference point the original
+ * timetable's drive times were measured from. Every VT-side drive runs
+ * between a station and the vt-location — out to the station southbound,
+ * home from it northbound.
  */
-export const RUTLAND_HOME = { lat: 43.6089, lon: -72.9781 };
+export const DEFAULT_VT_LOCATION = { lat: 43.6089, lon: -72.9781 };
 
 // Centroid of the tracked VT/NY stations, used only to decide NYC-side vs
 // Rutland-side at a coarse level (see classifyRegion in geo.ts).

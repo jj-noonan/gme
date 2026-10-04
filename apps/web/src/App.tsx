@@ -1,3 +1,4 @@
+import { DEFAULT_VT_LOCATION } from "@gme/shared";
 import { useEffect, useState } from "react";
 import { TabBar, type TabId } from "./components/TabBar.js";
 import { TimetableBoard } from "./components/TimetableBoard.js";
@@ -8,7 +9,9 @@ import { useUserLocation } from "./hooks/useUserLocation.js";
 
 export function App() {
   const { rows, error: scheduleError } = useSchedule();
-  const { location, region, resolved } = useUserLocation();
+  const { region, resolved } = useUserLocation();
+  // Fixed for now; the vt-location box will make this configurable.
+  const vtLocation = DEFAULT_VT_LOCATION;
   const [activeTab, setActiveTab] = useState<TabId>("N_TODAY");
   const [userPickedTab, setUserPickedTab] = useState(false);
 
@@ -35,16 +38,16 @@ export function App() {
         {scheduleError && <p className="board-error">Couldn't load the schedule: {scheduleError}</p>}
         {!rows && !scheduleError && <p className="board-empty">Loading schedule…</p>}
         {rows && activeTab === "N_TODAY" && (
-          <TodayBoard rows={rows} direction="N" statuses={statuses} userLocation={location} />
+          <TodayBoard rows={rows} direction="N" statuses={statuses} vtLocation={vtLocation} />
         )}
         {rows && activeTab === "S_TODAY" && (
-          <TodayBoard rows={rows} direction="S" statuses={statuses} userLocation={location} />
+          <TodayBoard rows={rows} direction="S" statuses={statuses} vtLocation={vtLocation} />
         )}
         {rows && activeTab === "N_TIMETABLE" && (
-          <TimetableBoard rows={rows} direction="N" userLocation={location} />
+          <TimetableBoard rows={rows} direction="N" vtLocation={vtLocation} />
         )}
         {rows && activeTab === "S_TIMETABLE" && (
-          <TimetableBoard rows={rows} direction="S" userLocation={location} />
+          <TimetableBoard rows={rows} direction="S" vtLocation={vtLocation} />
         )}
       </main>
     </div>

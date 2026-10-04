@@ -2,7 +2,7 @@ import {
   classifyRegion,
   NYP_COORDINATE,
   RUTLAND_CLUSTER_CENTROID,
-  RUTLAND_HOME,
+  DEFAULT_VT_LOCATION,
   type Coordinate,
   type Region,
 } from "@gme/shared";
@@ -22,7 +22,7 @@ export interface UserLocationState {
 
 export function useUserLocation(): UserLocationState {
   const [state, setState] = useState<UserLocationState>({
-    location: RUTLAND_HOME,
+    location: DEFAULT_VT_LOCATION,
     region: "RUTLAND",
     resolved: false,
   });
@@ -31,7 +31,7 @@ export function useUserLocation(): UserLocationState {
     let cancelled = false;
     resolveUserLocation().then((location) => {
       if (cancelled) return;
-      const resolvedLocation = location ?? RUTLAND_HOME;
+      const resolvedLocation = location ?? DEFAULT_VT_LOCATION;
       setState({
         location: resolvedLocation,
         region: classifyRegion(resolvedLocation, NYP_COORDINATE, RUTLAND_CLUSTER_CENTROID),

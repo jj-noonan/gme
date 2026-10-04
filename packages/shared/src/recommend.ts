@@ -1,5 +1,4 @@
-import { ASSUMED_NYC_TRANSIT_MINUTES, pickRecommendedStop, TRIP_BUFFER_MINUTES, type Coordinate } from "./geo.js";
-import { STATIONS } from "./stations.js";
+import { ASSUMED_NYC_TRANSIT_MINUTES, TRIP_BUFFER_MINUTES } from "./geo.js";
 import type { ScheduleRow } from "./types.js";
 
 export function parseHHMM(time: string): number {
@@ -38,16 +37,17 @@ export interface SouthboundRecommendation {
 /**
  * Southbound (VT/NY -> NYP): each train may stop at several tracked stations
  * (e.g. Ethan Allen at RUD/CNV/FED/ALB), all arriving NYP at the same time.
- * Picks whichever station minimizes total door-to-door time from the user's
- * actual location — which, since the arrival is fixed, is equivalent to
+ * Picks whichever station minimizes total door-to-door time from the
+ * vt-location — which, since the arrival is fixed, is equivalent to
  * whichever station lets the user leave home latest — so the minimizing
  * station is always the last one to become unreachable. Returns the
  * earliest train whose minimizing station is still reachable in time.
+ * `vtDriveMinutes` gives each row's drive from the vt-location to its station.
  */
 export function pickSouthboundRecommendation(
   rows: ScheduleRow[],
-  userLocation: Coordinate,
   nowMinutes: number,
+  vtDriveMinutes: (row: ScheduleRow) => number,
 ): SouthboundRecommendation | null {
   const byTrain = new Map<number, ScheduleRow[]>();
   for (const row of rows) {
@@ -63,24 +63,22 @@ export function pickSouthboundRecommendation(
   );
 
   for (const group of trainsByEarliestDeparture) {
-    const best = pickRecommendedStop(
-      userLocation,
-      STATIONS,
-      group.map((r) => ({
-        station: r.stationCode,
-        trainMinutes: parseHHMM(r.scheduledArrival) - parseHHMM(r.scheduledDeparture),
-      })),
-    );
+    // Ties keep the earlier row in the group.
+    let best: SouthboundRecommendation | null = null;
+    let bestTotal = Infinity;
+    for (const row of group) {
+      const driveMinutes = vtDriveMinutes(row);
+      const total = minutesBetweenClockTimes(row.scheduledDeparture, row.scheduledArrival) + driveMinutes;
+      if (total < bestTotal) {
+        best = { row, driveMinutes };
+        bestTotal = total;
+      }
+    }
     if (!best) continue;
 
-    const row = group.find((r) => r.stationCode === best.station);
-    if (!row) continue;
-
     const canStillMakeIt =
-      nowMinutes + best.driveMinutes + TRIP_BUFFER_MINUTES <= parseHHMM(row.scheduledDeparture);
-    if (canStillMakeIt) {
-      return { row, driveMinutes: best.driveMinutes };
-    }
+      nowMinutes + best.driveMinutes + TRIP_BUFFER_MINUTES <= parseHHMM(best.row.scheduledDeparture);
+    if (canStillMakeIt) return best;
   }
 
   return null;

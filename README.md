@@ -61,10 +61,11 @@ Shore's Boston-section trains never leaking into NYP-facing data).
 Deliberate, for a low-traffic personal site — revisit if that ever changes:
 
 - Schedule is a manually maintained snapshot, not live-scraped from PDFs.
-- The station → Rutland house drive (northbound, Today tab) is routed and
-  traffic-aware via Mapbox, through status-api's `/drive` (needs the
-  `MAPBOX_TOKEN` Fly secret). Every other drive estimate — and that one, when
-  status-api can't answer — uses straight-line distance × a flat average speed.
+- VT-side drives run between the station and a fixed vt-location (Jones
+  Donuts), not the viewer's live location. On the Today tabs they're routed
+  and traffic-aware via Mapbox, through status-api's `/drive` (needs the
+  `MAPBOX_TOKEN` Fly secret); elsewhere, or when status-api can't answer, they
+  use straight-line distance × a flat average speed.
 - NYC-side transit time is a flat 50-minute assumption.
 - "Today" filtering uses the viewer's local clock, assumed to be Eastern time.
 - No automated schedule-drift alerting yet — `fly logs` on status-api shows

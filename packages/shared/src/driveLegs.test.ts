@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDriveLeg, homeDriveLeg, parseDriveLeg, slotDepartAt } from "./driveLegs.js";
+import { formatDriveLeg, parseDriveLeg, slotDepartAt, vtDriveLeg } from "./driveLegs.js";
 import type { ScheduleRow } from "./types.js";
 
 function row(overrides: Partial<ScheduleRow> = {}): ScheduleRow {
@@ -58,11 +58,11 @@ describe("slotDepartAt", () => {
   });
 });
 
-describe("homeDriveLeg", () => {
+describe("vtDriveLeg", () => {
   const day = new Date(2026, 9, 5, 12, 0);
 
-  it("drives from the arrival station to the place, at the scheduled arrival", () => {
-    expect(homeDriveLeg(row(), JONES, day)).toEqual({
+  it("northbound: station → vt-location, at the scheduled arrival", () => {
+    expect(vtDriveLeg(row(), JONES, day)).toEqual({
       stationCode: "RUD",
       place: JONES,
       toStation: false,
@@ -70,12 +70,24 @@ describe("homeDriveLeg", () => {
     });
   });
 
-  it("rolls to the next day for trains that arrive after midnight", () => {
+  it("northbound: rolls to the next day for trains that arrive after midnight", () => {
     const late = row({ stationCode: "ALB", scheduledDeparture: "22:50", scheduledArrival: "01:56" });
-    expect(homeDriveLeg(late, JONES, day)?.departAt).toBe("2026-10-06T01:56");
+    expect(vtDriveLeg(late, JONES, day).departAt).toBe("2026-10-06T01:56");
   });
 
-  it("has no drive southbound", () => {
-    expect(homeDriveLeg(row({ direction: "S" }), JONES, day)).toBeNull();
+  it("southbound: vt-location → station, leaving drive + buffer before departure", () => {
+    // Jones Donuts → Albany is ~111 min straight-line, + 15 buffer = 126 min before 10:00.
+    const south = row({ direction: "S", stationCode: "ALB", scheduledDeparture: "10:00" });
+    expect(vtDriveLeg(south, JONES, day)).toEqual({
+      stationCode: "ALB",
+      place: JONES,
+      toStation: true,
+      departAt: "2026-10-05T07:54",
+    });
+  });
+
+  it("southbound: rolls back to the previous evening for an early-morning train", () => {
+    const early = row({ direction: "S", stationCode: "ALB", scheduledDeparture: "00:30" });
+    expect(vtDriveLeg(early, JONES, day).departAt).toBe("2026-10-04T22:24");
   });
 });

@@ -1,4 +1,4 @@
-import type { Coordinate, Direction, ScheduleRow } from "@gme/shared";
+import { straightLineDriveMinutes, type Coordinate, type Direction, type ScheduleRow } from "@gme/shared";
 import { useMemo } from "react";
 import { computeRowBands } from "../lib/rowBands.js";
 import { BoardHeader } from "./BoardHeader.js";
@@ -7,11 +7,11 @@ import { TrainRow } from "./TrainRow.js";
 export function TimetableBoard({
   rows,
   direction,
-  userLocation,
+  vtLocation,
 }: {
   rows: ScheduleRow[];
   direction: Direction;
-  userLocation: Coordinate;
+  vtLocation: Coordinate;
 }) {
   const sorted = useMemo(
     () =>
@@ -31,7 +31,7 @@ export function TimetableBoard({
           row={row}
           showDays
           band={bands[i]}
-          userLocation={userLocation}
+          vtDriveMinutes={straightLineDriveMinutes(vtLocation, row.stationCode)}
         />
       ))}
     </div>

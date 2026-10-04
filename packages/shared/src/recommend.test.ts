@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { minutesBetweenClockTimes, pickNorthboundRecommendation, pickSouthboundRecommendation } from "./recommend.js";
+import { straightLineDriveMinutes } from "./leaveBy.js";
 import { STATIONS } from "./stations.js";
 import type { ScheduleRow } from "./types.js";
 
@@ -51,6 +52,8 @@ describe("pickNorthboundRecommendation", () => {
 describe("pickSouthboundRecommendation", () => {
   const rud = STATIONS.find((s) => s.code === "RUD")!;
   const cnv = STATIONS.find((s) => s.code === "CNV")!;
+  const from = (place: { lat: number; lon: number }) => (r: ScheduleRow) =>
+    straightLineDriveMinutes(place, r.stationCode);
 
   // Same train, boarded a few stops apart: CNV is a couple minutes closer to
   // NYP (slightly shorter ride) but requires a real drive from Rutland.
@@ -61,17 +64,25 @@ describe("pickSouthboundRecommendation", () => {
 
   it("recommends the nearer station for a train stopping at multiple candidates", () => {
     // Standing at Castleton: CNV wins on both drive time and total trip time.
-    const result = pickSouthboundRecommendation(rows, cnv, 8 * 60);
+    const result = pickSouthboundRecommendation(rows, 8 * 60, from(cnv));
     expect(result?.row.stationCode).toBe("CNV");
   });
 
   it("recommends Rutland when starting from right there, since the extra drive to Castleton isn't worth the shorter ride", () => {
-    const result = pickSouthboundRecommendation(rows, rud, 8 * 60);
+    const result = pickSouthboundRecommendation(rows, 8 * 60, from(rud));
     expect(result?.row.stationCode).toBe("RUD");
   });
 
   it("skips a train once even its best station is no longer reachable in time", () => {
-    const result = pickSouthboundRecommendation(rows, cnv, 11 * 60);
+    const result = pickSouthboundRecommendation(rows, 11 * 60, from(cnv));
     expect(result).toBeNull();
+  });
+
+  it("decides on the drive times it's given, e.g. routed ones", () => {
+    // Pretend roads make Rutland 30 min from Castleton but Castleton itself 1 min away:
+    // Castleton wins even though its scheduled ride is the same length.
+    const routed = (r: ScheduleRow) => (r.stationCode === "CNV" ? 1 : 30);
+    expect(pickSouthboundRecommendation(rows, 8 * 60, routed)?.row.stationCode).toBe("CNV");
+    expect(pickSouthboundRecommendation(rows, 8 * 60, routed)?.driveMinutes).toBe(1);
   });
 });
