@@ -1,5 +1,7 @@
 import {
   computeLeaveBy,
+  formatDriveLeg,
+  homeDriveLeg,
   matchesDay,
   pickNorthboundRecommendation,
   pickSouthboundRecommendation,
@@ -9,6 +11,7 @@ import {
   type TrainStatus,
 } from "@gme/shared";
 import { useMemo } from "react";
+import { useHomeDriveMinutes } from "../hooks/useHomeDriveMinutes.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { TrainRow } from "./TrainRow.js";
@@ -57,6 +60,12 @@ export function TodayBoard({
     (r) => !computeLeaveBy(r, userLocation, nowMinutes).missed,
   );
 
+  const homeDriveMinutes = useHomeDriveMinutes(upcomingRows);
+  const homeDriveFor = (row: ScheduleRow): number | undefined => {
+    const leg = homeDriveLeg(row, now);
+    return leg ? homeDriveMinutes[formatDriveLeg(leg)] : undefined;
+  };
+
   if (todaysRows.length === 0) {
     return <p className="board-empty">No trains running today.</p>;
   }
@@ -87,6 +96,7 @@ export function TodayBoard({
             highlighted={isRecommended}
             band={bands[i]}
             live
+            homeDriveMinutes={homeDriveFor(row)}
             userLocation={userLocation}
             nowMinutes={nowMinutes}
           />
