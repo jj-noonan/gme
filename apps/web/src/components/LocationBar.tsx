@@ -1,3 +1,4 @@
+import type { Direction } from "@gme/shared";
 import { useEffect, useState } from "react";
 import type { PlaceState, PlaceStatus } from "../hooks/usePlace.js";
 import type { IconName } from "../lib/icons.js";
@@ -120,12 +121,24 @@ function PlaceField({
   );
 }
 
-/** The two ends of every trip, along the bottom of the board. */
-export function LocationBar({ vt, nyc }: { vt: PlaceState; nyc: PlaceState }) {
+/**
+ * The two ends of every trip, along the bottom of the board, in the order
+ * you travel them: NYC then VT northbound, VT then NYC southbound.
+ */
+export function LocationBar({
+  vt,
+  nyc,
+  direction,
+}: {
+  vt: PlaceState;
+  nyc: PlaceState;
+  direction: Direction;
+}) {
+  const vtField = <PlaceField key="vt" area="vt" place={vt} allowCurrent />;
+  const nycField = <PlaceField key="nyc" area="nyc" place={nyc} />;
   return (
     <footer className="place-bar">
-      <PlaceField area="vt" place={vt} allowCurrent />
-      <PlaceField area="nyc" place={nyc} />
+      {direction === "N" ? [nycField, vtField] : [vtField, nycField]}
     </footer>
   );
 }
