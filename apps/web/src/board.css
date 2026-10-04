@@ -222,6 +222,8 @@ body {
 }
 
 .trip__status {
+  color: inherit;
+  text-decoration: none;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
