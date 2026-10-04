@@ -13,3 +13,16 @@ export const AMTRAKER_MIRROR_URL = "https://amtrak-api.marcmap.app/get-trains";
 export const CACHE_TTL_MS = 60_000;
 
 export const FETCH_TIMEOUT_MS = 8_000;
+
+// Mapbox token for traffic-aware drive times (a public-scope `pk.` token is
+// enough). Unset means /drive-home answers with nothing and the web app keeps
+// its straight-line estimate.
+export const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN ?? "";
+export const MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic";
+
+// Future slots are predicted from typical traffic and barely move; near-term
+// ones follow live traffic, so nothing is cached for long.
+export const DRIVE_CACHE_TTL_MS = 10 * 60_000;
+
+// Upper bound on legs per /drive-home request — a day's northbound board is ~a dozen.
+export const MAX_DRIVE_LEGS = 40;
