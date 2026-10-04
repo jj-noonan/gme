@@ -54,7 +54,7 @@ export function App() {
           <TimetableBoard rows={rows} direction="S" vtLocation={vtLocation} />
         )}
       </main>
-      <LocationBar vt={vt} nyc={nyc} />
+      <LocationBar vt={vt} nyc={nyc} direction={activeTab.startsWith("N") ? "N" : "S"} />
     </div>
   );
 }
