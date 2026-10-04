@@ -127,9 +127,7 @@ export function TrainRow({
             <FlapText text={changeStationCode(row)} />
           </div>
           <div className="trip__sub">
-            {formatClockFromMinutes(trainDeparts)}
-            <Icon name="arrow-right" size={16} />
-            {formatClockFromMinutes(trainArrives)}
+            {formatClockFromMinutes(trainDeparts)} / {formatClockFromMinutes(trainArrives)}
           </div>
         </div>
 
