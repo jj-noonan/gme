@@ -177,8 +177,11 @@ body {
   text-align: center;
 }
 
-.trip__leg:nth-child(2) .flap-text {
+.trip__route {
+  display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 0.4rem;
 }
 
 .trip__leg:last-child .flap-text {

@@ -121,9 +121,15 @@ export function TrainRow({
 
         {/* The train itself: where it runs, and when it really does. */}
         <div className="trip__leg">
-          <FlapText text={`${boardingStationCode(row)} => ${changeStationCode(row)}`} />
+          <div className="trip__route">
+            <FlapText text={boardingStationCode(row)} />
+            <Icon name="arrow-right" size={20} />
+            <FlapText text={changeStationCode(row)} />
+          </div>
           <div className="trip__sub">
-            {formatClockFromMinutes(trainDeparts)} {"=>"} {formatClockFromMinutes(trainArrives)}
+            {formatClockFromMinutes(trainDeparts)}
+            <Icon name="arrow-right" size={16} />
+            {formatClockFromMinutes(trainArrives)}
           </div>
         </div>
 
