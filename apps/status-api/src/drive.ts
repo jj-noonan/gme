@@ -1,6 +1,8 @@
 import { formatDriveLeg, slotDepartAt, STATIONS, type DriveLeg } from "@gme/shared";
 import {
   DRIVE_CACHE_TTL_MS,
+  DRIVE_FAR_CACHE_TTL_MS,
+  DRIVE_NEAR_WINDOW_MINUTES,
   FETCH_TIMEOUT_MS,
   MAPBOX_DIRECTIONS_URL,
   MAPBOX_TOKEN,
@@ -15,7 +17,7 @@ export interface DriveDeps {
 const defaultDeps: DriveDeps = { token: MAPBOX_TOKEN, fetchImpl: fetch, now: () => new Date() };
 
 // Keyed by the slotted leg, so every row in the same quarter hour shares one call.
-const cache = new Map<string, { minutes: number; fetchedAt: number }>();
+const cache = new Map<string, { minutes: number; expiresAt: number }>();
 const inFlight = new Map<string, Promise<number | null>>();
 
 export function clearDriveCache(): void {
@@ -67,17 +69,31 @@ async function fetchDriveMinutes(leg: DriveLeg, deps: DriveDeps): Promise<number
   return seconds / 60;
 }
 
+function cacheTtlMs(leg: DriveLeg, deps: DriveDeps): number {
+  const nearCutoff = new Date(deps.now().getTime() + DRIVE_NEAR_WINDOW_MINUTES * 60_000);
+  return leg.departAt > easternNowLocal(nearCutoff) ? DRIVE_FAR_CACHE_TTL_MS : DRIVE_CACHE_TTL_MS;
+}
+
+/** Drops expired entries, so arbitrary vt-locations can't grow the cache without bound. */
+function pruneCache(): void {
+  const now = Date.now();
+  for (const [key, entry] of cache) {
+    if (now >= entry.expiresAt) cache.delete(key);
+  }
+}
+
 async function lookupSlot(leg: DriveLeg, deps: DriveDeps): Promise<number | null> {
   const key = formatDriveLeg(leg);
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.fetchedAt < DRIVE_CACHE_TTL_MS) return cached.minutes;
+  if (cached && Date.now() < cached.expiresAt) return cached.minutes;
 
   const pending = inFlight.get(key);
   if (pending) return pending;
 
+  pruneCache();
   const request = fetchDriveMinutes(leg, deps)
     .then((minutes) => {
-      if (minutes != null) cache.set(key, { minutes, fetchedAt: Date.now() });
+      if (minutes != null) cache.set(key, { minutes, expiresAt: Date.now() + cacheTtlMs(leg, deps) });
       return minutes;
     })
     .catch((error: unknown) => {

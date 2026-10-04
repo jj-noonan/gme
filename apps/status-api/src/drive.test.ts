@@ -1,5 +1,5 @@
 import type { DriveLeg } from "@gme/shared";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearDriveCache, easternNowLocal, getDriveMinutes } from "./drive.js";
 
 // 2026-10-05 12:00 Eastern (EDT, UTC-4).
@@ -86,5 +86,26 @@ describe("getDriveMinutes", () => {
     const fetchImpl = mapboxReturning(600);
     expect(await getDriveMinutes([leg()], deps(fetchImpl, ""))).toEqual({});
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});
+
+describe("drive cache lifetime", () => {
+  afterEach(() => vi.useRealTimers());
+
+  async function callsAfter(departAt: string, elapsedMs: number): Promise<number> {
+    vi.useFakeTimers({ now: NOON_EASTERN });
+    const fetchImpl = mapboxReturning(600);
+    await getDriveMinutes([leg({ departAt })], deps(fetchImpl));
+    vi.setSystemTime(NOON_EASTERN.getTime() + elapsedMs);
+    await getDriveMinutes([leg({ departAt })], deps(fetchImpl));
+    return fetchImpl.mock.calls.length;
+  }
+
+  it("refreshes a near-term slot after 10 minutes, for live traffic", async () => {
+    expect(await callsAfter("2026-10-05T13:00", 11 * 60_000)).toBe(2);
+  });
+
+  it("keeps a slot hours ahead for much longer", async () => {
+    expect(await callsAfter("2026-10-05T18:00", 3 * 60 * 60_000)).toBe(1);
   });
 });

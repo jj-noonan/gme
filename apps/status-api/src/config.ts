@@ -20,9 +20,13 @@ export const FETCH_TIMEOUT_MS = 8_000;
 export const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN ?? "";
 export const MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic";
 
-// Future slots are predicted from typical traffic and barely move; near-term
-// ones follow live traffic, so nothing is cached for long.
+// Slots within DRIVE_NEAR_WINDOW_MINUTES follow live traffic, so they're
+// cached briefly. Further-out slots are predicted from typical traffic and
+// barely move — and the timetable asks for dozens of them — so they're kept
+// for hours.
 export const DRIVE_CACHE_TTL_MS = 10 * 60_000;
+export const DRIVE_FAR_CACHE_TTL_MS = 6 * 60 * 60_000;
+export const DRIVE_NEAR_WINDOW_MINUTES = 120;
 
 // Upper bound on legs per /drive request — the biggest board (the full
 // southbound timetable) is a few dozen rows.
