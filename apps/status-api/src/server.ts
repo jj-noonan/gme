@@ -1,29 +1,32 @@
-import { createServer } from "node:http";
-import { parseDriveLeg, type DriveLeg } from "@gme/shared";
+import { createServer, type IncomingMessage } from "node:http";
+import { isInBounds, NYC_REGION, parseDriveLeg, VT_REGION, type DriveLeg } from "@gme/shared";
 import {
   ALLOWED_ORIGINS,
   DRIVE_RATE_LIMIT,
+  GEOCODE_RATE_LIMIT,
   MAX_DRIVE_LEGS,
   PORT,
-  VT_REGION,
 } from "./config.js";
 import { getDriveMinutes } from "./drive.js";
+import { geocode } from "./geocode.js";
 import { createRateLimiter } from "./rateLimit.js";
 import { getTrainStatuses } from "./statusCache.js";
 
 const allowDriveRequest = createRateLimiter(DRIVE_RATE_LIMIT);
+const allowGeocodeRequest = createRateLimiter(GEOCODE_RATE_LIMIT);
+
+const GEOCODE_AREAS = { vt: VT_REGION, nyc: NYC_REGION } as const;
+const MAX_GEOCODE_QUERY_LENGTH = 256;
+
+/** Who's asking, for rate limiting. Fly's proxy sets Fly-Client-IP; the socket is the proxy itself. */
+function clientKey(req: IncomingMessage): string {
+  return String(req.headers["fly-client-ip"] ?? req.socket.remoteAddress ?? "unknown");
+}
 
 /** A parsed leg whose place is inside the area this app serves, or null. */
 function parseRegionalDriveLeg(text: string): DriveLeg | null {
   const leg = parseDriveLeg(text);
-  if (!leg) return null;
-  const { lat, lon } = leg.place;
-  const inRegion =
-    lat >= VT_REGION.minLat &&
-    lat <= VT_REGION.maxLat &&
-    lon >= VT_REGION.minLon &&
-    lon <= VT_REGION.maxLon;
-  return inRegion ? leg : null;
+  return leg && isInBounds(leg.place, VT_REGION) ? leg : null;
 }
 
 function corsHeaders(origin: string | undefined): Record<string, string> {
@@ -61,9 +64,7 @@ const server = createServer(async (req, res) => {
   // ?legs=ALB>43.609,-72.978@2026-10-05T18:00;43.609,-72.978>CNV@… (see formatDriveLeg)
   //   → { minutes: { "ALB>43.609,-72.978@2026-10-05T18:00": 112.6, … } }
   if (url.pathname === "/drive" && req.method === "GET") {
-    // Fly's proxy sets Fly-Client-IP; the socket address is the proxy itself.
-    const client = String(req.headers["fly-client-ip"] ?? req.socket.remoteAddress ?? "unknown");
-    if (!allowDriveRequest(client)) {
+    if (!allowDriveRequest(clientKey(req))) {
       res.writeHead(429, { ...headers, "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "too many requests" }));
       return;
@@ -85,6 +86,34 @@ const server = createServer(async (req, res) => {
       console.error("Unexpected error serving /drive:", error);
       res.writeHead(500, { ...headers, "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "internal error" }));
+    }
+    return;
+  }
+
+  // ?q=23 West St, Rutland&area=vt → { lat, lon, label }, or 404 if nothing matches there.
+  if (url.pathname === "/geocode" && req.method === "GET") {
+    if (!allowGeocodeRequest(clientKey(req))) {
+      res.writeHead(429, { ...headers, "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "too many requests" }));
+      return;
+    }
+
+    const query = (url.searchParams.get("q") ?? "").trim();
+    const area = url.searchParams.get("area");
+    if (!query || query.length > MAX_GEOCODE_QUERY_LENGTH || (area !== "vt" && area !== "nyc")) {
+      res.writeHead(400, { ...headers, "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "bad query" }));
+      return;
+    }
+
+    try {
+      const result = await geocode(query, GEOCODE_AREAS[area]);
+      res.writeHead(result ? 200 : 404, { ...headers, "Content-Type": "application/json" });
+      res.end(JSON.stringify(result ?? { error: "not found" }));
+    } catch (error) {
+      console.error("Geocoding failed:", error);
+      res.writeHead(502, { ...headers, "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "geocoding unavailable" }));
     }
     return;
   }

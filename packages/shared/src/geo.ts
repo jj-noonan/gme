@@ -3,6 +3,22 @@ export interface Coordinate {
   lon: number;
 }
 
+export interface Bounds {
+  minLat: number;
+  maxLat: number;
+  minLon: number;
+  maxLon: number;
+}
+
+export function isInBounds(point: Coordinate, bounds: Bounds): boolean {
+  return (
+    point.lat >= bounds.minLat &&
+    point.lat <= bounds.maxLat &&
+    point.lon >= bounds.minLon &&
+    point.lon <= bounds.maxLon
+  );
+}
+
 /** Assumed flat transit time from anywhere in NYC to Penn Station, until this is worth making real. */
 export const ASSUMED_NYC_TRANSIT_MINUTES = 50;
 
