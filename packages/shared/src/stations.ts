@@ -1,3 +1,4 @@
+import type { Bounds } from "./geo.js";
 import type { Station } from "./types.js";
 
 // Approximate station coordinates (not the platform entrance, just the town) —
@@ -21,6 +22,23 @@ export const NYP_COORDINATE = { lat: 40.7506, lon: -73.9935 };
  * home from it northbound.
  */
 export const DEFAULT_VT_LOCATION = { lat: 43.6089, lon: -72.9781 };
+
+/**
+ * The default nyc-location: Bishop Loughlin Memorial High School, 357 Clermont
+ * Ave, Brooklyn. Not used in any timing yet — the NYC side is still a flat
+ * subway assumption.
+ */
+export const DEFAULT_NYC_LOCATION = { lat: 40.6871, lon: -73.9691 };
+
+/**
+ * Where a vt-location may be: VT plus eastern NY, generously. Keeps status-api
+ * from being a free directions/geocoding proxy for anywhere, and keeps every
+ * drive's origin in Eastern time.
+ */
+export const VT_REGION: Bounds = { minLat: 42.0, maxLat: 45.1, minLon: -74.6, maxLon: -71.4 };
+
+/** Where an nyc-location may be: the five boroughs, roughly. */
+export const NYC_REGION: Bounds = { minLat: 40.45, maxLat: 40.95, minLon: -74.3, maxLon: -73.65 };
 
 // Centroid of the tracked VT/NY stations, used only to decide NYC-side vs
 // Rutland-side at a coarse level (see classifyRegion in geo.ts).

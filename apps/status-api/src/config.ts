@@ -19,6 +19,7 @@ export const FETCH_TIMEOUT_MS = 8_000;
 // straight-line estimate.
 export const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN ?? "";
 export const MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic";
+export const MAPBOX_GEOCODE_URL = "https://api.mapbox.com/search/geocode/v6/forward";
 
 // Slots within DRIVE_NEAR_WINDOW_MINUTES follow live traffic, so they're
 // cached briefly. Further-out slots are predicted from typical traffic and
@@ -32,11 +33,10 @@ export const DRIVE_NEAR_WINDOW_MINUTES = 120;
 // southbound timetable) is a few dozen rows.
 export const MAX_DRIVE_LEGS = 80;
 
-// Places a drive may start or end at: VT plus eastern NY, generously. Keeps
-// /drive from being a free directions proxy for anywhere, and keeps every
-// origin in Eastern time (see depart_at in drive.ts).
-export const VT_REGION = { minLat: 42.0, maxLat: 45.1, minLon: -74.6, maxLon: -71.4 };
-
 // Per-client cap on /drive requests, as a backstop for the Mapbox quota. A
 // viewer polls every 10 minutes; this leaves lots of room for tab-switching.
 export const DRIVE_RATE_LIMIT = { requests: 60, windowMs: 10 * 60_000 };
+
+// Per-client cap on /geocode. A page load looks up at most two saved
+// addresses; this leaves room for someone typing a few attempts.
+export const GEOCODE_RATE_LIMIT = { requests: 20, windowMs: 10 * 60_000 };
