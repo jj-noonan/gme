@@ -386,3 +386,88 @@ body {
 .trip__status {
   gap: 0.3rem;
 }
+
+/* ---------- vt-location / nyc-location ---------- */
+
+.place-bar {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.4rem;
+  padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+  border-top: 2px solid var(--rule);
+  background: var(--tile-bg);
+}
+
+@media (min-width: 640px) {
+  .place-bar {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.place-field {
+  min-width: 0;
+}
+
+.place-field__row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.place-field__label {
+  display: flex;
+  flex: 0 0 auto;
+  color: var(--header-ink);
+}
+
+.place-field__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  background: var(--flap-face);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  /* 16px keeps iOS Safari from zooming the page on focus. */
+  font-size: 16px;
+}
+
+.place-field__input::placeholder {
+  color: var(--header-ink);
+  opacity: 0.7;
+}
+
+.place-field__input:focus {
+  outline: none;
+  border-color: var(--ink-dim);
+  background: var(--flap-face-active);
+}
+
+.place-field__locate {
+  display: flex;
+  flex: 0 0 auto;
+  padding: 0.4rem;
+  background: var(--flap-face);
+  color: var(--header-ink);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.place-field__locate--active {
+  background: var(--tile-bg-active);
+  color: var(--amber);
+  border-color: var(--ink-dim);
+}
+
+.place-field__note {
+  margin: 0.25rem 0 0 calc(20px + 0.4rem);
+  color: var(--ink-dim);
+  font-size: 0.72rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

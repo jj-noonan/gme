@@ -1,17 +1,21 @@
-import { DEFAULT_VT_LOCATION } from "@gme/shared";
 import { useEffect, useState } from "react";
+import { LocationBar } from "./components/LocationBar.js";
 import { TabBar, type TabId } from "./components/TabBar.js";
 import { TimetableBoard } from "./components/TimetableBoard.js";
 import { TodayBoard } from "./components/TodayBoard.js";
+import { usePlace } from "./hooks/usePlace.js";
 import { useSchedule } from "./hooks/useSchedule.js";
 import { useTrainStatuses } from "./hooks/useTrainStatuses.js";
 import { useUserLocation } from "./hooks/useUserLocation.js";
 
 export function App() {
   const { rows, error: scheduleError } = useSchedule();
-  const { region, resolved } = useUserLocation();
-  // Fixed for now; the vt-location box will make this configurable.
-  const vtLocation = DEFAULT_VT_LOCATION;
+  const user = useUserLocation();
+  const { region, resolved } = user;
+  const vt = usePlace("vt", user);
+  // Not used in any timing yet: the NYC side is still a flat subway estimate.
+  const nyc = usePlace("nyc", user);
+  const vtLocation = vt.coordinate;
   const [activeTab, setActiveTab] = useState<TabId>("N_TODAY");
   const [userPickedTab, setUserPickedTab] = useState(false);
 
@@ -50,6 +54,7 @@ export function App() {
           <TimetableBoard rows={rows} direction="S" vtLocation={vtLocation} />
         )}
       </main>
+      <LocationBar vt={vt} nyc={nyc} />
     </div>
   );
 }

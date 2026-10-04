@@ -18,6 +18,8 @@ export interface UserLocationState {
   region: Region;
   /** False while still waiting on geolocation/IP lookup; `location` is a placeholder until then. */
   resolved: boolean;
+  /** True until the lookup finishes, whether or not it found anything. */
+  pending: boolean;
 }
 
 export function useUserLocation(): UserLocationState {
@@ -25,6 +27,7 @@ export function useUserLocation(): UserLocationState {
     location: DEFAULT_VT_LOCATION,
     region: "RUTLAND",
     resolved: false,
+    pending: true,
   });
 
   useEffect(() => {
@@ -36,6 +39,7 @@ export function useUserLocation(): UserLocationState {
         location: resolvedLocation,
         region: classifyRegion(resolvedLocation, NYP_COORDINATE, RUTLAND_CLUSTER_CENTROID),
         resolved: location !== null,
+        pending: false,
       });
     });
     return () => {
