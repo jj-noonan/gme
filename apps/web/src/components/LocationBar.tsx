@@ -123,7 +123,9 @@ function PlaceField({
 
 /**
  * The two ends of every trip, along the bottom of the board, in the order
- * you travel them: NYC then VT northbound, VT then NYC southbound.
+ * you travel them: NYC then VT northbound, VT then NYC southbound. The
+ * starting box is the one that can use your current location — that's where
+ * you'd be standing.
  */
 export function LocationBar({
   vt,
@@ -134,11 +136,10 @@ export function LocationBar({
   nyc: PlaceState;
   direction: Direction;
 }) {
-  const vtField = <PlaceField key="vt" area="vt" place={vt} allowCurrent />;
-  const nycField = <PlaceField key="nyc" area="nyc" place={nyc} />;
+  const northbound = direction === "N";
+  const vtField = <PlaceField key="vt" area="vt" place={vt} allowCurrent={!northbound} />;
+  const nycField = <PlaceField key="nyc" area="nyc" place={nyc} allowCurrent={northbound} />;
   return (
-    <footer className="place-bar">
-      {direction === "N" ? [nycField, vtField] : [vtField, nycField]}
-    </footer>
+    <footer className="place-bar">{northbound ? [nycField, vtField] : [vtField, nycField]}</footer>
   );
 }
