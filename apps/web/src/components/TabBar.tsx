@@ -1,10 +1,11 @@
 export type TabId = "N_TODAY" | "S_TODAY" | "N_TIMETABLE" | "S_TIMETABLE";
 
-// Fixed order, always — see README.
+// Fixed order, always, grouped by direction so each direction's two views
+// sit side by side.
 const TABS: { id: TabId; label: string }[] = [
   { id: "N_TODAY", label: "Northbound · Today" },
-  { id: "S_TODAY", label: "Southbound · Today" },
   { id: "N_TIMETABLE", label: "Northbound · Timetable" },
+  { id: "S_TODAY", label: "Southbound · Today" },
   { id: "S_TIMETABLE", label: "Southbound · Timetable" },
 ];
 
