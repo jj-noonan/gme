@@ -43,7 +43,7 @@ export function TodayBoard({
 
   // Every row today, not just the upcoming ones: which rows are still
   // catchable depends on these drive times in the first place.
-  const vtDriveMinutes = useVtDriveMinutes(todaysRows, vtLocation, now);
+  const vtDriveMinutes = useVtDriveMinutes(todaysRows, vtLocation, () => now);
 
   const recommended = useMemo(() => {
     if (direction === "N") {

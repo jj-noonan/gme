@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchesDay, parseDayCode } from "./dayCodes.js";
+import { matchesDay, nextRunningDay, parseDayCode } from "./dayCodes.js";
 
 // Sun=0 Mon=1 Tue=2 Wed=3 Thu=4 Fri=5 Sat=6
 const SUN = new Date("2026-09-20T12:00:00");
@@ -54,5 +54,19 @@ describe("parseDayCode", () => {
 
   it("rejects an unrecognized day token", () => {
     expect(() => parseDayCode("XX-FR")).toThrow();
+  });
+});
+
+describe("nextRunningDay", () => {
+  // Sunday 2026-10-04, mid-afternoon.
+  const sunday = new Date(2026, 9, 4, 15, 30);
+
+  it("is today, at midnight, when the train runs today", () => {
+    expect(nextRunningDay("DAILY", sunday)).toEqual(new Date(2026, 9, 4));
+  });
+
+  it("skips ahead to the next day it runs", () => {
+    expect(nextRunningDay("MO-FR", sunday)).toEqual(new Date(2026, 9, 5));
+    expect(nextRunningDay("SA", sunday)).toEqual(new Date(2026, 9, 10));
   });
 });

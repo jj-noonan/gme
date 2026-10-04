@@ -63,3 +63,17 @@ export function parseDayCode(raw: string): Set<number> {
 export function matchesDay(raw: string, date: Date): boolean {
   return parseDayCode(raw).has(date.getDay());
 }
+
+/**
+ * The first day, starting with `from` itself, that a train with this day
+ * code runs — at local midnight. Every day code names at least one weekday,
+ * so this always finds one within a week.
+ */
+export function nextRunningDay(raw: string, from: Date): Date {
+  const days = parseDayCode(raw);
+  for (let offset = 0; offset < 7; offset++) {
+    const day = new Date(from.getFullYear(), from.getMonth(), from.getDate() + offset);
+    if (days.has(day.getDay())) return day;
+  }
+  throw new Error(`Day code "${raw}" names no days`);
+}
