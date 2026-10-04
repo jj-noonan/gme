@@ -61,13 +61,16 @@ Shore's Boston-section trains never leaking into NYP-facing data).
 Deliberate, for a low-traffic personal site — revisit if that ever changes:
 
 - Schedule is a manually maintained snapshot, not live-scraped from PDFs.
-- VT-side drives run between the station and a fixed vt-location (Jones
-  Donuts), not the viewer's live location. They're routed and traffic-aware
+- VT-side drives run between the station and the vt-location — Jones Donuts
+  by default, or a street address / current location set in the box at the
+  bottom of the board (saved per device; only the typed text is stored, and
+  it's re-geocoded on each load). They're routed and traffic-aware
   via Mapbox, through status-api's `/drive` (needs the `MAPBOX_TOKEN` Fly
   secret) — timetable rows priced for the next day that train runs. When
   status-api can't answer, they fall back to straight-line distance × a flat
   average speed.
-- NYC-side transit time is a flat 50-minute assumption.
+- NYC-side transit time is a flat 50-minute assumption; the nyc-location box
+  (Bishop Loughlin HS by default) is saved but not used in any timing yet.
 - "Today" filtering uses the viewer's local clock, assumed to be Eastern time.
 - No automated schedule-drift alerting yet — `fly logs` on status-api shows
   actual-vs-scheduled deltas if you want to eyeball it.
