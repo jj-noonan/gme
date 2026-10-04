@@ -3,6 +3,7 @@ import {
   formatDriveLeg,
   homeDriveLeg,
   matchesDay,
+  RUTLAND_HOME,
   pickNorthboundRecommendation,
   pickSouthboundRecommendation,
   type Coordinate,
@@ -11,7 +12,7 @@ import {
   type TrainStatus,
 } from "@gme/shared";
 import { useMemo } from "react";
-import { useHomeDriveMinutes } from "../hooks/useHomeDriveMinutes.js";
+import { useDriveMinutes } from "../hooks/useDriveMinutes.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { TrainRow } from "./TrainRow.js";
@@ -60,10 +61,11 @@ export function TodayBoard({
     (r) => !computeLeaveBy(r, userLocation, nowMinutes).missed,
   );
 
-  const homeDriveMinutes = useHomeDriveMinutes(upcomingRows);
+  const homeLegs = upcomingRows.map((row) => homeDriveLeg(row, RUTLAND_HOME, now));
+  const driveMinutes = useDriveMinutes(homeLegs.filter((leg) => leg !== null));
   const homeDriveFor = (row: ScheduleRow): number | undefined => {
-    const leg = homeDriveLeg(row, now);
-    return leg ? homeDriveMinutes[formatDriveLeg(leg)] : undefined;
+    const leg = homeDriveLeg(row, RUTLAND_HOME, now);
+    return leg ? driveMinutes[formatDriveLeg(leg)] : undefined;
   };
 
   if (todaysRows.length === 0) {

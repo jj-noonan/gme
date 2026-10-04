@@ -62,7 +62,7 @@ Deliberate, for a low-traffic personal site — revisit if that ever changes:
 
 - Schedule is a manually maintained snapshot, not live-scraped from PDFs.
 - The station → Rutland house drive (northbound, Today tab) is routed and
-  traffic-aware via Mapbox, through status-api's `/drive-home` (needs the
+  traffic-aware via Mapbox, through status-api's `/drive` (needs the
   `MAPBOX_TOKEN` Fly secret). Every other drive estimate — and that one, when
   status-api can't answer — uses straight-line distance × a flat average speed.
 - NYC-side transit time is a flat 50-minute assumption.

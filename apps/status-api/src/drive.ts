@@ -1,10 +1,4 @@
-import {
-  formatDriveLeg,
-  RUTLAND_HOME,
-  slotDepartAt,
-  STATIONS,
-  type HomeDriveLeg,
-} from "@gme/shared";
+import { formatDriveLeg, slotDepartAt, STATIONS, type DriveLeg } from "@gme/shared";
 import {
   DRIVE_CACHE_TTL_MS,
   FETCH_TIMEOUT_MS,
@@ -12,19 +6,19 @@ import {
   MAPBOX_TOKEN,
 } from "./config.js";
 
-export interface DriveHomeDeps {
+export interface DriveDeps {
   token: string;
   fetchImpl: typeof fetch;
   now: () => Date;
 }
 
-const defaultDeps: DriveHomeDeps = { token: MAPBOX_TOKEN, fetchImpl: fetch, now: () => new Date() };
+const defaultDeps: DriveDeps = { token: MAPBOX_TOKEN, fetchImpl: fetch, now: () => new Date() };
 
-// Keyed by station + slot, so every row arriving in the same quarter hour shares one call.
+// Keyed by the slotted leg, so every row in the same quarter hour shares one call.
 const cache = new Map<string, { minutes: number; fetchedAt: number }>();
 const inFlight = new Map<string, Promise<number | null>>();
 
-export function clearDriveHomeCache(): void {
+export function clearDriveCache(): void {
   cache.clear();
   inFlight.clear();
 }
@@ -47,15 +41,17 @@ export function easternNowLocal(now: Date): string {
   return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
 }
 
-async function fetchDriveMinutes(leg: HomeDriveLeg, deps: DriveHomeDeps): Promise<number | null> {
+async function fetchDriveMinutes(leg: DriveLeg, deps: DriveDeps): Promise<number | null> {
   const station = STATIONS.find((s) => s.code === leg.stationCode);
   if (!station) return null;
 
-  const coordinates = `${station.lon},${station.lat};${RUTLAND_HOME.lon},${RUTLAND_HOME.lat}`;
+  const stationEnd = `${station.lon},${station.lat}`;
+  const placeEnd = `${leg.place.lon},${leg.place.lat}`;
+  const coordinates = leg.toStation ? `${placeEnd};${stationEnd}` : `${stationEnd};${placeEnd}`;
   const params = new URLSearchParams({ overview: "false", access_token: deps.token });
   // Mapbox reads depart_at as the origin's local time, which is Eastern for
-  // every tracked station. It only accepts future times; a slot that has
-  // already started just gets live traffic instead.
+  // every tracked station and every place inside VT_REGION. It only accepts
+  // future times; a slot that has already started just gets live traffic.
   if (leg.departAt > easternNowLocal(deps.now())) params.set("depart_at", leg.departAt);
 
   const response = await deps.fetchImpl(`${MAPBOX_DIRECTIONS_URL}/${coordinates}?${params}`, {
@@ -71,7 +67,7 @@ async function fetchDriveMinutes(leg: HomeDriveLeg, deps: DriveHomeDeps): Promis
   return seconds / 60;
 }
 
-async function lookupSlot(leg: HomeDriveLeg, deps: DriveHomeDeps): Promise<number | null> {
+async function lookupSlot(leg: DriveLeg, deps: DriveDeps): Promise<number | null> {
   const key = formatDriveLeg(leg);
   const cached = cache.get(key);
   if (cached && Date.now() - cached.fetchedAt < DRIVE_CACHE_TTL_MS) return cached.minutes;
@@ -95,21 +91,18 @@ async function lookupSlot(leg: HomeDriveLeg, deps: DriveHomeDeps): Promise<numbe
 }
 
 /**
- * Traffic-aware drive minutes from each leg's station to the Rutland house,
- * keyed by the leg's wire form. Legs that can't be answered are left out.
+ * Traffic-aware drive minutes for each leg, keyed by the leg's wire form as
+ * requested. Legs that can't be answered are left out.
  */
-export async function getDriveHomeMinutes(
-  legs: HomeDriveLeg[],
-  deps: DriveHomeDeps = defaultDeps,
+export async function getDriveMinutes(
+  legs: DriveLeg[],
+  deps: DriveDeps = defaultDeps,
 ): Promise<Record<string, number>> {
   if (!deps.token) return {};
 
   const results = await Promise.all(
     legs.map(async (leg) => {
-      const minutes = await lookupSlot(
-        { stationCode: leg.stationCode, departAt: slotDepartAt(leg.departAt) },
-        deps,
-      );
+      const minutes = await lookupSlot({ ...leg, departAt: slotDepartAt(leg.departAt) }, deps);
       return [formatDriveLeg(leg), minutes] as const;
     }),
   );

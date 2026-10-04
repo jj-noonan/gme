@@ -15,8 +15,8 @@ export const CACHE_TTL_MS = 60_000;
 export const FETCH_TIMEOUT_MS = 8_000;
 
 // Mapbox token for traffic-aware drive times (a public-scope `pk.` token is
-// enough). Unset means /drive-home answers with nothing and the web app keeps
-// its straight-line estimate.
+// enough). Unset means /drive answers with nothing and the web app keeps its
+// straight-line estimate.
 export const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN ?? "";
 export const MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbox/driving-traffic";
 
@@ -24,5 +24,15 @@ export const MAPBOX_DIRECTIONS_URL = "https://api.mapbox.com/directions/v5/mapbo
 // ones follow live traffic, so nothing is cached for long.
 export const DRIVE_CACHE_TTL_MS = 10 * 60_000;
 
-// Upper bound on legs per /drive-home request — a day's northbound board is ~a dozen.
-export const MAX_DRIVE_LEGS = 40;
+// Upper bound on legs per /drive request — the biggest board (the full
+// southbound timetable) is a few dozen rows.
+export const MAX_DRIVE_LEGS = 80;
+
+// Places a drive may start or end at: VT plus eastern NY, generously. Keeps
+// /drive from being a free directions proxy for anywhere, and keeps every
+// origin in Eastern time (see depart_at in drive.ts).
+export const VT_REGION = { minLat: 42.0, maxLat: 45.1, minLon: -74.6, maxLon: -71.4 };
+
+// Per-client cap on /drive requests, as a backstop for the Mapbox quota. A
+// viewer polls every 10 minutes; this leaves lots of room for tab-switching.
+export const DRIVE_RATE_LIMIT = { requests: 60, windowMs: 10 * 60_000 };
