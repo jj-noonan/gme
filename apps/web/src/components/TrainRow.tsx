@@ -147,10 +147,10 @@ export function TrainRow({
         </span>
         {showDays && <span className="trip__days">{row.daysRaw}</span>}
         {live && (
-          <span className="trip__status">
+          <a className="trip__status" href={`https://amtraker.com/trains/${row.trainNumber}`}>
             <Icon name={statusIcon(label)} size={16} />
             <FlapText text={label} />
-          </span>
+          </a>
         )}
       </div>
     </article>
