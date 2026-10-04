@@ -62,10 +62,11 @@ Deliberate, for a low-traffic personal site — revisit if that ever changes:
 
 - Schedule is a manually maintained snapshot, not live-scraped from PDFs.
 - VT-side drives run between the station and a fixed vt-location (Jones
-  Donuts), not the viewer's live location. On the Today tabs they're routed
-  and traffic-aware via Mapbox, through status-api's `/drive` (needs the
-  `MAPBOX_TOKEN` Fly secret); elsewhere, or when status-api can't answer, they
-  use straight-line distance × a flat average speed.
+  Donuts), not the viewer's live location. They're routed and traffic-aware
+  via Mapbox, through status-api's `/drive` (needs the `MAPBOX_TOKEN` Fly
+  secret) — timetable rows priced for the next day that train runs. When
+  status-api can't answer, they fall back to straight-line distance × a flat
+  average speed.
 - NYC-side transit time is a flat 50-minute assumption.
 - "Today" filtering uses the viewer's local clock, assumed to be Eastern time.
 - No automated schedule-drift alerting yet — `fly logs` on status-api shows
