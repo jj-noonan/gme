@@ -173,6 +173,14 @@ body {
   text-align: right;
 }
 
+.trip__leg:nth-child(2) {
+  text-align: center;
+}
+
+.trip__leg:nth-child(2) .flap-text {
+  justify-content: center;
+}
+
 .trip__leg:last-child .flap-text {
   justify-content: flex-end;
 }
@@ -186,6 +194,17 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.trip__leg:nth-child(2) .trip__sub {
+  justify-content: center;
+}
+
+.trip__leg:last-child .trip__sub {
+  justify-content: flex-end;
 }
 
 .trip__meta {
