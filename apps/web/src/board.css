@@ -169,6 +169,14 @@ body {
   overflow: hidden;
 }
 
+.trip__leg:last-child {
+  text-align: right;
+}
+
+.trip__leg:last-child .flap-text {
+  justify-content: flex-end;
+}
+
 .trip__sub {
   margin-top: 0.2rem;
   font-family: "Oswald", sans-serif;
@@ -339,6 +347,10 @@ body {
   display: flex;
   align-items: center;
   gap: 0.3rem;
+}
+
+.board-header__col:last-child {
+  justify-content: flex-end;
 }
 
 .board-header__col svg {
