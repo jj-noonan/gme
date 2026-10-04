@@ -42,9 +42,3 @@ export interface TrainStatus {
   stale: boolean;
   perStation: StationStatus[];
 }
-
-export interface RecommendedStop {
-  station: StationCode;
-  driveMinutes: number;
-  totalTripMinutes: number;
-}

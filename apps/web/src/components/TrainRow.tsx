@@ -6,7 +6,6 @@ import {
   doorArrivalMinutes,
   minutesBetweenClockTimes,
   parseHHMM,
-  type Coordinate,
   type ScheduleRow,
   type StationStatus,
   type TrainStatus,
@@ -70,8 +69,7 @@ export function TrainRow({
   showDays,
   live,
   band,
-  homeDriveMinutes,
-  userLocation,
+  vtDriveMinutes,
   nowMinutes,
 }: {
   row: ScheduleRow;
@@ -81,16 +79,15 @@ export function TrainRow({
   /** Today tabs only — the timetable is a static reference with no live data. */
   live?: boolean;
   band?: boolean;
-  /** Routed station → house drive for a northbound row, when status-api has one. */
-  homeDriveMinutes?: number;
-  userLocation: Coordinate;
+  /** The row's VT-side drive: vt-location → station southbound, station → vt-location northbound. */
+  vtDriveMinutes: number;
   /** Omit on the timetable tabs — nothing is "missed" on a reference schedule. */
   nowMinutes?: number;
 }) {
   const label = statusLabel(row, status);
-  const leaveBy = computeLeaveBy(row, userLocation, nowMinutes ?? -Infinity);
+  const leaveBy = computeLeaveBy(row, vtDriveMinutes, nowMinutes ?? -Infinity);
   const trainMinutes = minutesBetweenClockTimes(row.scheduledDeparture, row.scheduledArrival);
-  const lastLeg = arrivalLegMinutes(row, homeDriveMinutes);
+  const lastLeg = arrivalLegMinutes(row, vtDriveMinutes);
 
   // Train and door times track the live delay; the leave-by time stays on the
   // schedule, so a late train grows the total rather than moving your alarm.

@@ -1,5 +1,3 @@
-import type { RecommendedStop, Station, StationCode } from "./types.js";
-
 export interface Coordinate {
   lat: number;
   lon: number;
@@ -42,40 +40,6 @@ export function estimateDriveMinutes(
   avgMph: number = DEFAULT_AVG_DRIVE_MPH,
 ): number {
   return (miles / avgMph) * 60;
-}
-
-export interface StopCandidate {
-  station: StationCode;
-  /** Minutes the train itself takes between NYP and this station. */
-  trainMinutes: number;
-}
-
-/**
- * Picks whichever candidate station minimizes total door-to-door trip time
- * (train + estimated drive from the user's actual location + buffer).
- * Ties keep the first candidate given.
- */
-export function pickRecommendedStop(
-  userLocation: Coordinate,
-  stations: Station[],
-  candidates: StopCandidate[],
-  avgMph: number = DEFAULT_AVG_DRIVE_MPH,
-): RecommendedStop | null {
-  let best: RecommendedStop | null = null;
-
-  for (const candidate of candidates) {
-    const station = stations.find((s) => s.code === candidate.station);
-    if (!station) continue;
-
-    const driveMinutes = estimateDriveMinutes(haversineMiles(userLocation, station), avgMph);
-    const totalTripMinutes = candidate.trainMinutes + driveMinutes + TRIP_BUFFER_MINUTES;
-
-    if (!best || totalTripMinutes < best.totalTripMinutes) {
-      best = { station: candidate.station, driveMinutes, totalTripMinutes };
-    }
-  }
-
-  return best;
 }
 
 export type Region = "NYC" | "RUTLAND";

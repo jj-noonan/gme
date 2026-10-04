@@ -7,8 +7,9 @@ import {
   doorArrivalMinutes,
   leadMinutes,
   leaveByMinutes,
+  straightLineDriveMinutes,
 } from "./leaveBy.js";
-import { STATIONS } from "./stations.js";
+import { DEFAULT_VT_LOCATION, STATIONS } from "./stations.js";
 import type { ScheduleRow } from "./types.js";
 
 function row(overrides: Partial<ScheduleRow> = {}): ScheduleRow {
@@ -27,22 +28,13 @@ function row(overrides: Partial<ScheduleRow> = {}): ScheduleRow {
 const RUD = STATIONS.find((s) => s.code === "RUD")!;
 
 describe("arrivalLegMinutes / doorArrivalMinutes", () => {
-  it("northbound: drives from the arrival station to the Rutland house", () => {
-    const toRutland = arrivalLegMinutes(row({ direction: "N", stationCode: "RUD" }));
-    const toAlbany = arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }));
-    // Getting off at Rutland is basically already home; Albany is ~2h away.
-    expect(toRutland).toBeLessThan(15);
-    expect(toAlbany).toBeGreaterThan(90);
+  it("northbound: the drive from the arrival station to the vt-location, in whole minutes", () => {
+    expect(arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }), 112.6)).toBe(113);
   });
 
-  it("northbound: prefers a routed drive time when one is given", () => {
-    expect(arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }), 97.6)).toBe(98);
-    expect(arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }), null)).toBeGreaterThan(90);
-  });
-
-  it("southbound: a flat cross-town hop, independent of which station you boarded", () => {
-    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "RUD" }))).toBe(50);
-    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "ALB" }))).toBe(50);
+  it("southbound: a flat cross-town hop, ignoring the VT drive", () => {
+    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "RUD" }), 2)).toBe(50);
+    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "ALB" }), 113)).toBe(50);
   });
 
   it("adds the last leg onto the train's arrival time", () => {
@@ -58,9 +50,19 @@ describe("arrivalLegMinutes / doorArrivalMinutes", () => {
   it("always yields whole minutes", () => {
     for (const station of STATIONS) {
       const r = row({ direction: "N", stationCode: station.code });
-      expect(Number.isInteger(arrivalLegMinutes(r))).toBe(true);
-      expect(Number.isInteger(doorArrivalMinutes(r, arrivalLegMinutes(r)))).toBe(true);
+      const leg = arrivalLegMinutes(r, straightLineDriveMinutes(DEFAULT_VT_LOCATION, station.code));
+      expect(Number.isInteger(leg)).toBe(true);
+      expect(Number.isInteger(doorArrivalMinutes(r, leg))).toBe(true);
     }
+  });
+});
+
+describe("straightLineDriveMinutes", () => {
+  it("is near zero at the station and grows with distance", () => {
+    expect(straightLineDriveMinutes(RUD, "RUD")).toBeCloseTo(0, 5);
+    // Jones Donuts: basically at Rutland; Albany is ~2h away.
+    expect(straightLineDriveMinutes(DEFAULT_VT_LOCATION, "RUD")).toBeLessThan(15);
+    expect(straightLineDriveMinutes(DEFAULT_VT_LOCATION, "ALB")).toBeGreaterThan(90);
   });
 });
 
@@ -108,31 +110,29 @@ describe("leaveByMinutes", () => {
 
 describe("computeLeaveBy", () => {
   it("marks a northbound train as missed once the 60-minute window has passed", () => {
-    const atSeven = computeLeaveBy(row({ scheduledDeparture: "08:15" }), RUD, 7 * 60);
+    const atSeven = computeLeaveBy(row({ scheduledDeparture: "08:15" }), 90, 7 * 60);
     expect(atSeven.missed).toBe(false);
 
-    const atSevenThirty = computeLeaveBy(row({ scheduledDeparture: "08:15" }), RUD, 7 * 60 + 30);
+    const atSevenThirty = computeLeaveBy(row({ scheduledDeparture: "08:15" }), 90, 7 * 60 + 30);
     expect(atSevenThirty.missed).toBe(true);
   });
 
-  it("uses a real drive estimate southbound from the user's location", () => {
-    const standingAtRutland = computeLeaveBy(
-      row({ direction: "S", stationCode: "RUD", scheduledDeparture: "11:06" }),
-      RUD,
+  it("southbound: leaves the VT drive plus buffer before departure", () => {
+    const result = computeLeaveBy(
+      row({ direction: "S", stationCode: "CNV", scheduledDeparture: "11:11" }),
+      19,
       8 * 60,
     );
-    // Standing at the station: essentially just the 15-minute buffer.
-    expect(standingAtRutland.leadMinutes).toBeCloseTo(15, 0);
-    expect(standingAtRutland.minutes).toBe(10 * 60 + 51);
+    expect(result.leadMinutes).toBe(34);
+    expect(result.minutes).toBe(10 * 60 + 37);
   });
 
   it("always yields whole minutes, even though drive estimates are fractional", () => {
     // A fractional lead used to render as "12:0.1" in the UI.
-    const albany = STATIONS.find((s) => s.code === "ALB")!;
     for (const station of STATIONS) {
       const result = computeLeaveBy(
         row({ direction: "S", stationCode: station.code, scheduledDeparture: "04:55" }),
-        albany,
+        straightLineDriveMinutes(DEFAULT_VT_LOCATION, station.code),
         0,
       );
       expect(Number.isInteger(result.minutes)).toBe(true);
@@ -141,15 +141,14 @@ describe("computeLeaveBy", () => {
   });
 
   it("gives a later leave time for a nearer station on the same train", () => {
-    const fromRutland = { lat: RUD.lat, lon: RUD.lon };
     const nearby = computeLeaveBy(
       row({ direction: "S", stationCode: "RUD", scheduledDeparture: "11:06" }),
-      fromRutland,
+      2,
       8 * 60,
     );
     const farther = computeLeaveBy(
       row({ direction: "S", stationCode: "ALB", scheduledDeparture: "11:06" }),
-      fromRutland,
+      113,
       8 * 60,
     );
     expect(nearby.minutes).toBeGreaterThan(farther.minutes);

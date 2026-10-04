@@ -3,7 +3,6 @@ import {
   classifyRegion,
   estimateDriveMinutes,
   haversineMiles,
-  pickRecommendedStop,
 } from "./geo.js";
 import type { Station } from "./types.js";
 
@@ -27,33 +26,6 @@ describe("estimateDriveMinutes", () => {
   it("scales linearly with distance at a fixed speed", () => {
     expect(estimateDriveMinutes(42, 42)).toBeCloseTo(60, 5);
     expect(estimateDriveMinutes(21, 42)).toBeCloseTo(30, 5);
-  });
-});
-
-describe("pickRecommendedStop", () => {
-  const stations = [RUD, CNV];
-
-  it("picks the station near the user even if its train leg is slower, when it wins on total time", () => {
-    // User standing right at Castleton: near-zero drive to CNV, but a real drive to RUD.
-    const result = pickRecommendedStop(CNV, stations, [
-      { station: "RUD", trainMinutes: 300 },
-      { station: "CNV", trainMinutes: 310 },
-    ]);
-    expect(result?.station).toBe("CNV");
-  });
-
-  it("picks the faster overall trip when the user is roughly equidistant", () => {
-    const midpoint = { lat: (RUD.lat + CNV.lat) / 2, lon: (RUD.lon + CNV.lon) / 2 };
-    const result = pickRecommendedStop(midpoint, stations, [
-      { station: "RUD", trainMinutes: 300 },
-      { station: "CNV", trainMinutes: 340 },
-    ]);
-    expect(result?.station).toBe("RUD");
-  });
-
-  it("returns null when no candidate matches a known station", () => {
-    const result = pickRecommendedStop(RUD, stations, [{ station: "BRA", trainMinutes: 100 }]);
-    expect(result).toBeNull();
   });
 });
 

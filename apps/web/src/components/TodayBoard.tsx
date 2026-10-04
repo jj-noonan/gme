@@ -1,9 +1,6 @@
 import {
   computeLeaveBy,
-  formatDriveLeg,
-  homeDriveLeg,
   matchesDay,
-  RUTLAND_HOME,
   pickNorthboundRecommendation,
   pickSouthboundRecommendation,
   type Coordinate,
@@ -12,7 +9,7 @@ import {
   type TrainStatus,
 } from "@gme/shared";
 import { useMemo } from "react";
-import { useDriveMinutes } from "../hooks/useDriveMinutes.js";
+import { useVtDriveMinutes } from "../hooks/useVtDriveMinutes.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { TrainRow } from "./TrainRow.js";
@@ -25,12 +22,12 @@ export function TodayBoard({
   rows,
   direction,
   statuses,
-  userLocation,
+  vtLocation,
 }: {
   rows: ScheduleRow[];
   direction: Direction;
   statuses: TrainStatus[];
-  userLocation: Coordinate;
+  vtLocation: Coordinate;
 }) {
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -44,13 +41,17 @@ export function TodayBoard({
     [rows, direction],
   );
 
+  // Every row today, not just the upcoming ones: which rows are still
+  // catchable depends on these drive times in the first place.
+  const vtDriveMinutes = useVtDriveMinutes(todaysRows, vtLocation, now);
+
   const recommended = useMemo(() => {
     if (direction === "N") {
       return pickNorthboundRecommendation(todaysRows, nowMinutes)?.trainNumber ?? null;
     }
-    const rec = pickSouthboundRecommendation(todaysRows, userLocation, nowMinutes);
+    const rec = pickSouthboundRecommendation(todaysRows, nowMinutes, vtDriveMinutes);
     return rec ? { trainNumber: rec.row.trainNumber, stationCode: rec.row.stationCode } : null;
-  }, [todaysRows, direction, userLocation, nowMinutes]);
+  }, [todaysRows, direction, vtDriveMinutes, nowMinutes]);
 
   // Show only trips you could still actually make: a train you can no longer
   // reach in time is no more useful than one that already left. This filters
@@ -58,15 +59,8 @@ export function TodayBoard({
   // (a ~2h drive to Albany), so those drop off well before departure.
   // The Timetable tabs remain the full reference view.
   const upcomingRows = todaysRows.filter(
-    (r) => !computeLeaveBy(r, userLocation, nowMinutes).missed,
+    (r) => !computeLeaveBy(r, vtDriveMinutes(r), nowMinutes).missed,
   );
-
-  const homeLegs = upcomingRows.map((row) => homeDriveLeg(row, RUTLAND_HOME, now));
-  const driveMinutes = useDriveMinutes(homeLegs.filter((leg) => leg !== null));
-  const homeDriveFor = (row: ScheduleRow): number | undefined => {
-    const leg = homeDriveLeg(row, RUTLAND_HOME, now);
-    return leg ? driveMinutes[formatDriveLeg(leg)] : undefined;
-  };
 
   if (todaysRows.length === 0) {
     return <p className="board-empty">No trains running today.</p>;
@@ -98,8 +92,7 @@ export function TodayBoard({
             highlighted={isRecommended}
             band={bands[i]}
             live
-            homeDriveMinutes={homeDriveFor(row)}
-            userLocation={userLocation}
+            vtDriveMinutes={vtDriveMinutes(row)}
             nowMinutes={nowMinutes}
           />
         );

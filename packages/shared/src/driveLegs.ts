@@ -1,4 +1,5 @@
 import type { Coordinate } from "./geo.js";
+import { leadMinutes, straightLineDriveMinutes } from "./leaveBy.js";
 import { parseHHMM } from "./recommend.js";
 import { STATIONS } from "./stations.js";
 import type { ScheduleRow, StationCode } from "./types.js";
@@ -26,6 +27,8 @@ export const DRIVE_SLOT_MINUTES = 15;
 
 /** Places are rounded to 3 decimals (~100m) on the wire — plenty for a drive, and cacheable. */
 const PLACE_DECIMALS = 3;
+
+const MINUTES_PER_DAY = 24 * 60;
 
 const PLACE_PATTERN = /^(-?\d{1,2}\.\d{1,3}),(-?\d{1,3}\.\d{1,3})$/;
 const TIME_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
@@ -98,23 +101,44 @@ function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 
+/** `day`'s date at `minutes` past its midnight (may spill into a neighboring day), as "YYYY-MM-DDTHH:MM". */
+function localTimeOn(day: Date, minutes: number): string {
+  const at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, minutes);
+  const date = `${at.getFullYear()}-${pad2(at.getMonth() + 1)}-${pad2(at.getDate())}`;
+  return `${date}T${pad2(at.getHours())}:${pad2(at.getMinutes())}`;
+}
+
 /**
- * The drive home for a northbound row running on `day` (read off the local
- * clock, assumed Eastern like the rest of the app), from the arrival station
- * to `place`. Null southbound — that trip ends with the subway, not a drive.
- * Uses the scheduled arrival: a late train rarely moves the drive into a
- * different traffic picture, and tracking live delay would re-key the lookup
- * every minute.
+ * The VT-side drive for a row whose train runs on `day` (read off the local
+ * clock, assumed Eastern like the rest of the app):
+ *
+ * - Northbound: station → vt-location, starting at the scheduled arrival
+ *   (the next day for trains arriving after midnight). Scheduled, not
+ *   delay-adjusted: a late train rarely changes the traffic picture, and
+ *   tracking delay would re-key the lookup every minute.
+ * - Southbound: vt-location → station, starting when you'd leave. That
+ *   depends on the drive time itself, so it's taken from the straight-line
+ *   estimate — close enough, since lookups are per 15-minute slot anyway.
  */
-export function homeDriveLeg(row: ScheduleRow, place: Coordinate, day: Date): DriveLeg | null {
-  if (row.direction !== "N") return null;
-  const overnight = parseHHMM(row.scheduledArrival) < parseHHMM(row.scheduledDeparture);
-  const arrival = new Date(day.getFullYear(), day.getMonth(), day.getDate() + (overnight ? 1 : 0));
-  const date = `${arrival.getFullYear()}-${pad2(arrival.getMonth() + 1)}-${pad2(arrival.getDate())}`;
+export function vtDriveLeg(row: ScheduleRow, vtLocation: Coordinate, day: Date): DriveLeg {
+  const departure = parseHHMM(row.scheduledDeparture);
+
+  if (row.direction === "N") {
+    const arrival = parseHHMM(row.scheduledArrival);
+    const overnight = arrival < departure;
+    return {
+      stationCode: row.stationCode,
+      place: vtLocation,
+      toStation: false,
+      departAt: localTimeOn(day, arrival + (overnight ? MINUTES_PER_DAY : 0)),
+    };
+  }
+
+  const lead = leadMinutes("S", straightLineDriveMinutes(vtLocation, row.stationCode));
   return {
     stationCode: row.stationCode,
-    place,
-    toStation: false,
-    departAt: `${date}T${row.scheduledArrival}`,
+    place: vtLocation,
+    toStation: true,
+    departAt: localTimeOn(day, departure - lead),
   };
 }

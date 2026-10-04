@@ -7,7 +7,7 @@ import {
   type Coordinate,
 } from "./geo.js";
 import { parseHHMM } from "./recommend.js";
-import { RUTLAND_HOME, STATIONS } from "./stations.js";
+import { STATIONS } from "./stations.js";
 import type { Direction, ScheduleRow, StationCode } from "./types.js";
 
 const MINUTES_PER_DAY = 24 * 60;
@@ -32,8 +32,8 @@ export function changeStationCode(row: ScheduleRow): StationCode | "NYP" {
 
 /**
  * How long before departure you need to set off, door to platform.
- * NYC is a flat subway assumption; the Rutland side is a drive estimate
- * from wherever you actually are.
+ * NYC is a flat subway assumption; the Rutland side is the drive from the
+ * vt-location.
  */
 export function leadMinutes(direction: Direction, driveMinutes: number | null): number {
   if (direction === "N") {
@@ -44,11 +44,13 @@ export function leadMinutes(direction: Direction, driveMinutes: number | null): 
   return Math.round((driveMinutes ?? 0) + TRIP_BUFFER_MINUTES);
 }
 
-/** Estimated drive minutes from `from` to a tracked station, or null if unknown. */
-export function driveMinutesToStation(from: Coordinate, stationCode: StationCode): number | null {
+/**
+ * Straight-line drive estimate between a place and a tracked station (either
+ * way — it's symmetric). The fallback whenever there's no routed time.
+ */
+export function straightLineDriveMinutes(place: Coordinate, stationCode: StationCode): number {
   const station = STATIONS.find((s) => s.code === stationCode);
-  if (!station) return null;
-  return estimateDriveMinutes(haversineMiles(from, station));
+  return station ? estimateDriveMinutes(haversineMiles(place, station)) : 0;
 }
 
 /**
@@ -69,15 +71,17 @@ export interface LeaveBy {
   missed: boolean;
 }
 
-/** Everything the UI needs to render a "leave by" time for one row. */
+/**
+ * Everything the UI needs to render a "leave by" time for one row.
+ * `vtDriveMinutes` is the row's vt-location ↔ station drive; only southbound
+ * uses it here, since that's the leg you set off on.
+ */
 export function computeLeaveBy(
   row: ScheduleRow,
-  userLocation: Coordinate,
+  vtDriveMinutes: number,
   nowMinutes: number,
 ): LeaveBy {
-  const drive =
-    row.direction === "S" ? driveMinutesToStation(userLocation, row.stationCode) : null;
-  const lead = leadMinutes(row.direction, drive);
+  const lead = leadMinutes(row.direction, row.direction === "S" ? vtDriveMinutes : null);
   const minutes = leaveByMinutes(row.scheduledDeparture, lead);
 
   // Only meaningful within the same day; a wrapped (previous-evening) leave
@@ -91,18 +95,13 @@ export function computeLeaveBy(
 /**
  * The last leg: from where the train drops you to the far-end door. No buffer
  * — buffers exist so you catch a train, not so you get off one.
- *
- * Both ends are fixed places, deliberately independent of live location: the
- * rider's phone is at the *departure* end, so it can't say how far the arrival
- * station is from the other home. `homeDriveMinutes`, when given, is a routed
- * drive time for the northbound leg (see /drive-home in status-api).
+ * `vtDriveMinutes` is the row's station ↔ vt-location drive; only northbound
+ * uses it here, since that's the leg you finish on.
  */
-export function arrivalLegMinutes(row: ScheduleRow, homeDriveMinutes?: number | null): number {
+export function arrivalLegMinutes(row: ScheduleRow, vtDriveMinutes: number): number {
   if (row.direction === "N") {
-    // Off the train in VT/NY, then drive to the house — a routed, traffic-aware
-    // time when we have one, the straight-line estimate otherwise.
-    const estimate = driveMinutesToStation(RUTLAND_HOME, row.stationCode);
-    return Math.round(homeDriveMinutes ?? estimate ?? 0);
+    // Off the train in VT/NY, then drive to the vt-location.
+    return Math.round(vtDriveMinutes);
   }
   // Off the train at NYP, then across town to the apartment.
   return ASSUMED_NYC_TRANSIT_MINUTES;
