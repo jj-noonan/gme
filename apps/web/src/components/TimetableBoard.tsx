@@ -1,6 +1,6 @@
 import { nextRunningDay, type Coordinate, type Direction, type ScheduleRow } from "@gme/shared";
 import { useMemo } from "react";
-import { useVtDriveMinutes } from "../hooks/useVtDriveMinutes.js";
+import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { TrainRow } from "./TrainRow.js";
@@ -9,10 +9,12 @@ export function TimetableBoard({
   rows,
   direction,
   vtLocation,
+  nycLocation,
 }: {
   rows: ScheduleRow[];
   direction: Direction;
   vtLocation: Coordinate;
+  nycLocation: Coordinate;
 }) {
   const sorted = useMemo(
     () =>
@@ -23,10 +25,10 @@ export function TimetableBoard({
   );
   const bands = computeRowBands(sorted);
 
-  // A timetable row has no date, so each drive is priced for the next day
-  // that train runs: typical traffic for that weekday and time.
+  // A timetable row has no date, so each door leg is planned for the next
+  // day that train runs: typical traffic and that day's subway schedule.
   const today = new Date();
-  const vtDriveMinutes = useVtDriveMinutes(sorted, vtLocation, (row) =>
+  const doorLegs = useDoorLegs(sorted, vtLocation, nycLocation, (row) =>
     nextRunningDay(row.daysRaw, today),
   );
 
@@ -39,7 +41,7 @@ export function TimetableBoard({
           row={row}
           showDays
           band={bands[i]}
-          vtDriveMinutes={vtDriveMinutes(row)}
+          doorLegs={doorLegs(row)}
         />
       ))}
     </div>

@@ -69,8 +69,12 @@ Deliberate, for a low-traffic personal site — revisit if that ever changes:
   secret) — timetable rows priced for the next day that train runs. When
   status-api can't answer, they fall back to straight-line distance × a flat
   average speed.
-- NYC-side transit time is a flat 50-minute assumption; the nyc-location box
-  (Bishop Loughlin HS by default) is saved but not used in any timing yet.
+- NYC-side trips run between Penn Station and the nyc-location (Bishop
+  Loughlin HS by default), planned by Google's Routes API (subway and bus)
+  through status-api's `/transit` (needs the `GOOGLE_MAPS_API_KEY` Fly
+  secret). They're planned on the schedule — fetched once per board, never
+  cached, per Google's terms — and fall back to a flat 50 minutes when
+  status-api can't answer.
 - "Today" filtering uses the viewer's local clock, assumed to be Eastern time.
 - No automated schedule-drift alerting yet — `fly logs` on status-api shows
   actual-vs-scheduled deltas if you want to eyeball it.

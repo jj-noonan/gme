@@ -13,9 +13,9 @@ export function App() {
   const user = useUserLocation();
   const { region, resolved } = user;
   const vt = usePlace("vt", user);
-  // Not used in any timing yet: the NYC side is still a flat subway estimate.
   const nyc = usePlace("nyc", user);
   const vtLocation = vt.coordinate;
+  const nycLocation = nyc.coordinate;
   const [activeTab, setActiveTab] = useState<TabId>("N_TODAY");
   const [userPickedTab, setUserPickedTab] = useState(false);
 
@@ -42,16 +42,38 @@ export function App() {
         {scheduleError && <p className="board-error">Couldn't load the schedule: {scheduleError}</p>}
         {!rows && !scheduleError && <p className="board-empty">Loading schedule…</p>}
         {rows && activeTab === "N_TODAY" && (
-          <TodayBoard rows={rows} direction="N" statuses={statuses} vtLocation={vtLocation} />
+          <TodayBoard
+            rows={rows}
+            direction="N"
+            statuses={statuses}
+            vtLocation={vtLocation}
+            nycLocation={nycLocation}
+          />
         )}
         {rows && activeTab === "S_TODAY" && (
-          <TodayBoard rows={rows} direction="S" statuses={statuses} vtLocation={vtLocation} />
+          <TodayBoard
+            rows={rows}
+            direction="S"
+            statuses={statuses}
+            vtLocation={vtLocation}
+            nycLocation={nycLocation}
+          />
         )}
         {rows && activeTab === "N_TIMETABLE" && (
-          <TimetableBoard rows={rows} direction="N" vtLocation={vtLocation} />
+          <TimetableBoard
+            rows={rows}
+            direction="N"
+            vtLocation={vtLocation}
+            nycLocation={nycLocation}
+          />
         )}
         {rows && activeTab === "S_TIMETABLE" && (
-          <TimetableBoard rows={rows} direction="S" vtLocation={vtLocation} />
+          <TimetableBoard
+            rows={rows}
+            direction="S"
+            vtLocation={vtLocation}
+            nycLocation={nycLocation}
+          />
         )}
       </main>
       <LocationBar vt={vt} nyc={nyc} direction={activeTab.startsWith("N") ? "N" : "S"} />

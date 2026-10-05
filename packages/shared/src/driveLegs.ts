@@ -1,5 +1,5 @@
-import type { Coordinate } from "./geo.js";
-import { leadMinutes, straightLineDriveMinutes } from "./leaveBy.js";
+import { TRIP_BUFFER_MINUTES, type Coordinate } from "./geo.js";
+import { straightLineDriveMinutes } from "./leaveBy.js";
 import { parseHHMM } from "./recommend.js";
 import { STATIONS } from "./stations.js";
 import type { ScheduleRow, StationCode } from "./types.js";
@@ -94,7 +94,7 @@ export function vtDriveLeg(row: ScheduleRow, vtLocation: Coordinate, day: Date):
     };
   }
 
-  const lead = leadMinutes("S", straightLineDriveMinutes(vtLocation, row.stationCode));
+  const lead = Math.round(straightLineDriveMinutes(vtLocation, row.stationCode) + TRIP_BUFFER_MINUTES);
   return {
     stationCode: row.stationCode,
     place: vtLocation,
