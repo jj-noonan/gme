@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { BoardHeader } from "./BoardHeader.js";
+import { GoogleCredit } from "./GoogleCredit.js";
 import { TrainRow } from "./TrainRow.js";
 
 export function TimetableBoard({
@@ -42,8 +43,10 @@ export function TimetableBoard({
           showDays
           band={bands[i]}
           doorLegs={doorLegs(row)}
+          nycLocation={nycLocation}
         />
       ))}
+      <GoogleCredit show={sorted.some((r) => doorLegs(r).nycLines !== null)} />
     </div>
   );
 }

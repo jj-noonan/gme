@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { BoardHeader } from "./BoardHeader.js";
+import { GoogleCredit } from "./GoogleCredit.js";
 import { TrainRow } from "./TrainRow.js";
 
 function statusFor(statuses: TrainStatus[], trainNumber: number): TrainStatus | undefined {
@@ -104,10 +105,12 @@ export function TodayBoard({
             band={bands[i]}
             live
             doorLegs={doorLegs(row)}
+            nycLocation={nycLocation}
             nowMinutes={nowMinutes}
           />
         );
       })}
+      <GoogleCredit show={upcomingRows.some((r) => doorLegs(r).nycLines !== null)} />
     </div>
   );
 }

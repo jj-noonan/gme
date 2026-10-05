@@ -6,15 +6,17 @@ import {
   doorArrivalMinutes,
   minutesBetweenClockTimes,
   parseHHMM,
-  type DoorLegs,
+  type Coordinate,
   type ScheduleRow,
   type StationStatus,
   type TrainStatus,
 } from "@gme/shared";
 import { formatClock, formatClockFromMinutes, formatDuration } from "../lib/format.js";
 import type { IconName } from "../lib/icons.js";
+import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
 import { FlapText } from "./FlapText.js";
 import { Icon } from "./Icon.js";
+import { TransitBadges } from "./TransitBadges.js";
 
 /** The stop where you actually board — NYP northbound, the tracked station southbound. */
 function boardingStop(row: ScheduleRow, status: TrainStatus | undefined): StationStatus | undefined {
@@ -71,6 +73,7 @@ export function TrainRow({
   live,
   band,
   doorLegs,
+  nycLocation,
   nowMinutes,
 }: {
   row: ScheduleRow;
@@ -81,7 +84,9 @@ export function TrainRow({
   live?: boolean;
   band?: boolean;
   /** The row's door-side legs: the VT drive and the NYC transit trip. */
-  doorLegs: DoorLegs;
+  doorLegs: RowDoorLegs;
+  /** For the badges' Google Maps link. */
+  nycLocation: Coordinate;
   /** Omit on the timetable tabs — nothing is "missed" on a reference schedule. */
   nowMinutes?: number;
 }) {
@@ -99,6 +104,12 @@ export function TrainRow({
   const totalMinutes = leaveBy.leadMinutes + delay + trainMinutes + lastLeg;
   const firstLegIcon: IconName = row.direction === "N" ? "train" : "drive";
 
+  // The NYC leg is where you start northbound and where you finish southbound.
+  const northbound = row.direction === "N";
+  const badges = doorLegs.nycLines && (
+    <TransitBadges lines={doorLegs.nycLines} nycLocation={nycLocation} toNyp={northbound} />
+  );
+
   const classes = [
     "trip",
     highlighted && "trip--recommended",
@@ -115,7 +126,7 @@ export function TrainRow({
         <div className="trip__leg">
           <FlapText text={formatClockFromMinutes(leaveBy.minutes)} />
           <div className="trip__sub">
-            <Icon name={firstLegIcon} size={16} />
+            {northbound && badges ? badges : <Icon name={firstLegIcon} size={16} />}
             {formatDuration(leaveBy.leadMinutes)}
           </div>
         </div>
@@ -136,6 +147,7 @@ export function TrainRow({
         <div className="trip__leg">
           <FlapText text={formatClockFromMinutes(doorArrival)} />
           <div className="trip__sub">
+            {!northbound && badges}
             <Icon name="leave-by" size={16} />
             {formatDuration(totalMinutes)}
           </div>
