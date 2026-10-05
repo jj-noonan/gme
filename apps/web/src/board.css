@@ -204,35 +204,39 @@ body {
   justify-content: flex-end;
 }
 
+/* Same three columns as the legs above, so the train's times sit under its
+   route in the middle and the status under the arrive column. */
 .trip__meta {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr var(--mid) 1fr;
   gap: 0.6rem;
+  align-items: center;
   margin-top: 0.5rem;
   padding-top: 0.45rem;
   border-top: 1px solid var(--rule);
 }
 
-/* The train name yields first when the row is tight; everything to its
-   right is short and fixed-size. */
 .trip__train {
   min-width: 0;
-  flex: 1 1 auto;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .trip__status {
+  grid-column: 3;
+  justify-self: end;
+  min-width: 0;
+  overflow: hidden;
   color: inherit;
   text-decoration: none;
-  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
-  margin-left: auto;
 }
 
 .trip__times {
-  flex: 0 0 auto;
+  grid-column: 2;
+  min-width: 0;
   font-family: "Oswald", sans-serif;
   font-size: 0.72rem;
   letter-spacing: 0.04em;
@@ -245,9 +249,29 @@ body {
   display: none;
 }
 
+/* The full status ("+12 MIN (ETD 11:37P)") needs a wider arrive column than
+   the narrow breakpoint leaves, so it has its own. */
+.status-short {
+  display: contents;
+}
+
+.status-full {
+  display: none;
+}
+
+@media (min-width: 760px) {
+  .status-short {
+    display: none;
+  }
+
+  .status-full {
+    display: contents;
+  }
+}
+
 .trip__days {
-  flex: 0 0 auto;
-  margin-left: auto;
+  grid-column: 3;
+  justify-self: end;
   font-family: "Oswald", sans-serif;
   font-size: 0.72rem;
   letter-spacing: 0.06em;
@@ -368,7 +392,14 @@ body {
   }
 
   .trip__meta {
-    gap: 0.45rem;
+    gap: 0.4rem;
+  }
+
+  /* Smaller tiles on the detail row, so the longest abbreviated name
+     ("ETHN ALN 290") fits its column on a 390px phone. */
+  .trip__meta .flap-tile {
+    width: 0.62em;
+    font-size: 0.86rem;
   }
 
   .trip__times {
@@ -387,6 +418,11 @@ body {
 @media (max-width: 380px) {
   .board-list {
     --mid: 5.5rem;
+  }
+
+  /* A little more room for the train name on the smallest phones. */
+  .trip__meta {
+    gap: 0.25rem;
   }
 
   .flap-tile {

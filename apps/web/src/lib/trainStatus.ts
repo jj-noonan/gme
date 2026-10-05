@@ -34,7 +34,7 @@ function same(icon: IconName, text: string): StatusText {
 /** What the live status says about boarding this row's train, in both lengths. */
 export function describeStatus(row: ScheduleRow, status: TrainStatus | undefined): StatusText {
   if (!status) return same("scheduled", "SCHEDULED");
-  if (status.stale) return same("scheduled", "NO LIVE DATA");
+  if (status.stale) return { icon: "scheduled", full: "NO LIVE DATA", short: "NO DATA" };
   if (!status.isTracked) return same("scheduled", "SCHEDULED");
 
   const stop = boardingStop(row, status);
