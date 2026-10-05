@@ -523,3 +523,30 @@ body {
   text-transform: uppercase;
   color: var(--header-ink);
 }
+
+/* ---------- NYC subway bullets ---------- */
+
+/* 5a: solid MTA bullet. Replaces the amber-outline .line-badge for subway routes.
+   Non-subway names (B25, WALK) keep the existing outlined pill. */
+.line-badge--subway {
+  min-width: 15px;
+  width: 15px;
+  height: 15px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--line-bg);
+  color: var(--line-fg);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* Bullets keep their colors on hover; the link shows an amber ring instead. */
+.transit-badges:hover .line-badge--subway,
+.transit-badges:focus-visible .line-badge--subway {
+  background: var(--line-bg);
+  color: var(--line-fg);
+  box-shadow: 0 0 0 1px var(--board-bg), 0 0 0 2.5px var(--ink);
+}
