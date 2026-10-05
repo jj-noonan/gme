@@ -66,7 +66,10 @@ describe("describeStatus", () => {
 
   it("says SCHEDULED or NO LIVE DATA without usable live data", () => {
     expect(describeStatus(ROW, undefined).full).toBe("SCHEDULED");
-    expect(describeStatus(ROW, { ...statusWith(12), stale: true }).full).toBe("NO LIVE DATA");
+    expect(describeStatus(ROW, { ...statusWith(12), stale: true })).toMatchObject({
+      full: "NO LIVE DATA",
+      short: "NO DATA",
+    });
   });
 });
 

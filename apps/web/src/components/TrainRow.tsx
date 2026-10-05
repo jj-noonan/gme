@@ -139,10 +139,10 @@ export function TrainRow({
             data-link-out={`live status for train ${row.trainNumber} on Amtraker`}
           >
             <Icon name={statusText.icon} size={16} />
-            <span className="only-wide">
+            <span className="status-full">
               <FlapText text={statusText.full} />
             </span>
-            <span className="only-narrow">
+            <span className="status-short">
               <FlapText text={statusText.short} />
             </span>
           </a>
