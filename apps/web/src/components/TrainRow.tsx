@@ -131,7 +131,13 @@ export function TrainRow({
         </span>
         {showDays && <span className="trip__days">{row.daysRaw}</span>}
         {live && (
-          <a className="trip__status" href={`https://amtraker.com/trains/${row.trainNumber}`}>
+          <a
+            className="trip__status"
+            href={`https://amtraker.com/trains/${row.trainNumber}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-link-out={`live status for train ${row.trainNumber} on Amtraker`}
+          >
             <Icon name={statusText.icon} size={16} />
             <span className="only-wide">
               <FlapText text={statusText.full} />
