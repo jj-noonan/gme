@@ -18,6 +18,7 @@ export function DriveLink({
       href={drivingDirectionsUrl(vtLocation, stationCode, toStation)}
       target="_blank"
       rel="noopener noreferrer"
+      data-link-out="driving directions in Google Maps"
       aria-label="Driving directions. Open in Google Maps"
       title="Open in Google Maps"
     >

@@ -43,6 +43,7 @@ export function TransitBadges({
       href={transitDirectionsUrl(nycLocation, toNyp)}
       target="_blank"
       rel="noopener noreferrer"
+      data-link-out="subway directions in Google Maps"
       aria-label={`Subway route: ${description}. Open in Google Maps`}
       title="Open in Google Maps"
     >

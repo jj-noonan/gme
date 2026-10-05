@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LinkOutConfirm } from "./components/LinkOutConfirm.js";
 import { LocationBar } from "./components/LocationBar.js";
 import { TabBar, type TabId } from "./components/TabBar.js";
 import { TimetableBoard } from "./components/TimetableBoard.js";
@@ -76,6 +77,7 @@ export function App() {
           />
         )}
       </main>
+      <LinkOutConfirm />
       <LocationBar vt={vt} nyc={nyc} direction={activeTab.startsWith("N") ? "N" : "S"} />
     </div>
   );
