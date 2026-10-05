@@ -1,6 +1,5 @@
 import { isInBounds, NYC_REGION, VT_REGION, type Coordinate } from "@gme/shared";
 import { useEffect, useState } from "react";
-import { STATUS_API_URL } from "../lib/config.js";
 import {
   DEFAULT_PLACES,
   loadPlaceSetting,
@@ -8,6 +7,7 @@ import {
   type PlaceArea,
   type PlaceSetting,
 } from "../lib/places.js";
+import { ClientError, fetchStatusApi } from "../lib/statusApi.js";
 import type { UserLocationState } from "./useUserLocation.js";
 
 const REGIONS = { vt: VT_REGION, nyc: NYC_REGION };
@@ -56,15 +56,8 @@ export function usePlace(area: PlaceArea, user: UserLocationState): PlaceState {
     setLookup({ text: addressText, status: "looking-up" });
 
     const params = new URLSearchParams({ q: addressText, area });
-    fetch(`${STATUS_API_URL}/geocode?${params}`)
-      .then(async (res) => {
-        if (cancelled) return;
-        if (res.status === 404) {
-          setLookup({ text: addressText, status: "not-found" });
-          return;
-        }
-        if (!res.ok) throw new Error(`status-api responded ${res.status}`);
-        const found = (await res.json()) as { lat: number; lon: number; label: string };
+    fetchStatusApi<{ lat: number; lon: number; label: string }>(`/geocode?${params}`)
+      .then((found) => {
         if (!cancelled) {
           setLookup({
             text: addressText,
@@ -74,8 +67,10 @@ export function usePlace(area: PlaceArea, user: UserLocationState): PlaceState {
           });
         }
       })
-      .catch(() => {
-        if (!cancelled) setLookup({ text: addressText, status: "unavailable" });
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        const notFound = err instanceof ClientError && err.status === 404;
+        setLookup({ text: addressText, status: notFound ? "not-found" : "unavailable" });
       });
 
     return () => {

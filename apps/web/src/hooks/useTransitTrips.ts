@@ -1,6 +1,6 @@
 import { formatTransitLeg, type TransitLeg, type TransitTrip } from "@gme/shared";
 import { useEffect, useMemo, useState } from "react";
-import { STATUS_API_URL } from "../lib/config.js";
+import { fetchStatusApi } from "../lib/statusApi.js";
 
 /**
  * NYC transit trips for `legs`, keyed by `formatTransitLeg`. Empty until (or
@@ -19,11 +19,9 @@ export function useTransitTrips(legs: TransitLeg[]): Record<string, TransitTrip>
     if (!legsParam) return;
 
     let cancelled = false;
-    fetch(`${STATUS_API_URL}/transit?legs=${encodeURIComponent(legsParam)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`status-api responded ${res.status}`);
-        return res.json() as Promise<{ trips: Record<string, TransitTrip> }>;
-      })
+    fetchStatusApi<{ trips: Record<string, TransitTrip> }>(
+      `/transit?legs=${encodeURIComponent(legsParam)}`,
+    )
       .then((data) => {
         if (!cancelled) setTrips(data.trips);
       })

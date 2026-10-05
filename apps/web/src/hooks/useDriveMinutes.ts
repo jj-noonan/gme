@@ -1,6 +1,7 @@
 import { formatDriveLeg, type DriveLeg } from "@gme/shared";
 import { useEffect, useMemo, useState } from "react";
-import { DRIVE_POLL_INTERVAL_MS, STATUS_API_URL } from "../lib/config.js";
+import { DRIVE_POLL_INTERVAL_MS } from "../lib/config.js";
+import { fetchStatusApi } from "../lib/statusApi.js";
 
 /**
  * Traffic-aware drive minutes for `legs`, keyed by `formatDriveLeg`. Empty
@@ -18,11 +19,9 @@ export function useDriveMinutes(legs: DriveLeg[]): Record<string, number> {
 
     let cancelled = false;
     const fetchMinutes = () => {
-      fetch(`${STATUS_API_URL}/drive?legs=${encodeURIComponent(legsParam)}`)
-        .then((res) => {
-          if (!res.ok) throw new Error(`status-api responded ${res.status}`);
-          return res.json() as Promise<{ minutes: Record<string, number> }>;
-        })
+      fetchStatusApi<{ minutes: Record<string, number> }>(
+        `/drive?legs=${encodeURIComponent(legsParam)}`,
+      )
         .then((data) => {
           if (!cancelled) setMinutes(data.minutes);
         })
