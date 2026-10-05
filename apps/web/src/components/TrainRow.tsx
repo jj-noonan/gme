@@ -15,7 +15,7 @@ import { abbreviateService, describeStatus, liveDelayMinutes } from "../lib/trai
 import { DriveLink } from "./DriveLink.js";
 import { FlapText } from "./FlapText.js";
 import { Icon } from "./Icon.js";
-import { TransitBadges } from "./TransitBadges.js";
+import { TransitLink } from "./TransitLink.js";
 
 const MINUTES_PER_DAY = 24 * 60;
 
@@ -65,12 +65,16 @@ export function TrainRow({
   // The NYC leg is where you start northbound and where you finish southbound;
   // the VT drive is the other end.
   const northbound = row.direction === "N";
-  const badges = doorLegs.nycLines && (
-    <TransitBadges lines={doorLegs.nycLines} nycLocation={nycLocation} toNyp={northbound} />
+  // Each leg — its icon or badges and its duration — links to that leg in Google Maps.
+  const nycLeg = (minutes: number) => (
+    <TransitLink lines={doorLegs.nycLines} nycLocation={nycLocation} toNyp={northbound}>
+      {formatDuration(minutes)}
+    </TransitLink>
   );
-  const nycLeg = badges ?? <Icon name="train" size={16} />;
-  const vtLeg = (
-    <DriveLink vtLocation={vtLocation} stationCode={row.stationCode} toStation={!northbound} />
+  const vtLeg = (minutes: number) => (
+    <DriveLink vtLocation={vtLocation} stationCode={row.stationCode} toStation={!northbound}>
+      {formatDuration(minutes)}
+    </DriveLink>
   );
 
   const classes = [
@@ -89,8 +93,7 @@ export function TrainRow({
         <div className="trip__leg">
           <FlapText text={formatClockFromMinutes(leaveBy.minutes)} />
           <div className="trip__sub">
-            {northbound ? nycLeg : vtLeg}
-            {formatDuration(leaveBy.leadMinutes)}
+            {northbound ? nycLeg(leaveBy.leadMinutes) : vtLeg(leaveBy.leadMinutes)}
           </div>
         </div>
 
@@ -101,10 +104,7 @@ export function TrainRow({
             <Icon name="arrow-right" size={20} />
             <FlapText text={changeStationCode(row)} />
           </div>
-          <div className="trip__sub">
-            {northbound ? vtLeg : nycLeg}
-            {formatDuration(lastLeg)}
-          </div>
+          <div className="trip__sub">{northbound ? vtLeg(lastLeg) : nycLeg(lastLeg)}</div>
         </div>
 
         {/* Through the far door, and what the whole trip cost. */}
