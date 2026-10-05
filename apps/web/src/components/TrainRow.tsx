@@ -12,6 +12,7 @@ import {
 import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
 import { formatClock, formatClockFromMinutes, formatDuration } from "../lib/format.js";
 import { abbreviateService, describeStatus, liveDelayMinutes } from "../lib/trainStatus.js";
+import { DriveLink } from "./DriveLink.js";
 import { FlapText } from "./FlapText.js";
 import { Icon } from "./Icon.js";
 import { TransitBadges } from "./TransitBadges.js";
@@ -30,6 +31,7 @@ export function TrainRow({
   live,
   band,
   doorLegs,
+  vtLocation,
   nycLocation,
   nowMinutes,
 }: {
@@ -42,7 +44,8 @@ export function TrainRow({
   band?: boolean;
   /** The row's door-side legs: the VT drive and the NYC transit trip. */
   doorLegs: RowDoorLegs;
-  /** For the badges' Google Maps link. */
+  /** For the drive's and the badges' Google Maps links. */
+  vtLocation: Coordinate;
   nycLocation: Coordinate;
   /** Omit on the timetable tabs — nothing is "missed" on a reference schedule. */
   nowMinutes?: number;
@@ -66,7 +69,9 @@ export function TrainRow({
     <TransitBadges lines={doorLegs.nycLines} nycLocation={nycLocation} toNyp={northbound} />
   );
   const nycLeg = badges ?? <Icon name="train" size={16} />;
-  const vtLeg = <Icon name="drive" size={16} />;
+  const vtLeg = (
+    <DriveLink vtLocation={vtLocation} stationCode={row.stationCode} toStation={!northbound} />
+  );
 
   const classes = [
     "trip",

@@ -105,6 +105,7 @@ export function TodayBoard({
             band={bands[i]}
             live
             doorLegs={doorLegs(row)}
+            vtLocation={vtLocation}
             nycLocation={nycLocation}
             nowMinutes={nowMinutes}
           />
