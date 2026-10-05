@@ -518,6 +518,21 @@ body {
   color: var(--board-bg);
 }
 
+/* The car icon for the VT drive, linking out like the transit badges. */
+.leg-link {
+  display: inline-flex;
+  color: inherit;
+  padding: 0.2rem;
+  margin: -0.2rem;
+  border-radius: 3px;
+}
+
+.leg-link:hover,
+.leg-link:focus-visible {
+  color: var(--amber);
+  box-shadow: 0 0 0 1.5px var(--ink-dim);
+}
+
 /* Round like MTA bullets, stretching into a pill for longer names (B25).
    Amber outline rather than line colours: amber is the board's only hue. */
 .line-badge {

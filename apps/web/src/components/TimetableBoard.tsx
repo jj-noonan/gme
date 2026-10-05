@@ -43,6 +43,7 @@ export function TimetableBoard({
           showDays
           band={bands[i]}
           doorLegs={doorLegs(row)}
+          vtLocation={vtLocation}
           nycLocation={nycLocation}
         />
       ))}
