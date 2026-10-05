@@ -1,19 +1,31 @@
 import { createServer, type IncomingMessage } from "node:http";
-import { isInBounds, NYC_REGION, parseDriveLeg, VT_REGION, type DriveLeg } from "@gme/shared";
+import {
+  isInBounds,
+  NYC_REGION,
+  parseDriveLeg,
+  parseTransitLeg,
+  VT_REGION,
+  type DriveLeg,
+  type TransitLeg,
+} from "@gme/shared";
 import {
   ALLOWED_ORIGINS,
   DRIVE_RATE_LIMIT,
   GEOCODE_RATE_LIMIT,
   MAX_DRIVE_LEGS,
+  MAX_TRANSIT_LEGS,
   PORT,
+  TRANSIT_RATE_LIMIT,
 } from "./config.js";
 import { getDriveMinutes } from "./drive.js";
 import { geocode } from "./geocode.js";
 import { createRateLimiter } from "./rateLimit.js";
 import { getTrainStatuses } from "./statusCache.js";
+import { getTransitTrips } from "./transit.js";
 
 const allowDriveRequest = createRateLimiter(DRIVE_RATE_LIMIT);
 const allowGeocodeRequest = createRateLimiter(GEOCODE_RATE_LIMIT);
+const allowTransitRequest = createRateLimiter(TRANSIT_RATE_LIMIT);
 
 const GEOCODE_AREAS = { vt: VT_REGION, nyc: NYC_REGION } as const;
 const MAX_GEOCODE_QUERY_LENGTH = 256;
@@ -21,6 +33,12 @@ const MAX_GEOCODE_QUERY_LENGTH = 256;
 /** Who's asking, for rate limiting. Fly's proxy sets Fly-Client-IP; the socket is the proxy itself. */
 function clientKey(req: IncomingMessage): string {
   return String(req.headers["fly-client-ip"] ?? req.socket.remoteAddress ?? "unknown");
+}
+
+/** A parsed transit leg whose place is inside NYC, or null. */
+function parseNycTransitLeg(text: string): TransitLeg | null {
+  const leg = parseTransitLeg(text);
+  return leg && isInBounds(leg.place, NYC_REGION) ? leg : null;
 }
 
 /** A parsed leg whose place is inside the area this app serves, or null. */
@@ -84,6 +102,35 @@ const server = createServer(async (req, res) => {
       res.end(JSON.stringify({ minutes, generatedAt: new Date().toISOString() }));
     } catch (error) {
       console.error("Unexpected error serving /drive:", error);
+      res.writeHead(500, { ...headers, "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "internal error" }));
+    }
+    return;
+  }
+
+  // ?legs=40.687,-73.969>NYP@2026-10-05T15:05;NYP>40.687,-73.969@… (see formatTransitLeg)
+  //   → { trips: { "40.687,-73.969>NYP@2026-10-05T15:05": { minutes: 41.5, lines: ["C"] }, … } }
+  if (url.pathname === "/transit" && req.method === "GET") {
+    if (!allowTransitRequest(clientKey(req))) {
+      res.writeHead(429, { ...headers, "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "too many requests" }));
+      return;
+    }
+
+    const raw = (url.searchParams.get("legs") ?? "").split(";").filter(Boolean);
+    const legs = raw.map(parseNycTransitLeg);
+    if (raw.length === 0 || raw.length > MAX_TRANSIT_LEGS || legs.includes(null)) {
+      res.writeHead(400, { ...headers, "Content-Type": "application/json" });
+      res.end(JSON.stringify({ error: "bad legs" }));
+      return;
+    }
+
+    try {
+      const trips = await getTransitTrips(legs as TransitLeg[]);
+      res.writeHead(200, { ...headers, "Content-Type": "application/json" });
+      res.end(JSON.stringify({ trips, generatedAt: new Date().toISOString() }));
+    } catch (error) {
+      console.error("Unexpected error serving /transit:", error);
       res.writeHead(500, { ...headers, "Content-Type": "application/json" });
       res.end(JSON.stringify({ error: "internal error" }));
     }

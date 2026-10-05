@@ -7,6 +7,7 @@ import {
   MAPBOX_DIRECTIONS_URL,
   MAPBOX_TOKEN,
 } from "./config.js";
+import { easternLocal } from "./eastern.js";
 
 export interface DriveDeps {
   token: string;
@@ -25,24 +26,6 @@ export function clearDriveCache(): void {
   inFlight.clear();
 }
 
-/** Current Eastern wall-clock time as "YYYY-MM-DDTHH:MM" — the same form legs are given in. */
-export function easternNowLocal(now: Date): string {
-  const parts = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: "America/New_York",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    })
-      .formatToParts(now)
-      .map((p) => [p.type, p.value]),
-  );
-  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
-}
-
 async function fetchDriveMinutes(leg: DriveLeg, deps: DriveDeps): Promise<number | null> {
   const station = STATIONS.find((s) => s.code === leg.stationCode);
   if (!station) return null;
@@ -54,7 +37,7 @@ async function fetchDriveMinutes(leg: DriveLeg, deps: DriveDeps): Promise<number
   // Mapbox reads depart_at as the origin's local time, which is Eastern for
   // every tracked station and every place inside VT_REGION. It only accepts
   // future times; a slot that has already started just gets live traffic.
-  if (leg.departAt > easternNowLocal(deps.now())) params.set("depart_at", leg.departAt);
+  if (leg.departAt > easternLocal(deps.now())) params.set("depart_at", leg.departAt);
 
   const response = await deps.fetchImpl(`${MAPBOX_DIRECTIONS_URL}/${coordinates}?${params}`, {
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -71,7 +54,7 @@ async function fetchDriveMinutes(leg: DriveLeg, deps: DriveDeps): Promise<number
 
 function cacheTtlMs(leg: DriveLeg, deps: DriveDeps): number {
   const nearCutoff = new Date(deps.now().getTime() + DRIVE_NEAR_WINDOW_MINUTES * 60_000);
-  return leg.departAt > easternNowLocal(nearCutoff) ? DRIVE_FAR_CACHE_TTL_MS : DRIVE_CACHE_TTL_MS;
+  return leg.departAt > easternLocal(nearCutoff) ? DRIVE_FAR_CACHE_TTL_MS : DRIVE_CACHE_TTL_MS;
 }
 
 /** Drops expired entries, so arbitrary vt-locations can't grow the cache without bound. */
