@@ -40,3 +40,17 @@ export const DRIVE_RATE_LIMIT = { requests: 60, windowMs: 10 * 60_000 };
 // Per-client cap on /geocode. A page load looks up at most two saved
 // addresses; this leaves room for someone typing a few attempts.
 export const GEOCODE_RATE_LIMIT = { requests: 20, windowMs: 10 * 60_000 };
+
+// Google Maps Platform key for NYC transit routing (restricted to the Routes
+// API). Unset means /transit answers with nothing and the web app keeps its
+// flat subway estimate.
+export const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY ?? "";
+export const GOOGLE_ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
+
+// Upper bound on legs per /transit request. Legs are one per train, not per
+// row, so even the full southbound timetable is well under this.
+export const MAX_TRANSIT_LEGS = 40;
+
+// Per-client cap on /transit. The web app fetches once per board and
+// location, not on a timer, so this is generous.
+export const TRANSIT_RATE_LIMIT = { requests: 30, windowMs: 10 * 60_000 };

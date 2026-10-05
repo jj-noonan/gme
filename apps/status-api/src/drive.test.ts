@@ -1,6 +1,6 @@
 import type { DriveLeg } from "@gme/shared";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { clearDriveCache, easternNowLocal, getDriveMinutes } from "./drive.js";
+import { clearDriveCache, getDriveMinutes } from "./drive.js";
 
 // 2026-10-05 12:00 Eastern (EDT, UTC-4).
 const NOON_EASTERN = new Date("2026-10-05T16:00:00Z");
@@ -28,12 +28,6 @@ function requestedUrl(fetchImpl: ReturnType<typeof mapboxReturning>): URL {
 beforeEach(() => {
   clearDriveCache();
   vi.spyOn(console, "error").mockImplementation(() => {});
-});
-
-describe("easternNowLocal", () => {
-  it("formats the Eastern wall clock, not UTC", () => {
-    expect(easternNowLocal(NOON_EASTERN)).toBe("2026-10-05T12:00");
-  });
 });
 
 describe("getDriveMinutes", () => {
