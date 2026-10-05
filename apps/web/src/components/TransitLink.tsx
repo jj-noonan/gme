@@ -1,7 +1,8 @@
 import type { Coordinate } from "@gme/shared";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { transitDirectionsUrl } from "../lib/googleMaps.js";
 import { SUBWAY_LINES, subwayLine } from "../lib/subwayLines.js";
+import { Icon } from "./Icon.js";
 
 /**
  * A subway route as its solid MTA bullet — just the letter or number, so
@@ -24,34 +25,46 @@ function LineBadge({ name }: { name: string }) {
 }
 
 /**
- * The lines ridden on the NYC leg, in order, as badges — linking to the same
- * trip in Google Maps.
+ * The NYC leg — its lines as badges (or the train icon while it's still the
+ * flat estimate) plus whatever's passed as children, the duration — as one
+ * link to the same trip in Google Maps.
  */
-export function TransitBadges({
+export function TransitLink({
   lines,
   nycLocation,
   toNyp,
+  children,
 }: {
-  lines: string[];
+  /** Lines ridden, in order; null until the trip's been looked up. */
+  lines: string[] | null;
   nycLocation: Coordinate;
   toNyp: boolean;
+  children: ReactNode;
 }) {
-  const description = lines.length > 0 ? `${lines.join(", then ")}` : "walk";
+  const route =
+    lines === null ? "" : lines.length > 0 ? `Subway route: ${lines.join(", then ")}. ` : "Walk. ";
   return (
     <a
-      className="transit-badges"
+      className="leg-link"
       href={transitDirectionsUrl(nycLocation, toNyp)}
       target="_blank"
       rel="noopener noreferrer"
       data-link-out="subway directions in Google Maps"
-      aria-label={`Subway route: ${description}. Open in Google Maps`}
+      aria-label={`${route}Open subway directions in Google Maps`}
       title="Open in Google Maps"
     >
-      {lines.length > 0 ? (
-        lines.map((line, i) => <LineBadge key={i} name={line} />)
+      {lines === null ? (
+        <Icon name="train" size={16} />
       ) : (
-        <span className="line-badge line-badge--walk">WALK</span>
+        <span className="transit-badges">
+          {lines.length > 0 ? (
+            lines.map((line, i) => <LineBadge key={i} name={line} />)
+          ) : (
+            <span className="line-badge line-badge--walk">WALK</span>
+          )}
+        </span>
       )}
+      {children}
     </a>
   );
 }

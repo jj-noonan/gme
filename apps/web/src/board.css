@@ -500,37 +500,30 @@ body {
 
 /* ---------- NYC transit badges ---------- */
 
-.transit-badges {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  color: inherit;
-  text-decoration: none;
-  /* Bigger tap target than the badges themselves, without moving them. */
-  padding: 0.2rem;
-  margin: -0.2rem;
-  border-radius: 3px;
-}
-
-.transit-badges:hover .line-badge,
-.transit-badges:focus-visible .line-badge {
-  background: var(--ink-dim);
-  color: var(--board-bg);
-}
-
-/* The car icon for the VT drive, linking out like the transit badges. */
+/* A door leg — icon or badges plus its duration — as one link out. Hover
+   brightens it and underlines the duration; a ring would be clipped by
+   .trip__sub's overflow. The badges, being inline-flex, don't pick up the
+   underline. */
 .leg-link {
   display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
   color: inherit;
-  padding: 0.2rem;
-  margin: -0.2rem;
-  border-radius: 3px;
+  text-decoration: none;
 }
 
 .leg-link:hover,
 .leg-link:focus-visible {
   color: var(--amber);
-  box-shadow: 0 0 0 1.5px var(--ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.transit-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 }
 
 /* Round like MTA bullets, stretching into a pill for longer names (B25).
@@ -584,13 +577,8 @@ body {
   line-height: 1;
 }
 
-/* Bullets keep their colors on hover; the link shows an amber ring instead. */
-.transit-badges:hover .line-badge--subway,
-.transit-badges:focus-visible .line-badge--subway {
-  background: var(--line-bg);
-  color: var(--line-fg);
-  box-shadow: 0 0 0 1px var(--board-bg), 0 0 0 2.5px var(--ink);
-}
+/* Bullets keep their colors on hover; the leg link (.leg-link) shows it's
+   hovered by brightening and underlining its duration instead. */
 
 /* ---------- confirm before leaving the board ---------- */
 
