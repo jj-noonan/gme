@@ -5,6 +5,7 @@ import {
   changeStationCode,
   computeLeaveBy,
   doorArrivalMinutes,
+  estimatedDoorLegs,
   leadMinutes,
   leaveByMinutes,
   straightLineDriveMinutes,
@@ -27,14 +28,22 @@ function row(overrides: Partial<ScheduleRow> = {}): ScheduleRow {
 
 const RUD = STATIONS.find((s) => s.code === "RUD")!;
 
+function legs(vtDriveMinutes: number, nycTransitMinutes: number) {
+  return { vtDriveMinutes, nycTransitMinutes };
+}
+
 describe("arrivalLegMinutes / doorArrivalMinutes", () => {
   it("northbound: the drive from the arrival station to the vt-location, in whole minutes", () => {
-    expect(arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }), 112.6)).toBe(113);
+    expect(arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }), legs(112.6, 41))).toBe(113);
   });
 
-  it("southbound: a flat cross-town hop, ignoring the VT drive", () => {
-    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "RUD" }), 2)).toBe(50);
-    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "ALB" }), 113)).toBe(50);
+  it("southbound: the transit trip from Penn Station to the nyc-location", () => {
+    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "RUD" }), legs(2, 38.4))).toBe(38);
+    expect(arrivalLegMinutes(row({ direction: "S", stationCode: "ALB" }), legs(113, 38.4))).toBe(38);
+  });
+
+  it("southbound: the flat 50 minutes when nothing's been looked up", () => {
+    expect(arrivalLegMinutes(row({ direction: "S" }), estimatedDoorLegs(113))).toBe(50);
   });
 
   it("adds the last leg onto the train's arrival time", () => {
@@ -50,7 +59,10 @@ describe("arrivalLegMinutes / doorArrivalMinutes", () => {
   it("always yields whole minutes", () => {
     for (const station of STATIONS) {
       const r = row({ direction: "N", stationCode: station.code });
-      const leg = arrivalLegMinutes(r, straightLineDriveMinutes(DEFAULT_VT_LOCATION, station.code));
+      const leg = arrivalLegMinutes(
+        r,
+        estimatedDoorLegs(straightLineDriveMinutes(DEFAULT_VT_LOCATION, station.code)),
+      );
       expect(Number.isInteger(leg)).toBe(true);
       expect(Number.isInteger(doorArrivalMinutes(r, leg))).toBe(true);
     }
@@ -82,16 +94,13 @@ describe("boardingStationCode", () => {
 });
 
 describe("leadMinutes", () => {
-  it("uses the flat subway estimate plus buffer northbound (50 + 10)", () => {
-    expect(leadMinutes("N", null)).toBe(60);
+  it("northbound: NYC transit plus the station buffer, ignoring the drive", () => {
+    expect(leadMinutes("N", estimatedDoorLegs(90))).toBe(60);
+    expect(leadMinutes("N", legs(90, 41.6))).toBe(52);
   });
 
-  it("ignores drive time northbound — you board at NYP regardless of where you are", () => {
-    expect(leadMinutes("N", 90)).toBe(60);
-  });
-
-  it("uses drive time plus buffer southbound (drive + 15)", () => {
-    expect(leadMinutes("S", 18)).toBe(33);
+  it("southbound: drive time plus buffer, ignoring transit (drive + 15)", () => {
+    expect(leadMinutes("S", legs(18, 41))).toBe(33);
   });
 });
 
@@ -110,17 +119,17 @@ describe("leaveByMinutes", () => {
 
 describe("computeLeaveBy", () => {
   it("marks a northbound train as missed once the 60-minute window has passed", () => {
-    const atSeven = computeLeaveBy(row({ scheduledDeparture: "08:15" }), 90, 7 * 60);
+    const atSeven = computeLeaveBy(row({ scheduledDeparture: "08:15" }), estimatedDoorLegs(90), 7 * 60);
     expect(atSeven.missed).toBe(false);
 
-    const atSevenThirty = computeLeaveBy(row({ scheduledDeparture: "08:15" }), 90, 7 * 60 + 30);
+    const atSevenThirty = computeLeaveBy(row({ scheduledDeparture: "08:15" }), estimatedDoorLegs(90), 7 * 60 + 30);
     expect(atSevenThirty.missed).toBe(true);
   });
 
   it("southbound: leaves the VT drive plus buffer before departure", () => {
     const result = computeLeaveBy(
       row({ direction: "S", stationCode: "CNV", scheduledDeparture: "11:11" }),
-      19,
+      estimatedDoorLegs(19),
       8 * 60,
     );
     expect(result.leadMinutes).toBe(34);
@@ -132,7 +141,7 @@ describe("computeLeaveBy", () => {
     for (const station of STATIONS) {
       const result = computeLeaveBy(
         row({ direction: "S", stationCode: station.code, scheduledDeparture: "04:55" }),
-        straightLineDriveMinutes(DEFAULT_VT_LOCATION, station.code),
+        estimatedDoorLegs(straightLineDriveMinutes(DEFAULT_VT_LOCATION, station.code)),
         0,
       );
       expect(Number.isInteger(result.minutes)).toBe(true);
@@ -143,12 +152,12 @@ describe("computeLeaveBy", () => {
   it("gives a later leave time for a nearer station on the same train", () => {
     const nearby = computeLeaveBy(
       row({ direction: "S", stationCode: "RUD", scheduledDeparture: "11:06" }),
-      2,
+      estimatedDoorLegs(2),
       8 * 60,
     );
     const farther = computeLeaveBy(
       row({ direction: "S", stationCode: "ALB", scheduledDeparture: "11:06" }),
-      113,
+      estimatedDoorLegs(113),
       8 * 60,
     );
     expect(nearby.minutes).toBeGreaterThan(farther.minutes);

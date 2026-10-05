@@ -9,7 +9,7 @@ import {
   type TrainStatus,
 } from "@gme/shared";
 import { useMemo } from "react";
-import { useVtDriveMinutes } from "../hooks/useVtDriveMinutes.js";
+import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { TrainRow } from "./TrainRow.js";
@@ -23,11 +23,13 @@ export function TodayBoard({
   direction,
   statuses,
   vtLocation,
+  nycLocation,
 }: {
   rows: ScheduleRow[];
   direction: Direction;
   statuses: TrainStatus[];
   vtLocation: Coordinate;
+  nycLocation: Coordinate;
 }) {
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -42,16 +44,25 @@ export function TodayBoard({
   );
 
   // Every row today, not just the upcoming ones: which rows are still
-  // catchable depends on these drive times in the first place.
-  const vtDriveMinutes = useVtDriveMinutes(todaysRows, vtLocation, () => now);
+  // catchable depends on these door legs in the first place.
+  const doorLegs = useDoorLegs(todaysRows, vtLocation, nycLocation, () => now);
 
   const recommended = useMemo(() => {
     if (direction === "N") {
-      return pickNorthboundRecommendation(todaysRows, nowMinutes)?.trainNumber ?? null;
+      const rec = pickNorthboundRecommendation(
+        todaysRows,
+        nowMinutes,
+        (r) => doorLegs(r).nycTransitMinutes,
+      );
+      return rec?.trainNumber ?? null;
     }
-    const rec = pickSouthboundRecommendation(todaysRows, nowMinutes, vtDriveMinutes);
+    const rec = pickSouthboundRecommendation(
+      todaysRows,
+      nowMinutes,
+      (r) => doorLegs(r).vtDriveMinutes,
+    );
     return rec ? { trainNumber: rec.row.trainNumber, stationCode: rec.row.stationCode } : null;
-  }, [todaysRows, direction, vtDriveMinutes, nowMinutes]);
+  }, [todaysRows, direction, doorLegs, nowMinutes]);
 
   // Show only trips you could still actually make: a train you can no longer
   // reach in time is no more useful than one that already left. This filters
@@ -59,7 +70,7 @@ export function TodayBoard({
   // (a ~2h drive to Albany), so those drop off well before departure.
   // The Timetable tabs remain the full reference view.
   const upcomingRows = todaysRows.filter(
-    (r) => !computeLeaveBy(r, vtDriveMinutes(r), nowMinutes).missed,
+    (r) => !computeLeaveBy(r, doorLegs(r), nowMinutes).missed,
   );
 
   if (todaysRows.length === 0) {
@@ -92,7 +103,7 @@ export function TodayBoard({
             highlighted={isRecommended}
             band={bands[i]}
             live
-            vtDriveMinutes={vtDriveMinutes(row)}
+            doorLegs={doorLegs(row)}
             nowMinutes={nowMinutes}
           />
         );

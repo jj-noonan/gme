@@ -31,17 +31,38 @@ export function changeStationCode(row: ScheduleRow): StationCode | "NYP" {
 }
 
 /**
- * How long before departure you need to set off, door to platform.
- * NYC is a flat subway assumption; the Rutland side is the drive from the
- * vt-location.
+ * The door-side legs of a row's trip, whichever way it runs: the drive
+ * between the vt-location and the VT/NY station, and the transit trip
+ * between the nyc-location and Penn Station. Routed when known, estimates
+ * otherwise — the caller decides.
  */
-export function leadMinutes(direction: Direction, driveMinutes: number | null): number {
-  if (direction === "N") {
-    return ASSUMED_NYC_TRANSIT_MINUTES + NYC_STATION_BUFFER_MINUTES;
-  }
-  // Drive estimates are fractional; sub-minute precision is false precision
+export interface DoorLegs {
+  vtDriveMinutes: number;
+  /**
+   * Heading out: from leaving the door to the arrive-by time at Penn Station
+   * (the station buffer before departure). Heading home: from the train
+   * getting in to reaching the door.
+   */
+  nycTransitMinutes: number;
+}
+
+/** Door legs with nothing looked up yet: the flat subway assumption for NYC. */
+export function estimatedDoorLegs(vtDriveMinutes: number): DoorLegs {
+  return { vtDriveMinutes, nycTransitMinutes: ASSUMED_NYC_TRANSIT_MINUTES };
+}
+
+/**
+ * How long before departure you need to set off, door to platform: the leg
+ * you start on, plus that end's station buffer.
+ */
+export function leadMinutes(direction: Direction, legs: DoorLegs): number {
+  const raw =
+    direction === "N"
+      ? legs.nycTransitMinutes + NYC_STATION_BUFFER_MINUTES
+      : legs.vtDriveMinutes + TRIP_BUFFER_MINUTES;
+  // Routed times are fractional; sub-minute precision is false precision
   // anyway, and a non-integer here renders as "12:0.1" downstream.
-  return Math.round((driveMinutes ?? 0) + TRIP_BUFFER_MINUTES);
+  return Math.round(raw);
 }
 
 /**
@@ -71,17 +92,9 @@ export interface LeaveBy {
   missed: boolean;
 }
 
-/**
- * Everything the UI needs to render a "leave by" time for one row.
- * `vtDriveMinutes` is the row's vt-location ↔ station drive; only southbound
- * uses it here, since that's the leg you set off on.
- */
-export function computeLeaveBy(
-  row: ScheduleRow,
-  vtDriveMinutes: number,
-  nowMinutes: number,
-): LeaveBy {
-  const lead = leadMinutes(row.direction, row.direction === "S" ? vtDriveMinutes : null);
+/** Everything the UI needs to render a "leave by" time for one row. */
+export function computeLeaveBy(row: ScheduleRow, legs: DoorLegs, nowMinutes: number): LeaveBy {
+  const lead = leadMinutes(row.direction, legs);
   const minutes = leaveByMinutes(row.scheduledDeparture, lead);
 
   // Only meaningful within the same day; a wrapped (previous-evening) leave
@@ -93,18 +106,13 @@ export function computeLeaveBy(
 }
 
 /**
- * The last leg: from where the train drops you to the far-end door. No buffer
- * — buffers exist so you catch a train, not so you get off one.
- * `vtDriveMinutes` is the row's station ↔ vt-location drive; only northbound
- * uses it here, since that's the leg you finish on.
+ * The last leg: from where the train drops you to the far-end door — the
+ * drive to the vt-location northbound, transit to the nyc-location
+ * southbound. No buffer: buffers exist so you catch a train, not so you get
+ * off one.
  */
-export function arrivalLegMinutes(row: ScheduleRow, vtDriveMinutes: number): number {
-  if (row.direction === "N") {
-    // Off the train in VT/NY, then drive to the vt-location.
-    return Math.round(vtDriveMinutes);
-  }
-  // Off the train at NYP, then across town to the apartment.
-  return ASSUMED_NYC_TRANSIT_MINUTES;
+export function arrivalLegMinutes(row: ScheduleRow, legs: DoorLegs): number {
+  return Math.round(row.direction === "N" ? legs.vtDriveMinutes : legs.nycTransitMinutes);
 }
 
 /** Clock time you actually get to the door, as minutes since midnight. */

@@ -1,4 +1,4 @@
-import { ASSUMED_NYC_TRANSIT_MINUTES, TRIP_BUFFER_MINUTES } from "./geo.js";
+import { NYC_STATION_BUFFER_MINUTES, TRIP_BUFFER_MINUTES } from "./geo.js";
 import type { ScheduleRow } from "./types.js";
 
 export function parseHHMM(time: string): number {
@@ -15,16 +15,21 @@ export function minutesBetweenClockTimes(start: string, end: string): number {
 
 /**
  * Northbound (NYP -> VT/NY): single origin, so there's no station choice —
- * just the next train you can still reach NYP in time to catch, assuming
- * the flat NYC transit estimate.
+ * just the next train you can still reach NYP in time to catch, with the
+ * station buffer to spare. `nycTransitMinutes` gives each row's trip from
+ * the nyc-location to Penn Station.
  */
 export function pickNorthboundRecommendation(
   rows: ScheduleRow[],
   nowMinutes: number,
-  transitMinutes: number = ASSUMED_NYC_TRANSIT_MINUTES,
+  nycTransitMinutes: (row: ScheduleRow) => number,
 ): ScheduleRow | null {
   const catchable = rows
-    .filter((r) => parseHHMM(r.scheduledDeparture) >= nowMinutes + transitMinutes)
+    .filter(
+      (r) =>
+        parseHHMM(r.scheduledDeparture) >=
+        nowMinutes + nycTransitMinutes(r) + NYC_STATION_BUFFER_MINUTES,
+    )
     .sort((a, b) => parseHHMM(a.scheduledDeparture) - parseHHMM(b.scheduledDeparture));
   return catchable[0] ?? null;
 }

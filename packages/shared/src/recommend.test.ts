@@ -38,14 +38,21 @@ describe("pickNorthboundRecommendation", () => {
   ];
 
   it("picks the next train reachable given the assumed transit time", () => {
-    // 9:00am + 50min transit = 9:50, so the 8:15 has already left but 2:19pm is fine.
-    const result = pickNorthboundRecommendation(rows, 9 * 60, 50);
+    // 9:00am + 50min transit + 10min buffer = 10:00, so the 8:15 has already left but 2:19pm is fine.
+    const result = pickNorthboundRecommendation(rows, 9 * 60, () => 50);
     expect(result?.trainNumber).toBe(291);
   });
 
   it("returns null when nothing is catchable today", () => {
-    const result = pickNorthboundRecommendation(rows, 23 * 60, 50);
+    const result = pickNorthboundRecommendation(rows, 23 * 60, () => 50);
     expect(result).toBeNull();
+  });
+
+  it("leaves the station buffer to spare, and uses each row's own transit time", () => {
+    // 13:20 + 50 + 10 = 14:20: one minute too late for the 14:19 on the flat estimate…
+    expect(pickNorthboundRecommendation(rows, 13 * 60 + 20, () => 50)).toBeNull();
+    // …but fine if the real trip to Penn Station is 45 minutes.
+    expect(pickNorthboundRecommendation(rows, 13 * 60 + 20, () => 45)?.trainNumber).toBe(291);
   });
 });
 
