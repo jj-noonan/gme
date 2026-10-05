@@ -231,6 +231,20 @@ body {
   margin-left: auto;
 }
 
+.trip__times {
+  flex: 0 0 auto;
+  font-family: "Oswald", sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Two renderings of the same thing, swapped at the narrow breakpoint below. */
+.only-narrow {
+  display: none;
+}
+
 .trip__days {
   flex: 0 0 auto;
   margin-left: auto;
@@ -355,6 +369,18 @@ body {
 
   .trip__meta {
     gap: 0.45rem;
+  }
+
+  .trip__times {
+    font-size: 0.64rem;
+  }
+
+  .only-wide {
+    display: none;
+  }
+
+  .only-narrow {
+    display: contents;
   }
 }
 

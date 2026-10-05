@@ -3,61 +3,18 @@ import {
   boardingStationCode,
   changeStationCode,
   computeLeaveBy,
-  doorArrivalMinutes,
   minutesBetweenClockTimes,
   parseHHMM,
   type Coordinate,
   type ScheduleRow,
-  type StationStatus,
   type TrainStatus,
 } from "@gme/shared";
-import { formatClock, formatClockFromMinutes, formatDuration } from "../lib/format.js";
-import type { IconName } from "../lib/icons.js";
 import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
+import { formatClock, formatClockFromMinutes, formatDuration } from "../lib/format.js";
+import { abbreviateService, describeStatus, liveDelayMinutes } from "../lib/trainStatus.js";
 import { FlapText } from "./FlapText.js";
 import { Icon } from "./Icon.js";
 import { TransitBadges } from "./TransitBadges.js";
-
-/** The stop where you actually board — NYP northbound, the tracked station southbound. */
-function boardingStop(row: ScheduleRow, status: TrainStatus | undefined): StationStatus | undefined {
-  return status?.perStation.find((s) => s.stationCode === boardingStationCode(row));
-}
-
-function statusIcon(label: string): IconName {
-  if (label === "ON TIME") return "on-time";
-  if (label === "NO LIVE DATA") return "scheduled";
-  if (label.includes("CANCEL")) return "cancelled";
-  if (label.includes("LATE")) return "delayed";
-  return "scheduled";
-}
-
-function statusLabel(row: ScheduleRow, status: TrainStatus | undefined): string {
-  if (!status) return "SCHEDULED";
-  if (status.stale) return "NO LIVE DATA";
-  if (!status.isTracked) return "SCHEDULED";
-
-  const stop = boardingStop(row, status);
-  if (!stop) return "SCHEDULED";
-  if (stop.stopStatus === "Departed") return "DEPARTED";
-
-  const delay = stop.delayMinutes;
-  // `== null` (not `=== null`) and the finite check both matter: if the API
-  // ever drifts out of shape again, this must degrade to "SCHEDULED" rather
-  // than rendering "NAN MIN EARLY" on the board.
-  if (delay == null || !Number.isFinite(delay)) {
-    return stop.stopStatus?.toUpperCase() ?? "SCHEDULED";
-  }
-  if (Math.abs(delay) <= 2) return "ON TIME";
-  const was = formatClock(row.scheduledDeparture);
-  return delay > 0 ? `${delay} MIN LATE FROM ${was}` : `${-delay} MIN EARLY FROM ${was}`;
-}
-
-/** Minutes the boarding stop is running late (negative = early); 0 with no usable live data. */
-function liveDelayMinutes(row: ScheduleRow, status: TrainStatus | undefined): number {
-  if (!status || status.stale || !status.isTracked) return 0;
-  const delay = boardingStop(row, status)?.delayMinutes;
-  return delay != null && Number.isFinite(delay) ? delay : 0;
-}
 
 const MINUTES_PER_DAY = 24 * 60;
 
@@ -90,25 +47,26 @@ export function TrainRow({
   /** Omit on the timetable tabs — nothing is "missed" on a reference schedule. */
   nowMinutes?: number;
 }) {
-  const label = statusLabel(row, status);
+  const statusText = describeStatus(row, status);
   const leaveBy = computeLeaveBy(row, doorLegs, nowMinutes ?? -Infinity);
   const trainMinutes = minutesBetweenClockTimes(row.scheduledDeparture, row.scheduledArrival);
   const lastLeg = arrivalLegMinutes(row, doorLegs);
 
-  // Train and door times track the live delay; the leave-by time stays on the
-  // schedule, so a late train grows the total rather than moving your alarm.
+  // The door arrival tracks the live delay; the leave-by time and the train's
+  // own times stay on the schedule (the status carries the live estimate), so
+  // a late train grows the total rather than moving your alarm.
   const delay = liveDelayMinutes(row, status);
-  const trainDeparts = wrapMinutes(parseHHMM(row.scheduledDeparture) + delay);
-  const trainArrives = wrapMinutes(parseHHMM(row.scheduledArrival) + delay);
-  const doorArrival = wrapMinutes(trainArrives + lastLeg);
+  const doorArrival = wrapMinutes(parseHHMM(row.scheduledArrival) + delay + lastLeg);
   const totalMinutes = leaveBy.leadMinutes + delay + trainMinutes + lastLeg;
-  const firstLegIcon: IconName = row.direction === "N" ? "train" : "drive";
 
-  // The NYC leg is where you start northbound and where you finish southbound.
+  // The NYC leg is where you start northbound and where you finish southbound;
+  // the VT drive is the other end.
   const northbound = row.direction === "N";
   const badges = doorLegs.nycLines && (
     <TransitBadges lines={doorLegs.nycLines} nycLocation={nycLocation} toNyp={northbound} />
   );
+  const nycLeg = badges ?? <Icon name="train" size={16} />;
+  const vtLeg = <Icon name="drive" size={16} />;
 
   const classes = [
     "trip",
@@ -122,16 +80,16 @@ export function TrainRow({
   return (
     <article className={classes}>
       <div className="trip__legs">
-        {/* Leave the door. */}
+        {/* Leave the door, and how long it takes to get to the train. */}
         <div className="trip__leg">
           <FlapText text={formatClockFromMinutes(leaveBy.minutes)} />
           <div className="trip__sub">
-            {northbound && badges ? badges : <Icon name={firstLegIcon} size={16} />}
+            {northbound ? nycLeg : vtLeg}
             {formatDuration(leaveBy.leadMinutes)}
           </div>
         </div>
 
-        {/* The train itself: where it runs, and when it really does. */}
+        {/* The train itself, and how long from getting off it to the far door. */}
         <div className="trip__leg">
           <div className="trip__route">
             <FlapText text={boardingStationCode(row)} />
@@ -139,7 +97,8 @@ export function TrainRow({
             <FlapText text={changeStationCode(row)} />
           </div>
           <div className="trip__sub">
-            {formatClockFromMinutes(trainDeparts)} / {formatClockFromMinutes(trainArrives)}
+            {northbound ? vtLeg : nycLeg}
+            {formatDuration(lastLeg)}
           </div>
         </div>
 
@@ -147,7 +106,6 @@ export function TrainRow({
         <div className="trip__leg">
           <FlapText text={formatClockFromMinutes(doorArrival)} />
           <div className="trip__sub">
-            {!northbound && badges}
             <Icon name="leave-by" size={16} />
             {formatDuration(totalMinutes)}
           </div>
@@ -156,13 +114,26 @@ export function TrainRow({
 
       <div className="trip__meta">
         <span className="trip__train">
-          <FlapText text={`${row.service} ${row.trainNumber}`} />
+          <span className="only-wide">
+            <FlapText text={`${row.service} ${row.trainNumber}`} />
+          </span>
+          <span className="only-narrow">
+            <FlapText text={`${abbreviateService(row.service)} ${row.trainNumber}`} />
+          </span>
+        </span>
+        <span className="trip__times">
+          {formatClock(row.scheduledDeparture)} / {formatClock(row.scheduledArrival)}
         </span>
         {showDays && <span className="trip__days">{row.daysRaw}</span>}
         {live && (
           <a className="trip__status" href={`https://amtraker.com/trains/${row.trainNumber}`}>
-            <Icon name={statusIcon(label)} size={16} />
-            <FlapText text={label} />
+            <Icon name={statusText.icon} size={16} />
+            <span className="only-wide">
+              <FlapText text={statusText.full} />
+            </span>
+            <span className="only-narrow">
+              <FlapText text={statusText.short} />
+            </span>
           </a>
         )}
       </div>
