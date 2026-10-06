@@ -62,9 +62,10 @@ Deliberate, for a low-traffic personal site — revisit if that ever changes:
 
 - Schedule is a manually maintained snapshot, not live-scraped from PDFs.
 - VT-side drives run between the station and the vt-location — Jones Donuts
-  by default, or a street address / current location set in the box at the
+  by default, or a place, address or current location set in the box at the
   bottom of the board (saved per device; only the typed text is stored, and
-  it's re-geocoded on each load). They're routed and traffic-aware
+  it's looked up again on each load, via Google Places, falling back to
+  Mapbox's address-only geocoding). They're routed and traffic-aware
   via Mapbox, through status-api's `/drive` (needs the `MAPBOX_TOKEN` Fly
   secret) — timetable rows priced for the next day that train runs. When
   status-api can't answer, they fall back to straight-line distance × a flat

@@ -32,7 +32,7 @@ function statusNote(area: PlaceArea, status: PlaceStatus, matchedLabel: string |
     case "looking-up":
       return "Looking up that address…";
     case "not-found":
-      return `No address found in ${AREA_REGIONS[area]} — using ${fallback}.`;
+      return `Nothing found in ${AREA_REGIONS[area]} — using ${fallback}.`;
     case "outside-area":
       return `You're not in ${AREA_REGIONS[area]} — using ${fallback}.`;
     case "unavailable":
@@ -88,7 +88,7 @@ function PlaceField({
           inputMode="search"
           enterKeyHint="done"
           autoComplete="street-address"
-          placeholder={`${AREA_NAMES[area]}: street address`}
+          placeholder={`${AREA_NAMES[area]}: place or address`}
           aria-describedby={note ? noteId : undefined}
           value={draft}
           onFocus={(e) => {
