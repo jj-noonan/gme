@@ -45,10 +45,33 @@ body {
 
 /* ---------- tabs ---------- */
 
-.tab-bar {
+.top-bar {
   display: flex;
   flex: 0 0 auto;
   border-bottom: 2px solid var(--rule);
+}
+
+.tab-bar {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.info-button {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  background: var(--tile-bg);
+  color: var(--header-ink);
+  border: none;
+  border-left: 1px solid var(--rule);
+  font-family: "Oswald", sans-serif;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.info-button:hover,
+.info-button:focus-visible {
+  color: var(--amber);
 }
 
 .tab {
@@ -618,7 +641,7 @@ body {
 
 /* ---------- confirm before leaving the board ---------- */
 
-.link-out {
+.sheet-backdrop {
   position: fixed;
   inset: 0;
   z-index: 10;
@@ -667,4 +690,63 @@ body {
   background: var(--tile-bg-active);
   color: var(--amber);
   border-color: var(--ink-dim);
+}
+
+/* ---------- how this works ---------- */
+
+.info-panel {
+  width: 100%;
+  max-width: 560px;
+  max-height: 85dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  background: var(--tile-bg);
+  border-top: 2px solid var(--ink-dim);
+  color: var(--ink-dim);
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.info-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.info-panel h2 {
+  margin: 0;
+  font-family: "Oswald", sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.info-panel h3 {
+  margin: 1rem 0 0.2rem;
+  font-family: "Oswald", sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.info-panel p {
+  margin: 0.3rem 0 0;
+}
+
+.info-panel__close {
+  padding: 0.4rem 0.8rem;
+  background: var(--flap-face);
+  color: var(--header-ink);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  font-family: "Oswald", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
 }

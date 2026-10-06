@@ -51,7 +51,7 @@ export function LinkOutConfirm() {
   };
 
   return (
-    <div className="link-out" onClick={() => setPending(null)}>
+    <div className="sheet-backdrop" onClick={() => setPending(null)}>
       <div
         className="link-out__sheet"
         role="dialog"

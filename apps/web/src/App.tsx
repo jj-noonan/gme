@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { InfoPanel } from "./components/InfoPanel.js";
 import { LinkOutConfirm } from "./components/LinkOutConfirm.js";
 import { LocationBar } from "./components/LocationBar.js";
 import { TabBar, type TabId } from "./components/TabBar.js";
@@ -19,6 +20,8 @@ export function App() {
   const nycLocation = nyc.coordinate;
   const [activeTab, setActiveTab] = useState<TabId>("N_TODAY");
   const [userPickedTab, setUserPickedTab] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const closeInfo = useCallback(() => setShowInfo(false), []);
 
   // Once we know the region, default to the appropriate "Today" tab —
   // unless the rider has already picked a tab themselves.
@@ -32,13 +35,24 @@ export function App() {
 
   return (
     <div className="board">
-      <TabBar
-        active={activeTab}
-        onSelect={(id) => {
-          setUserPickedTab(true);
-          setActiveTab(id);
-        }}
-      />
+      <header className="top-bar">
+        <TabBar
+          active={activeTab}
+          onSelect={(id) => {
+            setUserPickedTab(true);
+            setActiveTab(id);
+          }}
+        />
+        <button
+          type="button"
+          className="info-button"
+          aria-label="How this works"
+          title="How this works"
+          onClick={() => setShowInfo(true)}
+        >
+          ?
+        </button>
+      </header>
       <main className="board-main">
         {scheduleError && <p className="board-error">Couldn't load the schedule: {scheduleError}</p>}
         {!rows && !scheduleError && <p className="board-empty">Loading schedule…</p>}
@@ -78,6 +92,7 @@ export function App() {
         )}
       </main>
       <LinkOutConfirm />
+      {showInfo && <InfoPanel onClose={closeInfo} />}
       <LocationBar vt={vt} nyc={nyc} direction={activeTab.startsWith("N") ? "N" : "S"} />
     </div>
   );
