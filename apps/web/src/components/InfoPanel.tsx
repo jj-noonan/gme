@@ -1,4 +1,5 @@
 import {
+  AIRPORT_BUFFER_MINUTES,
   ASSUMED_NYC_TRANSIT_MINUTES,
   DEFAULT_AVG_DRIVE_MPH,
   NYC_STATION_BUFFER_MINUTES,
@@ -84,6 +85,14 @@ export function InfoPanel({ onClose }: { onClose: () => void }) {
           Today lists only trains you can still catch today. The highlighted row is the next one;
           southbound, it's the stop that gets you there soonest, door to door. Timetable lists
           every train, planned for the next day it runs.
+        </p>
+
+        <h3>Cape Air</h3>
+        <p>
+          Flights between Lebanon, NH (LEB) and White Plains, with Cape Air's shuttle to Penn
+          Station, shown as Penn ↔ LEB: the shuttle is allowed an hour and reaches White Plains{" "}
+          {AIRPORT_BUFFER_MINUTES} min before the flight. At Lebanon, the buffer is{" "}
+          {AIRPORT_BUFFER_MINUTES} min. Flight times are entered by hand and have no live status.
         </p>
 
         <h3>Locations</h3>

@@ -13,6 +13,15 @@ export const STATIONS: Station[] = [
   { code: "BLF", name: "Bellows Falls, VT", lat: 43.1365, lon: -72.4446 },
   { code: "BRA", name: "Brattleboro, VT", lat: 42.8508, lon: -72.5587 },
   { code: "NHV", name: "New Haven, CT", lat: 41.2977, lon: -72.9267 },
+  // Not a station: Cape Air's Lebanon Municipal Airport, the VT end of its
+  // flights to White Plains (and its shuttle to Penn Station).
+  {
+    code: "LEB",
+    name: "Lebanon, NH",
+    lat: 43.6249,
+    lon: -72.3086,
+    mapsName: "Lebanon Municipal Airport, West Lebanon, NH",
+  },
 ];
 
 export const NYP_COORDINATE = { lat: 40.751, lon: -73.9963 };

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-// Regenerates data/schedule.json from data/schedule-source.json.
+// Regenerates data/schedule.json from data/schedule-source.json (imported
+// from Amtrak's GTFS) plus data/schedule-extra.json (hand-maintained rows
+// the import doesn't cover, like Cape Air).
 //
 // Run this by hand (`npm run build:schedule`) whenever you've re-checked the
 // Amtrak timetable PDFs and updated schedule-source.json. This is the manual
@@ -9,8 +11,9 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const dataDir = new URL("../data/", import.meta.url);
 const source = JSON.parse(readFileSync(new URL("schedule-source.json", dataDir), "utf8"));
+const extra = JSON.parse(readFileSync(new URL("schedule-extra.json", dataDir), "utf8"));
 
-const KNOWN_STATIONS = new Set(["RUD", "CNV", "WHL", "FED", "ALB", "BLF", "BRA", "NHV"]);
+const KNOWN_STATIONS = new Set(["RUD", "CNV", "WHL", "FED", "ALB", "BLF", "BRA", "NHV", "LEB"]);
 
 function splitTrainRoute(route) {
   const lastSpace = route.lastIndexOf(" ");
@@ -37,7 +40,7 @@ function to24Hour(clock) {
   return `${String(hour).padStart(2, "0")}:${mm}`;
 }
 
-const rows = source.rows.map((row) => {
+const rows = [...source.rows, ...extra.rows].map((row) => {
   const { service, trainNumber } = splitTrainRoute(row.trainRoute);
   const dep = parseStationTime(row.trainDeparture);
   const arr = parseStationTime(row.trainArrival);
@@ -58,6 +61,7 @@ const rows = source.rows.map((row) => {
     stationCode,
     scheduledDeparture: to24Hour(dep.time),
     scheduledArrival: to24Hour(arr.time),
+    ...(row.mode === "flight" ? { mode: "flight" } : {}),
   };
 });
 

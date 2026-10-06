@@ -86,6 +86,14 @@ describe("vtDriveLeg", () => {
     });
   });
 
+  it("southbound flights: leave in time for the airport's longer buffer", () => {
+    const flight = row({ direction: "S", stationCode: "LEB", scheduledDeparture: "07:22", mode: "flight" });
+    const train = { ...flight, mode: undefined };
+    // Same drive either way; the flight's 15 extra buffer minutes move the leave time earlier.
+    const minutes = (leg: { departAt: string }) => Number(leg.departAt.slice(11, 13)) * 60 + Number(leg.departAt.slice(14));
+    expect(minutes(vtDriveLeg(train, JONES, day)) - minutes(vtDriveLeg(flight, JONES, day))).toBe(15);
+  });
+
   it("southbound: rolls back to the previous evening for an early-morning train", () => {
     const early = row({ direction: "S", stationCode: "ALB", scheduledDeparture: "00:30" });
     expect(vtDriveLeg(early, JONES, day).departAt).toBe("2026-10-04T22:25");

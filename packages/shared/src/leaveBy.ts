@@ -4,6 +4,7 @@ import {
   haversineMiles,
   NYC_STATION_BUFFER_MINUTES,
   TRIP_BUFFER_MINUTES,
+  vtBufferMinutes,
   type Coordinate,
 } from "./geo.js";
 import { parseHHMM } from "./recommend.js";
@@ -55,11 +56,15 @@ export function estimatedDoorLegs(vtDriveMinutes: number): DoorLegs {
  * How long before departure you need to set off, door to platform: the leg
  * you start on, plus that end's station buffer.
  */
-export function leadMinutes(direction: Direction, legs: DoorLegs): number {
+export function leadMinutes(
+  direction: Direction,
+  legs: DoorLegs,
+  vtBuffer: number = TRIP_BUFFER_MINUTES,
+): number {
   const raw =
     direction === "N"
       ? legs.nycTransitMinutes + NYC_STATION_BUFFER_MINUTES
-      : legs.vtDriveMinutes + TRIP_BUFFER_MINUTES;
+      : legs.vtDriveMinutes + vtBuffer;
   // Routed times are fractional; sub-minute precision is false precision
   // anyway, and a non-integer here renders as "12:0.1" downstream.
   return Math.round(raw);
@@ -94,7 +99,7 @@ export interface LeaveBy {
 
 /** Everything the UI needs to render a "leave by" time for one row. */
 export function computeLeaveBy(row: ScheduleRow, legs: DoorLegs, nowMinutes: number): LeaveBy {
-  const lead = leadMinutes(row.direction, legs);
+  const lead = leadMinutes(row.direction, legs, vtBufferMinutes(row));
   const minutes = leaveByMinutes(row.scheduledDeparture, lead);
 
   // Only meaningful within the same day; a wrapped (previous-evening) leave

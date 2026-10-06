@@ -1,0 +1,42 @@
+{
+  "$comment": "Hand-maintained rows the GTFS import doesn't cover; build-schedule merges them with schedule-source.json. Cape Air (LEB ↔ HPN) has no public feed: flight times from FlightAware's scheduled flights (checked 2026-10-06), every day. Each row's NYC end is Penn Station via Cape Air's shuttle, allowed 60 min, leaving Penn so it reaches HPN 30 min before the flight (so NYP departure = flight − 90 min; NYP arrival = landing + 60 min).",
+  "asOf": "2026-10-06",
+  "rows": [
+    {
+      "$comment": "9K 1081: shuttle 07:56A from Penn, HPN 09:26A → LEB 11:01A",
+      "direction": "N",
+      "day": "DAILY",
+      "trainRoute": "CAPE AIR 1081",
+      "trainDeparture": "07:56A NYP",
+      "trainArrival": "11:01A LEB",
+      "mode": "flight"
+    },
+    {
+      "$comment": "9K 1089: shuttle 03:46P from Penn, HPN 05:16P → LEB 06:51P",
+      "direction": "N",
+      "day": "DAILY",
+      "trainRoute": "CAPE AIR 1089",
+      "trainDeparture": "03:46P NYP",
+      "trainArrival": "06:51P LEB",
+      "mode": "flight"
+    },
+    {
+      "$comment": "9K 1080: LEB 07:22A → HPN 08:55A, shuttle to Penn by 09:55A",
+      "direction": "S",
+      "day": "DAILY",
+      "trainRoute": "CAPE AIR 1080",
+      "trainDeparture": "07:22A LEB",
+      "trainArrival": "09:55A NYP",
+      "mode": "flight"
+    },
+    {
+      "$comment": "9K 1088: LEB 03:01P → HPN 04:34P, shuttle to Penn by 05:34P",
+      "direction": "S",
+      "day": "DAILY",
+      "trainRoute": "CAPE AIR 1088",
+      "trainDeparture": "03:01P LEB",
+      "trainArrival": "05:34P NYP",
+      "mode": "flight"
+    }
+  ]
+}

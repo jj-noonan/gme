@@ -8,8 +8,9 @@ const schedule = JSON.parse(
 ) as { rows: ScheduleRow[] };
 
 describe("the schedule and the station/train lists", () => {
-  it("tracks live status for every train on the board", () => {
-    const untracked = [...new Set(schedule.rows.map((r) => r.trainNumber))].filter(
+  it("tracks live status for every train on the board (flights have none)", () => {
+    const trains = schedule.rows.filter((r) => r.mode !== "flight");
+    const untracked = [...new Set(trains.map((r) => r.trainNumber))].filter(
       (n) => !TRACKED_TRAIN_NUMBERS.includes(n),
     );
     expect(untracked).toEqual([]);

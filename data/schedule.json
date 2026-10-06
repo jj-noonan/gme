@@ -550,6 +550,46 @@
       "stationCode": "NHV",
       "scheduledDeparture": "22:20",
       "scheduledArrival": "23:59"
+    },
+    {
+      "trainNumber": 1081,
+      "service": "CAPE AIR",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "LEB",
+      "scheduledDeparture": "07:56",
+      "scheduledArrival": "11:01",
+      "mode": "flight"
+    },
+    {
+      "trainNumber": 1089,
+      "service": "CAPE AIR",
+      "direction": "N",
+      "daysRaw": "DAILY",
+      "stationCode": "LEB",
+      "scheduledDeparture": "15:46",
+      "scheduledArrival": "18:51",
+      "mode": "flight"
+    },
+    {
+      "trainNumber": 1080,
+      "service": "CAPE AIR",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "LEB",
+      "scheduledDeparture": "07:22",
+      "scheduledArrival": "09:55",
+      "mode": "flight"
+    },
+    {
+      "trainNumber": 1088,
+      "service": "CAPE AIR",
+      "direction": "S",
+      "daysRaw": "DAILY",
+      "stationCode": "LEB",
+      "scheduledDeparture": "15:01",
+      "scheduledArrival": "17:34",
+      "mode": "flight"
     }
   ]
 }

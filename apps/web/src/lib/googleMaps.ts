@@ -18,9 +18,9 @@ export function transitDirectionsUrl(place: Coordinate, toNyp: boolean): string 
 }
 
 /**
- * Google Maps driving directions between the vt-location and a station.
- * The station goes by name rather than coordinates: ours are the town, not
- * the platform, and Maps finds the actual station from its name.
+ * Google Maps driving directions between the vt-location and a station (or
+ * Cape Air's airport). The station goes by name rather than coordinates, so
+ * Maps lands on the station or terminal itself, not a nearby road.
  */
 export function drivingDirectionsUrl(
   place: Coordinate,
@@ -28,8 +28,8 @@ export function drivingDirectionsUrl(
   toStation: boolean,
 ): string {
   const here = `${place.lat},${place.lon}`;
-  const name = STATIONS.find((s) => s.code === stationCode)?.name ?? stationCode;
-  const station = `${name} Amtrak station`;
+  const known = STATIONS.find((s) => s.code === stationCode);
+  const station = known?.mapsName ?? `${known?.name ?? stationCode} Amtrak station`;
   const params = new URLSearchParams({
     api: "1",
     origin: toStation ? here : station,

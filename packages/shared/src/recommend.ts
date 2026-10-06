@@ -1,4 +1,4 @@
-import { NYC_STATION_BUFFER_MINUTES, TRIP_BUFFER_MINUTES } from "./geo.js";
+import { NYC_STATION_BUFFER_MINUTES, vtBufferMinutes } from "./geo.js";
 import type { ScheduleRow } from "./types.js";
 
 export function parseHHMM(time: string): number {
@@ -82,7 +82,8 @@ export function pickSouthboundRecommendation(
     if (!best) continue;
 
     const canStillMakeIt =
-      nowMinutes + best.driveMinutes + TRIP_BUFFER_MINUTES <= parseHHMM(best.row.scheduledDeparture);
+      nowMinutes + best.driveMinutes + vtBufferMinutes(best.row) <=
+      parseHHMM(best.row.scheduledDeparture);
     if (canStillMakeIt) return best;
   }
 
