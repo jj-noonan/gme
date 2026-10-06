@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchesDay, nextRunningDay, parseDayCode } from "./dayCodes.js";
+import { formatDayCode, matchesDay, nextRunningDay, parseDayCode } from "./dayCodes.js";
 
 // Sun=0 Mon=1 Tue=2 Wed=3 Thu=4 Fri=5 Sat=6
 const SUN = new Date("2026-09-20T12:00:00");
@@ -68,5 +68,24 @@ describe("nextRunningDay", () => {
   it("skips ahead to the next day it runs", () => {
     expect(nextRunningDay("MO-FR", sunday)).toEqual(new Date(2026, 9, 5));
     expect(nextRunningDay("SA", sunday)).toEqual(new Date(2026, 9, 10));
+  });
+});
+
+describe("formatDayCode", () => {
+  it("uses the timetable's notation", () => {
+    expect(formatDayCode(new Set([0, 1, 2, 3, 4, 5, 6]))).toBe("DAILY");
+    expect(formatDayCode(new Set([1, 2, 3, 4, 5]))).toBe("MO-FR");
+    expect(formatDayCode(new Set([0, 6]))).toBe("SASU");
+    expect(formatDayCode(new Set([5]))).toBe("FR");
+    expect(formatDayCode(new Set([0, 1, 2, 3, 6]))).toBe("SA-WE");
+    expect(formatDayCode(new Set([1, 3, 5]))).toBe("MO,WE,FR");
+    expect(formatDayCode(new Set([0, 1, 2, 3, 4, 5]))).toBe("SU-FR");
+  });
+
+  it("reads back to the same days for every possible set", () => {
+    for (let mask = 1; mask < 128; mask++) {
+      const days = new Set([0, 1, 2, 3, 4, 5, 6].filter((d) => mask & (1 << d)));
+      expect(parseDayCode(formatDayCode(days))).toEqual(days);
+    }
   });
 });

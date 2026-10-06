@@ -77,3 +77,38 @@ export function nextRunningDay(raw: string, from: Date): Date {
   }
   throw new Error(`Day code "${raw}" names no days`);
 }
+
+/**
+ * The day code for a set of weekdays (0=Sun..6=Sat), in the timetable's own
+ * notation: "DAILY", ranges for runs of three or more ("MO-FR", wrapping
+ * like "FR-MO"), pairs and singles run together ("SUSA", "TH"), segments
+ * joined by commas ("SU-WE,SA"). Always reads back to the same set with
+ * parseDayCode.
+ */
+export function formatDayCode(days: Set<number>): string {
+  if (days.size === 0) throw new Error("A day code needs at least one day");
+  if (days.size === 7) return "DAILY";
+
+  // Start just after a day the train doesn't run, so no run is split across
+  // the Saturday/Sunday wrap.
+  const gap = [0, 1, 2, 3, 4, 5, 6].find((d) => !days.has(d))!;
+  const runs: number[][] = [];
+  for (let i = 1; i <= 7; i++) {
+    const day = (gap + i) % 7;
+    if (!days.has(day)) continue;
+    const last = runs.at(-1);
+    if (last && (last.at(-1)! + 1) % 7 === day) last.push(day);
+    else runs.push([day]);
+  }
+
+  // Monday-first reads most naturally ("MO-FR,SU" rather than "SU,MO-FR")...
+  // except a run that wraps through Sunday stays whole ("FR-MO").
+  runs.sort((a, b) => ((a[0] + 6) % 7) - ((b[0] + 6) % 7));
+  return runs
+    .map((run) =>
+      run.length >= 3
+        ? `${DAY_ORDER[run[0]]}-${DAY_ORDER[run.at(-1)!]}`
+        : run.map((d) => DAY_ORDER[d]).join(""),
+    )
+    .join(",");
+}

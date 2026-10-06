@@ -13,6 +13,7 @@
     "prebuild:web": "npm run build:schedule",
     "build:web": "npm run build -w apps/web",
     "build:schedule": "node scripts/build-schedule.mjs",
+    "import:schedule": "tsx scripts/import-gtfs.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
