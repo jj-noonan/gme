@@ -542,6 +542,11 @@ body {
   cursor: pointer;
 }
 
+.place-field__locate:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .place-field__locate--active {
   background: var(--tile-bg-active);
   color: var(--amber);

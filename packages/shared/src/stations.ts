@@ -41,13 +41,6 @@ export const VT_REGION: Bounds = { minLat: 42.0, maxLat: 45.1, minLon: -74.6, ma
 /** Where an nyc-location may be: the five boroughs, roughly. */
 export const NYC_REGION: Bounds = { minLat: 40.45, maxLat: 40.95, minLon: -74.3, maxLon: -73.65 };
 
-// Centroid of the tracked VT/NY stations, used only to decide NYC-side vs
-// Rutland-side at a coarse level (see classifyRegion in geo.ts).
-export const RUTLAND_CLUSTER_CENTROID = {
-  lat: STATIONS.reduce((sum, s) => sum + s.lat, 0) / STATIONS.length,
-  lon: STATIONS.reduce((sum, s) => sum + s.lon, 0) / STATIONS.length,
-};
-
 export const TRACKED_TRAIN_NUMBERS = [
   68, 69, // Adirondack
   290, 291, // Ethan Allen Express

@@ -8,6 +8,8 @@ import { Icon } from "./Icon.js";
 const AREA_ICONS: Record<PlaceArea, IconName> = { vt: "vermont", nyc: "new-york" };
 const AREA_NAMES: Record<PlaceArea, string> = { vt: "VT location", nyc: "NYC location" };
 const AREA_REGIONS: Record<PlaceArea, string> = { vt: "VT or eastern NY", nyc: "NYC" };
+// Short enough to fit under the box on a phone.
+const AWAY_NOTE = "Too far away to use current location.";
 
 /** The text a box shows for its current setting. */
 function displayText(area: PlaceArea, place: PlaceState): string {
@@ -44,10 +46,13 @@ function PlaceField({
   area,
   place,
   allowCurrent,
+  away,
 }: {
   area: PlaceArea;
   place: PlaceState;
   allowCurrent?: boolean;
+  /** Far from both ends: current location can't be turned on (only off). */
+  away?: boolean;
 }) {
   const shown = displayText(area, place);
   const [draft, setDraft] = useState(shown);
@@ -65,7 +70,9 @@ function PlaceField({
   };
 
   const usingCurrent = place.setting.kind === "current";
-  const note = statusNote(area, place.status, place.matchedLabel);
+  const locateDisabled = Boolean(away) && !usingCurrent;
+  const note =
+    allowCurrent && locateDisabled ? AWAY_NOTE : statusNote(area, place.status, place.matchedLabel);
   const noteId = `${area}-location-note`;
 
   return (
@@ -105,7 +112,8 @@ function PlaceField({
             className={`place-field__locate${usingCurrent ? " place-field__locate--active" : ""}`}
             aria-pressed={usingCurrent}
             aria-label="Use current location"
-            title="Use current location"
+            title={locateDisabled ? AWAY_NOTE : "Use current location"}
+            disabled={locateDisabled}
             onClick={() => place.setSetting(usingCurrent ? { kind: "default" } : { kind: "current" })}
           >
             <Icon name="map-pin" size={20} />
@@ -131,14 +139,21 @@ export function LocationBar({
   vt,
   nyc,
   direction,
+  away,
 }: {
   vt: PlaceState;
   nyc: PlaceState;
   direction: Direction;
+  /** Outside the NYC metro area and over 100 miles from Rutland. */
+  away: boolean;
 }) {
   const northbound = direction === "N";
-  const vtField = <PlaceField key="vt" area="vt" place={vt} allowCurrent={!northbound} />;
-  const nycField = <PlaceField key="nyc" area="nyc" place={nyc} allowCurrent={northbound} />;
+  const vtField = (
+    <PlaceField key="vt" area="vt" place={vt} allowCurrent={!northbound} away={away} />
+  );
+  const nycField = (
+    <PlaceField key="nyc" area="nyc" place={nyc} allowCurrent={northbound} away={away} />
+  );
   return (
     <footer className="place-bar">{northbound ? [nycField, vtField] : [vtField, nycField]}</footer>
   );

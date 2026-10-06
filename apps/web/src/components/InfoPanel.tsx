@@ -3,6 +3,7 @@ import {
   DEFAULT_AVG_DRIVE_MPH,
   NYC_STATION_BUFFER_MINUTES,
   TRIP_BUFFER_MINUTES,
+  VT_RANGE_MILES,
 } from "@gme/shared";
 import { useEffect, useRef } from "react";
 
@@ -88,7 +89,9 @@ export function InfoPanel({ onClose }: { onClose: () => void }) {
         <h3>Locations</h3>
         <p>
           Type a place or address, or use your current location for where you're starting. Saved
-          on this device only.
+          on this device only. Away from both ends (outside the NYC area and over{" "}
+          {VT_RANGE_MILES} miles from Rutland), the board opens on a timetable and current location
+          is off.
         </p>
 
         <h3>Caveats</h3>

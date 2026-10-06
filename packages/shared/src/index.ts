@@ -7,3 +7,4 @@ export * from "./recommend.js";
 export * from "./leaveBy.js";
 export * from "./driveLegs.js";
 export * from "./transitLegs.js";
+export * from "./regions.js";
