@@ -97,6 +97,7 @@ export function InfoPanel({ onClose }: { onClose: () => void }) {
         <h3>Caveats</h3>
         <p>
           Drive and subway links open Google Maps planned for now, not for the train's time.
+          The train's name opens Amtrak to buy tickets, but can't fill in the search for you.
           Schedules are a snapshot of Amtrak's timetable. "Today" uses this device's clock,
           assumed to be Eastern time.
         </p>
