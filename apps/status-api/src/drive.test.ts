@@ -40,14 +40,14 @@ describe("getDriveMinutes", () => {
     const fetchImpl = mapboxReturning(600);
     await getDriveMinutes([leg()], deps(fetchImpl));
     const url = requestedUrl(fetchImpl);
-    expect(url.pathname).toContain("/driving-traffic/-73.7423,42.6339;-72.978,43.609");
+    expect(url.pathname).toContain("/driving-traffic/-73.7411,42.641;-72.978,43.609");
     expect(url.searchParams.get("depart_at")).toBe("2026-10-05T18:00");
   });
 
   it("routes place → station heading out", async () => {
     const fetchImpl = mapboxReturning(600);
     await getDriveMinutes([leg({ toStation: true })], deps(fetchImpl));
-    expect(requestedUrl(fetchImpl).pathname).toContain("/-72.978,43.609;-73.7423,42.6339");
+    expect(requestedUrl(fetchImpl).pathname).toContain("/-72.978,43.609;-73.7411,42.641");
   });
 
   it("uses live traffic (no depart_at) once the slot has started", async () => {
