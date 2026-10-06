@@ -1,6 +1,6 @@
 export type Direction = "N" | "S";
 
-export type StationCode = "RUD" | "CNV" | "WHL" | "FED" | "ALB" | "BLF" | "BRA";
+export type StationCode = "RUD" | "CNV" | "WHL" | "FED" | "ALB" | "BLF" | "BRA" | "NHV";
 
 export interface Station {
   code: StationCode;

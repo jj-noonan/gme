@@ -95,6 +95,13 @@
     },
     {
       "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "ACELA 2156",
+      "trainDeparture": "02:06P NYP",
+      "trainArrival": "03:40P NHV"
+    },
+    {
+      "direction": "N",
       "day": "DAILY",
       "trainRoute": "ETHAN ALLEN 291",
       "trainDeparture": "02:19P NYP",
@@ -123,6 +130,13 @@
     },
     {
       "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "NE REGIONAL 174",
+      "trainDeparture": "02:29P NYP",
+      "trainArrival": "04:11P NHV"
+    },
+    {
+      "direction": "N",
       "day": "DAILY",
       "trainRoute": "EMPIRE 235",
       "trainDeparture": "03:15P NYP",
@@ -137,10 +151,31 @@
     },
     {
       "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "ACELA 2158",
+      "trainDeparture": "04:04P NYP",
+      "trainArrival": "05:43P NHV"
+    },
+    {
+      "direction": "N",
       "day": "DAILY",
       "trainRoute": "EMPIRE 237",
       "trainDeparture": "04:45P NYP",
       "trainArrival": "07:10P ALB"
+    },
+    {
+      "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "NE REGIONAL 184",
+      "trainDeparture": "05:07P NYP",
+      "trainArrival": "07:01P NHV"
+    },
+    {
+      "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "NE REGIONAL 94",
+      "trainDeparture": "05:38P NYP",
+      "trainArrival": "07:25P NHV"
     },
     {
       "direction": "N",
@@ -151,10 +186,45 @@
     },
     {
       "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "ACELA 2160",
+      "trainDeparture": "06:05P NYP",
+      "trainArrival": "07:42P NHV"
+    },
+    {
+      "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "NE REGIONAL 148",
+      "trainDeparture": "06:40P NYP",
+      "trainArrival": "08:32P NHV"
+    },
+    {
+      "direction": "N",
       "day": "DAILY",
       "trainRoute": "EMPIRE 241",
       "trainDeparture": "06:46P NYP",
       "trainArrival": "09:15P ALB"
+    },
+    {
+      "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "NE REGIONAL 176",
+      "trainDeparture": "07:12P NYP",
+      "trainArrival": "08:59P NHV"
+    },
+    {
+      "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "NE REGIONAL 178",
+      "trainDeparture": "07:50P NYP",
+      "trainArrival": "09:40P NHV"
+    },
+    {
+      "direction": "N",
+      "day": "MO-FR",
+      "trainRoute": "NE REGIONAL 136",
+      "trainDeparture": "08:50P NYP",
+      "trainArrival": "10:40P NHV"
     },
     {
       "direction": "N",
@@ -319,6 +389,13 @@
     },
     {
       "direction": "S",
+      "day": "SASU",
+      "trainRoute": "NE REGIONAL 165",
+      "trainDeparture": "05:35P NHV",
+      "trainArrival": "07:31P NYP"
+    },
+    {
+      "direction": "S",
       "day": "DAILY",
       "trainRoute": "MAPLE LEAF 64",
       "trainDeparture": "06:35P ALB",
@@ -326,10 +403,31 @@
     },
     {
       "direction": "S",
+      "day": "SASU",
+      "trainRoute": "NE REGIONAL 167",
+      "trainDeparture": "07:06P NHV",
+      "trainArrival": "08:51P NYP"
+    },
+    {
+      "direction": "S",
       "day": "DAILY",
       "trainRoute": "ADIRONDACK 68",
       "trainDeparture": "07:40P ALB",
       "trainArrival": "10:15P NYP"
+    },
+    {
+      "direction": "S",
+      "day": "SU",
+      "trainRoute": "NE REGIONAL 67",
+      "trainDeparture": "09:10P NHV",
+      "trainArrival": "11:05P NYP"
+    },
+    {
+      "direction": "S",
+      "day": "SASU",
+      "trainRoute": "NE REGIONAL 169",
+      "trainDeparture": "10:20P NHV",
+      "trainArrival": "11:59P NYP"
     }
   ]
 }

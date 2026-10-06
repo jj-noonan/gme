@@ -10,7 +10,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 const dataDir = new URL("../data/", import.meta.url);
 const source = JSON.parse(readFileSync(new URL("schedule-source.json", dataDir), "utf8"));
 
-const KNOWN_STATIONS = new Set(["RUD", "CNV", "WHL", "FED", "ALB", "BLF", "BRA"]);
+const KNOWN_STATIONS = new Set(["RUD", "CNV", "WHL", "FED", "ALB", "BLF", "BRA", "NHV"]);
 
 function splitTrainRoute(route) {
   const lastSpace = route.lastIndexOf(" ");

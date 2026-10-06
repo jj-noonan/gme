@@ -39,8 +39,10 @@ const FEED: GtfsFeed = {
     { trip_id: "t291we", route_id: "r1", service_id: "we", trip_short_name: "291" },
     // Southbound, past midnight in GTFS terms.
     { trip_id: "t290", route_id: "r1", service_id: "wk", trip_short_name: "290" },
-    // New Haven: one before and one after the 14:00 cut-off.
+    // New Haven: one before and one after the 14:00 cut-off, and one after
+    // midnight (29:44 = 5:44am) that mustn't count as late in the day.
     { trip_id: "t170", route_id: "r2", service_id: "wk", trip_short_name: "170" },
+    { trip_id: "t66", route_id: "r2", service_id: "wk", trip_short_name: "66" },
     { trip_id: "t176", route_id: "r2", service_id: "wk", trip_short_name: "176" },
     // Next timetable's version of 291, not running this week.
     { trip_id: "t291later", route_id: "r1", service_id: "wk-later", trip_short_name: "291" },
@@ -60,6 +62,8 @@ const FEED: GtfsFeed = {
     stop("t290", "NYP", 9, "28:27:00"),
     stop("t170", "NYP", 1, "09:05:00"),
     stop("t170", "NHV", 4, "10:50:00"),
+    stop("t66", "NYP", 1, "29:44:00"),
+    stop("t66", "NHV", 4, "31:24:00"),
     stop("t176", "NYP", 1, "19:12:00"),
     stop("t176", "NHV", 4, "21:01:00"),
     stop("t640", "NYP", 1, "15:00:00"),

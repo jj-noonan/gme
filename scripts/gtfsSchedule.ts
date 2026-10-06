@@ -117,7 +117,8 @@ function hhmm(time: string): number {
 function passes(filter: DirectionFilter | undefined, days: Set<number>, departs: number): boolean {
   if (!filter) return true;
   if (filter.days && !filter.days.some((d) => days.has(DAY_TOKENS.indexOf(d)))) return false;
-  if (filter.departsFrom && departs < hhmm(filter.departsFrom)) return false;
+  // Compare clock times: a GTFS "29:44" is a 5:44am departure, not an evening one.
+  if (filter.departsFrom && departs % (24 * 60) < hhmm(filter.departsFrom)) return false;
   return true;
 }
 

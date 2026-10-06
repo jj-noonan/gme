@@ -71,6 +71,7 @@ const SERVICE_ABBREVIATIONS: Record<string, string> = {
   ADIRONDACK: "ADK",
   VERMONTER: "VTER",
   "MAPLE LEAF": "MPL LEAF",
+  "NE REGIONAL": "NE RGNL",
 };
 
 export function abbreviateService(service: string): string {
