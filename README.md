@@ -10,7 +10,8 @@ apps/web/          site (Vite + React + TS) — deploys to GitHub Pages
 apps/status-api/   Fly.io proxy/cache for live Amtrak status
 packages/shared/   day-code parser, station/geo data, recommendation logic (tested)
 data/
-  schedule-source.json   hand-maintained, edit this when Amtrak's timetable changes
+  schedule-import.json   which routes/stations to pull from Amtrak's GTFS feed
+  schedule-source.json   imported from GTFS (can be hand-edited between imports)
   schedule.json           generated — do not edit directly
 ```
 
@@ -38,11 +39,23 @@ Shore's Boston-section trains never leaking into NYP-facing data).
 
 ## Updating the schedule
 
-1. Re-check the timetable PDFs, edit `data/schedule-source.json`.
-2. `npm run build:schedule` — regenerates `data/schedule.json` and
-   `apps/web/public/schedule.json`.
+1. `npm run import:schedule` — downloads Amtrak's GTFS feed and rewrites
+   `data/schedule-source.json` with the trains `data/schedule-import.json`
+   asks for, as they run in the week starting today, then regenerates
+   `data/schedule.json` and `apps/web/public/schedule.json`.
+   - `-- --from 2026-11-16` imports a different week. The feed holds a year
+     of overlapping timetables (track work, holidays, timetable changes), so
+     pick a week that represents what riders will see; re-import when a
+     temporary change ends.
+   - `-- --feed ./GTFS.zip` uses a feed you already downloaded.
+2. Review the diff of `data/schedule-source.json`. If a train number is new,
+   add it to `TRACKED_TRAIN_NUMBERS` in `packages/shared/src/stations.ts`
+   (a test fails until you do).
 3. Commit and push, or re-run the "Deploy web" GitHub Action manually
    (Actions tab → Deploy web → Run workflow) if nothing else changed.
+
+To hand-edit instead, change `data/schedule-source.json` and run
+`npm run build:schedule`; the next import will overwrite it.
 
 ## Deploy
 
@@ -60,7 +73,8 @@ Shore's Boston-section trains never leaking into NYP-facing data).
 
 Deliberate, for a low-traffic personal site — revisit if that ever changes:
 
-- Schedule is a manually maintained snapshot, not live-scraped from PDFs.
+- The schedule is one imported week of Amtrak's GTFS feed, not live: re-run
+  the import when timetables change.
 - VT-side drives run between the station and the vt-location — Jones Donuts
   by default, or a place, address or current location set in the box at the
   bottom of the board (saved per device; only the typed text is stored, and
@@ -99,9 +113,9 @@ Considered and deliberately parked. Each is a self-contained change:
   idle hit a cold start (the web app retries through it). Setting
   `min_machines_running = 1` in `fly.toml` removes the wait for a small
   monthly cost.
-- **Live schedule.** The schedule is a hand-maintained snapshot (see above);
-  scraping or importing Amtrak's GTFS would keep it current, and could also
-  alert on drift.
+- **Live schedule.** The schedule is one imported week (see above). Running
+  the import on a schedule, per day of the week, would keep it current and
+  could also alert on drift.
 - **Real timezone handling.** "Today" uses the viewer's clock and assumes
   Eastern time; travellers in other timezones would see the wrong day's
   trains near midnight.

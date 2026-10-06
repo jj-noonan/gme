@@ -1,0 +1,26 @@
+{
+  "$comment": "What scripts/import-gtfs.ts pulls from Amtrak's GTFS feed into data/schedule-source.json. Each group names the routes it takes (GTFS route_long_name \u2192 the name shown on the board) and the tracked stations it takes them at; optional per-direction filters narrow it further.",
+  "feed": "https://content.amtrak.com/content/gtfs/GTFS.zip",
+  "groups": [
+    {
+      "$comment": "The VT/NY trains, at every tracked station they stop at.",
+      "routes": {
+        "Adirondack": "ADIRONDACK",
+        "Ethan Allen Express": "ETHAN ALLEN",
+        "Vermonter": "VERMONTER",
+        "Empire Service": "EMPIRE",
+        "Maple Leaf": "MAPLE LEAF",
+        "Lake Shore Limited": "LAKE SHORE"
+      },
+      "stations": [
+        "RUD",
+        "CNV",
+        "WHL",
+        "FED",
+        "ALB",
+        "BLF",
+        "BRA"
+      ]
+    }
+  ]
+}
