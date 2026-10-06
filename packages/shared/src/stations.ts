@@ -1,19 +1,20 @@
 import type { Bounds } from "./geo.js";
 import type { Station } from "./types.js";
 
-// Approximate station coordinates (not the platform entrance, just the town) —
-// precise enough for haversine + average-speed drive estimates.
+// Station platform coordinates, from Amtraker's station data
+// (api.amtraker.com/v3/stations/<code>), so drives route to the station
+// itself rather than the middle of town.
 export const STATIONS: Station[] = [
-  { code: "RUD", name: "Rutland, VT", lat: 43.6106, lon: -72.9726 },
-  { code: "CNV", name: "Castleton, VT", lat: 43.6009, lon: -73.1731 },
-  { code: "WHL", name: "Whitehall, NY", lat: 43.5548, lon: -73.4051 },
-  { code: "FED", name: "Fort Edward, NY", lat: 43.2695, lon: -73.5843 },
-  { code: "ALB", name: "Albany-Rensselaer, NY", lat: 42.6339, lon: -73.7423 },
-  { code: "BLF", name: "Bellows Falls, VT", lat: 43.1334, lon: -72.4487 },
-  { code: "BRA", name: "Brattleboro, VT", lat: 42.8509, lon: -72.5579 },
+  { code: "RUD", name: "Rutland, VT", lat: 43.6058, lon: -72.9815 },
+  { code: "CNV", name: "Castleton, VT", lat: 43.6134, lon: -73.1713 },
+  { code: "WHL", name: "Whitehall, NY", lat: 43.5547, lon: -73.4032 },
+  { code: "FED", name: "Fort Edward, NY", lat: 43.2696, lon: -73.5806 },
+  { code: "ALB", name: "Albany-Rensselaer, NY", lat: 42.641, lon: -73.7411 },
+  { code: "BLF", name: "Bellows Falls, VT", lat: 43.1365, lon: -72.4446 },
+  { code: "BRA", name: "Brattleboro, VT", lat: 42.8508, lon: -72.5587 },
 ];
 
-export const NYP_COORDINATE = { lat: 40.7506, lon: -73.9935 };
+export const NYP_COORDINATE = { lat: 40.751, lon: -73.9963 };
 
 /**
  * The default vt-location: Jones Donuts, the reference point the original
