@@ -46,6 +46,10 @@ export const GEOCODE_RATE_LIMIT = { requests: 20, windowMs: 10 * 60_000 };
 // flat subway estimate.
 export const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY ?? "";
 export const GOOGLE_ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes";
+// Place and address search for the location boxes (Places API (New) Text
+// Search; the key needs that API allowed too). Falls back to Mapbox's
+// address-only geocoding if Google can't answer.
+export const GOOGLE_PLACES_SEARCH_URL = "https://places.googleapis.com/v1/places:searchText";
 
 // Upper bound on legs per /transit request. Legs are one per train, not per
 // row, so even the full southbound timetable is well under this.
