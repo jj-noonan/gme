@@ -20,6 +20,9 @@ export const ICONS = {
   flap: "<rect x=\"4\" y=\"3\" width=\"16\" height=\"18\" rx=\"2\"/><path d=\"M2 12h20\"/><path d=\"M9 7h6M9 17h6\"/>",
   "arrow-right": "<path d=\"M4 12h16\"/><path d=\"M14 6l6 6-6 6\"/>",
   refresh: "<path d=\"M21 12a9 9 0 1 1-3-7l3 3\"/><path d=\"M21 3v5h-5\"/>",
+  // Not from the handoff: drawn to match it (24px, 2px round strokes) for
+  // Cape Air rows, in place of arrow-right. Nose points right.
+  plane: "<path d=\"M21 12c0-1-1-1.5-2-1.5h-4L10 3H8l2.5 7.5H6L4 8H2.5L4 12l-1.5 4H4l2-2.5h4.5L8 21h2l5-7.5h4c1 0 2-.5 2-1.5z\"/>",
 } as const;
 
 export type IconName = keyof typeof ICONS;

@@ -72,6 +72,9 @@ export function TrainRow({
   // the VT drive is the other end.
   const northbound = row.direction === "N";
   const flight = row.mode === "flight";
+  // Cape Air sells its Penn Station shuttle as "ZYP"; show that on flight
+  // rows (the subway leg still runs to Penn Station either way).
+  const routeCode = (code: string) => (flight && code === "NYP" ? "ZYP" : code);
   // Each leg — its icon or badges and its duration — links to that leg in Google Maps.
   const nycLeg = (minutes: number) => (
     <TransitLink lines={doorLegs.nycLines} nycLocation={nycLocation} toNyp={northbound}>
@@ -107,9 +110,9 @@ export function TrainRow({
         {/* The train itself, and how long from getting off it to the far door. */}
         <div className="trip__leg">
           <div className="trip__route">
-            <FlapText text={boardingStationCode(row)} />
-            <Icon name="arrow-right" size={20} />
-            <FlapText text={changeStationCode(row)} />
+            <FlapText text={routeCode(boardingStationCode(row))} />
+            <Icon name={flight ? "plane" : "arrow-right"} size={20} />
+            <FlapText text={routeCode(changeStationCode(row))} />
           </div>
           <div className="trip__sub">{northbound ? vtLeg(lastLeg) : nycLeg(lastLeg)}</div>
         </div>
