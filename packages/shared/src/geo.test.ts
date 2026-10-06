@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  classifyRegion,
   estimateDriveMinutes,
   haversineMiles,
 } from "./geo.js";
@@ -26,15 +25,5 @@ describe("estimateDriveMinutes", () => {
   it("scales linearly with distance at a fixed speed", () => {
     expect(estimateDriveMinutes(42, 42)).toBeCloseTo(60, 5);
     expect(estimateDriveMinutes(21, 42)).toBeCloseTo(30, 5);
-  });
-});
-
-describe("classifyRegion", () => {
-  it("classifies a point near NYP as NYC", () => {
-    expect(classifyRegion(NYP, NYP, RUD)).toBe("NYC");
-  });
-
-  it("classifies a point near the Rutland cluster as RUTLAND", () => {
-    expect(classifyRegion(RUD, NYP, RUD)).toBe("RUTLAND");
   });
 });

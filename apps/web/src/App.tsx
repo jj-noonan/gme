@@ -1,3 +1,4 @@
+import { nearerEnd } from "@gme/shared";
 import { useCallback, useEffect, useState } from "react";
 import { InfoPanel } from "./components/InfoPanel.js";
 import { LinkOutConfirm } from "./components/LinkOutConfirm.js";
@@ -23,12 +24,16 @@ export function App() {
   const [showInfo, setShowInfo] = useState(false);
   const closeInfo = useCallback(() => setShowInfo(false), []);
 
-  // Once we know the region, default to the appropriate "Today" tab —
-  // unless the rider has already picked a tab themselves.
+  // Once we know the region, default to the appropriate tab — unless the
+  // rider has already picked one themselves. Today when you're at one end
+  // of the trip; away from both, today's leave-by times mean nothing, so
+  // the timetable for whichever end is nearer.
   useEffect(() => {
     if (userPickedTab || !resolved) return;
-    setActiveTab(region === "NYC" ? "N_TODAY" : "S_TODAY");
-  }, [region, resolved, userPickedTab]);
+    if (region === "NYC") setActiveTab("N_TODAY");
+    else if (region === "RUTLAND") setActiveTab("S_TODAY");
+    else setActiveTab(nearerEnd(user.location) === "NYC" ? "N_TIMETABLE" : "S_TIMETABLE");
+  }, [region, resolved, userPickedTab, user.location]);
 
   const isTodayTab = activeTab === "N_TODAY" || activeTab === "S_TODAY";
   const { statuses } = useTrainStatuses(isTodayTab);
@@ -93,7 +98,12 @@ export function App() {
       </main>
       <LinkOutConfirm />
       {showInfo && <InfoPanel onClose={closeInfo} />}
-      <LocationBar vt={vt} nyc={nyc} direction={activeTab.startsWith("N") ? "N" : "S"} />
+      <LocationBar
+        vt={vt}
+        nyc={nyc}
+        direction={activeTab.startsWith("N") ? "N" : "S"}
+        away={resolved && region === "AWAY"}
+      />
     </div>
   );
 }

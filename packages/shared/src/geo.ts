@@ -57,16 +57,3 @@ export function estimateDriveMinutes(
 ): number {
   return (miles / avgMph) * 60;
 }
-
-export type Region = "NYC" | "RUTLAND";
-
-/** Classifies a location as NYC-side or Rutland-side by proximity to each anchor point. */
-export function classifyRegion(
-  userLocation: Coordinate,
-  nyp: Coordinate,
-  rutlandClusterCentroid: Coordinate,
-): Region {
-  return haversineMiles(userLocation, nyp) <= haversineMiles(userLocation, rutlandClusterCentroid)
-    ? "NYC"
-    : "RUTLAND";
-}

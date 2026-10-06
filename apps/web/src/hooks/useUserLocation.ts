@@ -1,11 +1,4 @@
-import {
-  classifyRegion,
-  NYP_COORDINATE,
-  RUTLAND_CLUSTER_CENTROID,
-  DEFAULT_VT_LOCATION,
-  type Coordinate,
-  type Region,
-} from "@gme/shared";
+import { classifyRegion, DEFAULT_VT_LOCATION, type Coordinate, type Region } from "@gme/shared";
 import { useEffect, useState } from "react";
 import { resolveUserLocation } from "../lib/location.js";
 
@@ -37,7 +30,7 @@ export function useUserLocation(): UserLocationState {
       const resolvedLocation = location ?? DEFAULT_VT_LOCATION;
       setState({
         location: resolvedLocation,
-        region: classifyRegion(resolvedLocation, NYP_COORDINATE, RUTLAND_CLUSTER_CENTROID),
+        region: classifyRegion(resolvedLocation),
         resolved: location !== null,
         pending: false,
       });
