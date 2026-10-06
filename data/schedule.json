@@ -120,6 +120,15 @@
       "scheduledArrival": "15:48"
     },
     {
+      "trainNumber": 2156,
+      "service": "ACELA",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "14:06",
+      "scheduledArrival": "15:40"
+    },
+    {
       "trainNumber": 291,
       "service": "ETHAN ALLEN",
       "direction": "N",
@@ -156,6 +165,15 @@
       "scheduledArrival": "19:35"
     },
     {
+      "trainNumber": 174,
+      "service": "NE REGIONAL",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "14:29",
+      "scheduledArrival": "16:11"
+    },
+    {
       "trainNumber": 235,
       "service": "EMPIRE",
       "direction": "N",
@@ -174,6 +192,15 @@
       "scheduledArrival": "18:20"
     },
     {
+      "trainNumber": 2158,
+      "service": "ACELA",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "16:04",
+      "scheduledArrival": "17:43"
+    },
+    {
       "trainNumber": 237,
       "service": "EMPIRE",
       "direction": "N",
@@ -181,6 +208,24 @@
       "stationCode": "ALB",
       "scheduledDeparture": "16:45",
       "scheduledArrival": "19:10"
+    },
+    {
+      "trainNumber": 184,
+      "service": "NE REGIONAL",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "17:07",
+      "scheduledArrival": "19:01"
+    },
+    {
+      "trainNumber": 94,
+      "service": "NE REGIONAL",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "17:38",
+      "scheduledArrival": "19:25"
     },
     {
       "trainNumber": 239,
@@ -192,6 +237,24 @@
       "scheduledArrival": "20:28"
     },
     {
+      "trainNumber": 2160,
+      "service": "ACELA",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "18:05",
+      "scheduledArrival": "19:42"
+    },
+    {
+      "trainNumber": 148,
+      "service": "NE REGIONAL",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "18:40",
+      "scheduledArrival": "20:32"
+    },
+    {
       "trainNumber": 241,
       "service": "EMPIRE",
       "direction": "N",
@@ -199,6 +262,33 @@
       "stationCode": "ALB",
       "scheduledDeparture": "18:46",
       "scheduledArrival": "21:15"
+    },
+    {
+      "trainNumber": 176,
+      "service": "NE REGIONAL",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "19:12",
+      "scheduledArrival": "20:59"
+    },
+    {
+      "trainNumber": 178,
+      "service": "NE REGIONAL",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "19:50",
+      "scheduledArrival": "21:40"
+    },
+    {
+      "trainNumber": 136,
+      "service": "NE REGIONAL",
+      "direction": "N",
+      "daysRaw": "MO-FR",
+      "stationCode": "NHV",
+      "scheduledDeparture": "20:50",
+      "scheduledArrival": "22:40"
     },
     {
       "trainNumber": 243,
@@ -408,6 +498,15 @@
       "scheduledArrival": "22:15"
     },
     {
+      "trainNumber": 165,
+      "service": "NE REGIONAL",
+      "direction": "S",
+      "daysRaw": "SASU",
+      "stationCode": "NHV",
+      "scheduledDeparture": "17:35",
+      "scheduledArrival": "19:31"
+    },
+    {
       "trainNumber": 64,
       "service": "MAPLE LEAF",
       "direction": "S",
@@ -417,6 +516,15 @@
       "scheduledArrival": "21:16"
     },
     {
+      "trainNumber": 167,
+      "service": "NE REGIONAL",
+      "direction": "S",
+      "daysRaw": "SASU",
+      "stationCode": "NHV",
+      "scheduledDeparture": "19:06",
+      "scheduledArrival": "20:51"
+    },
+    {
       "trainNumber": 68,
       "service": "ADIRONDACK",
       "direction": "S",
@@ -424,6 +532,24 @@
       "stationCode": "ALB",
       "scheduledDeparture": "19:40",
       "scheduledArrival": "22:15"
+    },
+    {
+      "trainNumber": 67,
+      "service": "NE REGIONAL",
+      "direction": "S",
+      "daysRaw": "SU",
+      "stationCode": "NHV",
+      "scheduledDeparture": "21:10",
+      "scheduledArrival": "23:05"
+    },
+    {
+      "trainNumber": 169,
+      "service": "NE REGIONAL",
+      "direction": "S",
+      "daysRaw": "SASU",
+      "stationCode": "NHV",
+      "scheduledDeparture": "22:20",
+      "scheduledArrival": "23:59"
     }
   ]
 }

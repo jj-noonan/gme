@@ -21,6 +21,28 @@
         "BLF",
         "BRA"
       ]
+    },
+    {
+      "$comment": "New Haven, for the weekend: out on Friday afternoon/evening, back on Sunday afternoon/evening.",
+      "routes": {
+        "Northeast Regional": "NE REGIONAL",
+        "Acela": "ACELA"
+      },
+      "stations": [
+        "NHV"
+      ],
+      "northbound": {
+        "days": [
+          "FR"
+        ],
+        "departsFrom": "14:00"
+      },
+      "southbound": {
+        "days": [
+          "SU"
+        ],
+        "departsFrom": "14:00"
+      }
     }
   ]
 }

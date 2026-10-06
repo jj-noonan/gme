@@ -101,6 +101,11 @@ Deliberate, for a low-traffic personal site — revisit if that ever changes:
 
 Considered and deliberately parked. Each is a self-contained change:
 
+- **Re-import the schedule after 2026-11-16.** The current import (week of
+  2026-10-05) reflects autumn track work: Vermonter 54 leaves NYP at 9:00A on
+  weekends, and most Sunday New Haven trains don't run. From the week of
+  2026-11-16 the normal timetable returns (`npm run import:schedule`).
+
 - **Google for driving too, one provider.** Driving stays on Mapbox: its free
   tier is far larger (~100k vs ~5k traffic-aware routes a month) and it
   allows short caching, which Google's terms don't. Swapping is contained to
