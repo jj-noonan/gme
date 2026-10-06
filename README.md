@@ -78,3 +78,29 @@ Deliberate, for a low-traffic personal site — revisit if that ever changes:
 - "Today" filtering uses the viewer's local clock, assumed to be Eastern time.
 - No automated schedule-drift alerting yet — `fly logs` on status-api shows
   actual-vs-scheduled deltas if you want to eyeball it.
+- Google Maps links (the drive and subway legs on each row) can't carry a
+  departure or arrival time, so Maps plans the trip for *now*, not for the
+  train's time. The board's own times are planned for the train.
+
+## Later
+
+Considered and deliberately parked. Each is a self-contained change:
+
+- **Google for driving too, one provider.** Driving stays on Mapbox: its free
+  tier is far larger (~100k vs ~5k traffic-aware routes a month) and it
+  allows short caching, which Google's terms don't. Swapping is contained to
+  `apps/status-api/src/drive.ts`.
+- **Delay-aware lookups.** Drive and subway legs are looked up for the
+  train's *scheduled* arrival, not the delayed one, so a very late train gets
+  traffic/subway timing for the wrong hour. Re-keying on live delay would mean
+  a fresh lookup whenever the delay changes.
+- **Keep status-api warm.** It scales to zero, so the first requests after
+  idle hit a cold start (the web app retries through it). Setting
+  `min_machines_running = 1` in `fly.toml` removes the wait for a small
+  monthly cost.
+- **Live schedule.** The schedule is a hand-maintained snapshot (see above);
+  scraping or importing Amtrak's GTFS would keep it current, and could also
+  alert on drift.
+- **Real timezone handling.** "Today" uses the viewer's clock and assumes
+  Eastern time; travellers in other timezones would see the wrong day's
+  trains near midnight.
