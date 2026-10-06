@@ -17,6 +17,10 @@ import { FlapText } from "./FlapText.js";
 import { Icon } from "./Icon.js";
 import { TransitLink } from "./TransitLink.js";
 
+// Amtrak's booking form lives on its home page; there's no documented (or,
+// in testing, working) way to pre-fill it from a link.
+const AMTRAK_BOOKING_URL = "https://www.amtrak.com/home.html";
+
 const MINUTES_PER_DAY = 24 * 60;
 
 function wrapMinutes(minutes: number): number {
@@ -118,14 +122,23 @@ export function TrainRow({
       </div>
 
       <div className="trip__meta">
-        <span className="trip__train">
+        {/* Amtrak has no link that pre-fills a search, so the confirm sheet
+            says what to search for instead. */}
+        <a
+          className="trip__train"
+          href={AMTRAK_BOOKING_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-link-out={`Amtrak to buy tickets (search ${boardingStationCode(row)} to ${changeStationCode(row)})`}
+          title="Buy tickets on Amtrak"
+        >
           <span className="only-wide">
             <FlapText text={`${row.service} ${row.trainNumber}`} />
           </span>
           <span className="only-narrow">
             <FlapText text={`${abbreviateService(row.service)} ${row.trainNumber}`} />
           </span>
-        </span>
+        </a>
         <span className="trip__times">
           {formatClock(row.scheduledDeparture)} / {formatClock(row.scheduledArrival)}
         </span>
