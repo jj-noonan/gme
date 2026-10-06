@@ -93,6 +93,10 @@ Deliberate, for a low-traffic personal site — revisit if that ever changes:
 - "Today" filtering uses the viewer's local clock, assumed to be Eastern time.
 - No automated schedule-drift alerting yet — `fly logs` on status-api shows
   actual-vs-scheduled deltas if you want to eyeball it.
+- Cape Air flights (LEB ↔ White Plains, with Cape Air's shuttle to Penn
+  Station) are hand-entered in `data/schedule-extra.json` from FlightAware's
+  scheduled times, with the shuttle allowed 60 minutes; Cape Air has no public
+  feed and no live status.
 - Google Maps links (the drive and subway legs on each row) can't carry a
   departure or arrival time, so Maps plans the trip for *now*, not for the
   train's time. The board's own times are planned for the train.

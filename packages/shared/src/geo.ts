@@ -1,3 +1,5 @@
+import type { ScheduleRow } from "./types.js";
+
 export interface Coordinate {
   lat: number;
   lon: number;
@@ -24,6 +26,14 @@ export const ASSUMED_NYC_TRANSIT_MINUTES = 50;
 
 /** Door-to-door buffer baked into every trip time, matching the original hand-built sheet. */
 export const TRIP_BUFFER_MINUTES = 15;
+
+/** Slack before a Cape Air flight at Lebanon: check-in closes ahead of departure. */
+export const AIRPORT_BUFFER_MINUTES = 30;
+
+/** The buffer at the VT end of a row: the airport's for a flight, the station's for a train. */
+export function vtBufferMinutes(row: Pick<ScheduleRow, "mode">): number {
+  return row.mode === "flight" ? AIRPORT_BUFFER_MINUTES : TRIP_BUFFER_MINUTES;
+}
 
 /**
  * Slack on top of the NYC subway estimate. Smaller than the drive-side buffer

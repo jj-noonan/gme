@@ -34,4 +34,9 @@ describe("drivingDirectionsUrl", () => {
     expect(url.searchParams.get("origin")).toBe("Albany-Rensselaer, NY Amtrak station");
     expect(url.searchParams.get("destination")).toBe("43.6089,-72.9781");
   });
+
+  it("asks for the airport, not an Amtrak station, for Cape Air", () => {
+    const url = new URL(drivingDirectionsUrl(jones, "LEB", true));
+    expect(url.searchParams.get("destination")).toBe("Lebanon Municipal Airport, West Lebanon, NH");
+  });
 });

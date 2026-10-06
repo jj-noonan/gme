@@ -149,6 +149,18 @@ describe("computeLeaveBy", () => {
     }
   });
 
+  it("southbound flights: the airport's 30-minute buffer instead of the station's 15", () => {
+    const flight = row({
+      direction: "S",
+      stationCode: "LEB",
+      scheduledDeparture: "07:22",
+      mode: "flight",
+    });
+    const result = computeLeaveBy(flight, estimatedDoorLegs(60), 0);
+    expect(result.leadMinutes).toBe(90);
+    expect(result.minutes).toBe(5 * 60 + 52);
+  });
+
   it("gives a later leave time for a nearer station on the same train", () => {
     const nearby = computeLeaveBy(
       row({ direction: "S", stationCode: "RUD", scheduledDeparture: "11:06" }),

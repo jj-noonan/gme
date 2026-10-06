@@ -100,7 +100,7 @@ export function TodayBoard({
           <TrainRow
             key={`${row.trainNumber}-${row.stationCode}-${i}`}
             row={row}
-            status={statusFor(statuses, row.trainNumber)}
+            status={row.mode === "flight" ? undefined : statusFor(statuses, row.trainNumber)}
             highlighted={isRecommended}
             band={bands[i]}
             live
