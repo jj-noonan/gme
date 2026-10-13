@@ -2,7 +2,7 @@ import type { ScheduleRow, TrainStatus } from "@gme/shared";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
-import { comparedToUsual, TripDetail } from "./TripDetail.js";
+import { comparedToUsual, dayOffsets, TripDetail } from "./TripDetail.js";
 
 const EMPIRE: ScheduleRow = {
   trainNumber: 284,
@@ -137,6 +137,31 @@ describe("TripDetail", () => {
     expect(screen.queryByText(/Starts|From /)).toBeNull();
   });
 
+  it("marks each stop with its place: Vermont, the stations, New York", () => {
+    const { container } = renderDetail();
+    const markers = Array.from(container.querySelectorAll(".detail-stop__marker svg path"));
+    expect(markers.length).toBeGreaterThan(0);
+    expect(container.querySelectorAll(".detail-stop__marker")).toHaveLength(4);
+  });
+
+  it("draws a divider where the trip crosses midnight", () => {
+    // Empire 245: leave 10:25p, train 11:25p, into Albany 1:56a.
+    const late = { ...EMPIRE, direction: "N" as const, scheduledDeparture: "23:25", scheduledArrival: "01:56" };
+    const { container } = renderDetail({ row: late, nowMinutes: undefined });
+    const items = Array.from(container.querySelectorAll(".detail-timeline > li")).map((li) => li.className);
+    const divider = items.indexOf("detail-day");
+    expect(container.querySelector(".detail-day")?.textContent).toBe("Next day");
+    // Between the train and the stop it gets into.
+    expect(items[divider - 1]).toBe("detail-segment");
+    expect(items[divider + 1]).toBe("detail-stop");
+    expect(container.querySelectorAll(".detail-day")).toHaveLength(1);
+  });
+
+  it("no divider for a trip within one day", () => {
+    const { container } = renderDetail();
+    expect(container.querySelector(".detail-day")).toBeNull();
+  });
+
   it("closes on Back and on Escape", () => {
     const onClose = vi.fn();
     renderDetail({ onClose });
@@ -152,5 +177,13 @@ describe("comparedToUsual", () => {
     expect(comparedToUsual(102, 100)).toEqual({ text: "about usual", tone: "usual" });
     expect(comparedToUsual(92, 100)).toEqual({ text: "8 min faster than usual", tone: "faster" });
     expect(comparedToUsual(108, 100)).toEqual({ text: "8 min slower than usual", tone: "slower" });
+  });
+});
+
+describe("dayOffsets", () => {
+  it("counts a day each time the clock goes backwards", () => {
+    expect(dayOffsets([600, 785, 935, 967])).toEqual([0, 0, 0, 0]);
+    expect(dayOffsets([1345, 1405, 116, 226])).toEqual([0, 0, 1, 1]);
+    expect(dayOffsets([1410, 30, 200, 260])).toEqual([0, 1, 1, 1]);
   });
 });

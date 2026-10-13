@@ -819,9 +819,9 @@ body {
   color: var(--header-ink);
 }
 
-/* The rail: one line down the left, a dot at each place you pass through. */
+/* The rail: one line down the left, a marker at each place you pass through. */
 .detail-timeline {
-  --rail-x: 0.45rem;
+  --rail-x: 0.85rem;
   list-style: none;
   margin: 1rem auto 0;
   padding: 0;
@@ -829,13 +829,15 @@ body {
 }
 
 .detail-stop,
-.detail-segment {
+.detail-segment,
+.detail-day {
   position: relative;
-  padding-left: 2rem;
+  padding-left: 2.5rem;
 }
 
 .detail-segment::before,
-.detail-stop::before {
+.detail-stop::before,
+.detail-day::before {
   content: "";
   position: absolute;
   left: var(--rail-x);
@@ -859,25 +861,58 @@ body {
 
 .detail-stop {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.75rem;
-  padding-block: 0.35rem;
+  min-height: 2.4rem;
+  padding-block: 0.3rem;
 }
 
-.detail-stop__dot {
+/* An icon in a ring, sitting on the rail. Start and end are the two places
+   (Vermont, New York), stations the station; the destination is filled. */
+.detail-stop__marker {
   position: absolute;
-  left: calc(var(--rail-x) - 0.4rem + 1px);
+  left: calc(var(--rail-x) + 1px);
   top: 50%;
-  width: 0.8rem;
-  height: 0.8rem;
-  margin-top: -0.4rem;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 50%;
   background: var(--board-bg);
   border: 2px solid var(--amber);
+  color: var(--amber);
 }
 
-.detail-stop--final .detail-stop__dot {
+.detail-stop--final .detail-stop__marker {
   background: var(--amber);
+  color: var(--board-bg);
+}
+
+/* Crossing midnight: a dotted rule across the timeline, dated in the middle. */
+.detail-day {
+  display: flex;
+  align-items: center;
+  padding-block: 0.5rem;
+  color: var(--header-ink);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.detail-day__label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1 1 auto;
+}
+
+.detail-day__label::before,
+.detail-day__label::after {
+  content: "";
+  flex: 1 1 auto;
+  border-top: 2px dotted var(--header-ink);
 }
 
 .detail-stop__time {
