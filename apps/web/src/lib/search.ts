@@ -1,5 +1,7 @@
 import {
   boardingStationCode,
+  tripTimeline,
+  type DoorLegs,
   changeStationCode,
   parseDayCode,
   STATIONS,
@@ -197,4 +199,10 @@ export function matchesSearch(terms: SearchTerm[], trip: SearchableTrip): boolea
   if (terms.length === 0) return true;
   const text = haystack(trip.row);
   return terms.every((term) => matchesTerm(term, trip, text));
+}
+
+/** A row as search sees it, with the same times the board shows. */
+export function searchableTrip(row: ScheduleRow, legs: DoorLegs, delayMinutes: number): SearchableTrip {
+  const trip = tripTimeline(row, legs, delayMinutes, -Infinity);
+  return { row, leaveDoor: trip.leaveDoor, arriveDoor: trip.arriveDoor };
 }

@@ -936,3 +936,59 @@ body {
   color: var(--ink);
   letter-spacing: 0.04em;
 }
+
+/* ---------- search ---------- */
+
+.search-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+  background: var(--tile-bg);
+  color: var(--header-ink);
+}
+
+.search-bar__label {
+  display: flex;
+}
+
+.search-bar__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.45rem 0.6rem;
+  background: var(--flap-face);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  /* 16px keeps iOS Safari from zooming the page on focus. */
+  font-size: 16px;
+}
+
+.search-bar__input::placeholder {
+  color: var(--header-ink);
+  opacity: 0.7;
+}
+
+/* The native clear button doesn't match the board; ours replaces it. */
+.search-bar__input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.search-bar__clear {
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  background: none;
+  border: 1px solid var(--rule);
+  color: var(--header-ink);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.search-bar__clear:hover,
+.search-bar__clear:focus-visible {
+  color: var(--amber);
+}

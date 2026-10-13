@@ -1,17 +1,20 @@
 import { nearerEnd } from "@gme/shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { InfoPanel } from "./components/InfoPanel.js";
 import { LinkOutConfirm } from "./components/LinkOutConfirm.js";
 import { LocationBar } from "./components/LocationBar.js";
+import { SearchBar } from "./components/SearchBar.js";
 import { TabBar, type TabId } from "./components/TabBar.js";
 import { TimetableBoard } from "./components/TimetableBoard.js";
 import { TodayBoard } from "./components/TodayBoard.js";
 import { usePlace } from "./hooks/usePlace.js";
 import { useSchedule } from "./hooks/useSchedule.js";
+import { useSearchQuery } from "./hooks/useSearchQuery.js";
 import { useTrainStatuses } from "./hooks/useTrainStatuses.js";
 import { useTripRoute } from "./hooks/useTripRoute.js";
 import { useUserLocation } from "./hooks/useUserLocation.js";
 import { placeLabel } from "./lib/places.js";
+import { parseQuery } from "./lib/search.js";
 
 export function App() {
   const { rows, error: scheduleError } = useSchedule();
@@ -26,6 +29,8 @@ export function App() {
   const [showInfo, setShowInfo] = useState(false);
   const closeInfo = useCallback(() => setShowInfo(false), []);
   const trip = useTripRoute();
+  const [query, setQuery] = useSearchQuery();
+  const searchTerms = useMemo(() => parseQuery(query), [query]);
   const placeLabels = { vt: placeLabel("vt", vt.setting), nyc: placeLabel("nyc", nyc.setting) };
 
   // A trip link opens on the board it came from.
@@ -70,6 +75,8 @@ export function App() {
           ?
         </button>
       </header>
+      {/* Move freely: the search box is self-contained. */}
+      <SearchBar query={query} onChange={setQuery} />
       <main className="board-main">
         {scheduleError && <p className="board-error">Couldn't load the schedule: {scheduleError}</p>}
         {!rows && !scheduleError && <p className="board-empty">Loading schedule…</p>}
@@ -82,6 +89,8 @@ export function App() {
             nycLocation={nycLocation}
             placeLabels={placeLabels}
             openTrip={boardTrip}
+            query={query}
+            searchTerms={searchTerms}
             onOpenTrip={trip.open}
             onCloseTrip={trip.close}
           />
@@ -95,6 +104,8 @@ export function App() {
             nycLocation={nycLocation}
             placeLabels={placeLabels}
             openTrip={boardTrip}
+            query={query}
+            searchTerms={searchTerms}
             onOpenTrip={trip.open}
             onCloseTrip={trip.close}
           />
@@ -107,6 +118,8 @@ export function App() {
             nycLocation={nycLocation}
             placeLabels={placeLabels}
             openTrip={boardTrip}
+            query={query}
+            searchTerms={searchTerms}
             onOpenTrip={trip.open}
             onCloseTrip={trip.close}
           />
@@ -119,6 +132,8 @@ export function App() {
             nycLocation={nycLocation}
             placeLabels={placeLabels}
             openTrip={boardTrip}
+            query={query}
+            searchTerms={searchTerms}
             onOpenTrip={trip.open}
             onCloseTrip={trip.close}
           />

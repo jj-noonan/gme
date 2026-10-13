@@ -11,7 +11,8 @@ import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { formatTripHash, isTripRow, type TripRoute } from "../lib/tripRoute.js";
-import { hasDeparted } from "../lib/trainStatus.js";
+import { matchesSearch, searchableTrip, type SearchTerm } from "../lib/search.js";
+import { hasDeparted, liveDelayMinutes } from "../lib/trainStatus.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { GoogleCredit } from "./GoogleCredit.js";
 import { TrainRow } from "./TrainRow.js";
@@ -29,6 +30,8 @@ export function TodayBoard({
   nycLocation,
   placeLabels,
   openTrip,
+  query,
+  searchTerms,
   onOpenTrip,
   onCloseTrip,
 }: {
@@ -41,6 +44,9 @@ export function TodayBoard({
   placeLabels: { vt: string; nyc: string };
   /** The trip whose detail page is open, if it's on this board. */
   openTrip: TripRoute | null;
+  /** The search box's text, and what it parsed to; only matching trips show. */
+  query: string;
+  searchTerms: SearchTerm[];
   onOpenTrip: (route: TripRoute) => void;
   onCloseTrip: () => void;
 }) {
@@ -85,9 +91,11 @@ export function TodayBoard({
   // Keep each trip up until its train leaves the station, so one you're
   // already on your way to stays on the board (styled as underway once its
   // leave-by time passes). The Timetable tabs remain the full reference view.
-  const upcomingRows = todaysRows.filter(
-    (r) =>
-      !hasDeparted(r, r.mode === "flight" ? undefined : statusFor(statuses, r.trainNumber), nowMinutes),
+  const rowStatus = (r: ScheduleRow) =>
+    r.mode === "flight" ? undefined : statusFor(statuses, r.trainNumber);
+  const upcomingRows = todaysRows.filter((r) => !hasDeparted(r, rowStatus(r), nowMinutes));
+  const shownRows = upcomingRows.filter((r) =>
+    matchesSearch(searchTerms, searchableTrip(r, doorLegs(r), liveDelayMinutes(r, rowStatus(r)))),
   );
 
   // Found among all of today's rows, so a shared link still opens after the
@@ -96,7 +104,7 @@ export function TodayBoard({
   const detail = detailRow && (
     <TripDetail
       row={detailRow}
-      status={detailRow.mode === "flight" ? undefined : statusFor(statuses, detailRow.trainNumber)}
+      status={rowStatus(detailRow)}
       doorLegs={doorLegs(detailRow)}
       vtLocation={vtLocation}
       nycLocation={nycLocation}
@@ -120,12 +128,21 @@ export function TodayBoard({
     );
   }
 
-  const bands = computeRowBands(upcomingRows);
+  if (shownRows.length === 0) {
+    return (
+      <>
+        <p className="board-empty">No trips match “{query.trim()}”.</p>
+        {detail}
+      </>
+    );
+  }
+
+  const bands = computeRowBands(shownRows);
 
   return (
     <div className="board-list">
       <BoardHeader />
-      {upcomingRows.map((row, i) => {
+      {shownRows.map((row, i) => {
         const isRecommended =
           direction === "N"
             ? recommended === row.trainNumber
@@ -138,7 +155,7 @@ export function TodayBoard({
           <TrainRow
             key={`${row.trainNumber}-${row.stationCode}-${i}`}
             row={row}
-            status={row.mode === "flight" ? undefined : statusFor(statuses, row.trainNumber)}
+            status={rowStatus(row)}
             highlighted={isRecommended}
             band={bands[i]}
             live
@@ -149,7 +166,7 @@ export function TodayBoard({
           />
         );
       })}
-      <GoogleCredit show={upcomingRows.some((r) => doorLegs(r).nycLines !== null)} />
+      <GoogleCredit show={shownRows.some((r) => doorLegs(r).nycLines !== null)} />
       {detail}
     </div>
   );
