@@ -1,10 +1,7 @@
 import {
-  arrivalLegMinutes,
   boardingStationCode,
   changeStationCode,
-  computeLeaveBy,
-  minutesBetweenClockTimes,
-  parseHHMM,
+  tripTimeline,
   type Coordinate,
   type ScheduleRow,
   type TrainStatus,
@@ -22,12 +19,6 @@ import { TransitLink } from "./TransitLink.js";
 const AMTRAK_BOOKING_URL = "https://www.amtrak.com/home.html";
 // Cape Air sells the Penn Station shuttle and flight together as ZYP ↔ LEB.
 const CAPE_AIR_BOOKING_URL = "https://www.capeair.com/";
-
-const MINUTES_PER_DAY = 24 * 60;
-
-function wrapMinutes(minutes: number): number {
-  return ((Math.round(minutes) % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
-}
 
 export function TrainRow({
   row,
@@ -57,16 +48,7 @@ export function TrainRow({
   nowMinutes?: number;
 }) {
   const statusText = describeStatus(row, status);
-  const leaveBy = computeLeaveBy(row, doorLegs, nowMinutes ?? -Infinity);
-  const trainMinutes = minutesBetweenClockTimes(row.scheduledDeparture, row.scheduledArrival);
-  const lastLeg = arrivalLegMinutes(row, doorLegs);
-
-  // The door arrival tracks the live delay; the leave-by time and the train's
-  // own times stay on the schedule (the status carries the live estimate), so
-  // a late train grows the total rather than moving your alarm.
-  const delay = liveDelayMinutes(row, status);
-  const doorArrival = wrapMinutes(parseHHMM(row.scheduledArrival) + delay + lastLeg);
-  const totalMinutes = leaveBy.leadMinutes + delay + trainMinutes + lastLeg;
+  const trip = tripTimeline(row, doorLegs, liveDelayMinutes(row, status), nowMinutes ?? -Infinity);
 
   // The NYC leg is where you start northbound and where you finish southbound;
   // the VT drive is the other end.
@@ -92,7 +74,7 @@ export function TrainRow({
     highlighted && "trip--recommended",
     band && "trip--band",
     // Past its leave-by time but the train hasn't left: you're on your way (or late).
-    leaveBy.missed && "trip--underway",
+    trip.underway && "trip--underway",
   ]
     .filter(Boolean)
     .join(" ");
@@ -100,11 +82,12 @@ export function TrainRow({
   return (
     <article className={classes}>
       <div className="trip__legs">
-        {/* Leave the door, and how long it takes to get to the train. */}
+        {/* Leave the door, and how long it takes to get to the train. The
+            station buffer is the unexplained gap; the detail page spells it out. */}
         <div className="trip__leg">
-          <FlapText text={formatClockFromMinutes(leaveBy.minutes)} />
+          <FlapText text={formatClockFromMinutes(trip.leaveDoor)} />
           <div className="trip__sub">
-            {northbound ? nycLeg(leaveBy.leadMinutes) : vtLeg(leaveBy.leadMinutes)}
+            {northbound ? nycLeg(trip.firstLegMinutes) : vtLeg(trip.firstLegMinutes)}
           </div>
         </div>
 
@@ -115,15 +98,17 @@ export function TrainRow({
             <Icon name={flight ? "plane" : "arrow-right"} size={20} />
             <FlapText text={routeCode(changeStationCode(row))} />
           </div>
-          <div className="trip__sub">{northbound ? vtLeg(lastLeg) : nycLeg(lastLeg)}</div>
+          <div className="trip__sub">
+            {northbound ? vtLeg(trip.lastLegMinutes) : nycLeg(trip.lastLegMinutes)}
+          </div>
         </div>
 
         {/* Through the far door, and what the whole trip cost. */}
         <div className="trip__leg">
-          <FlapText text={formatClockFromMinutes(doorArrival)} />
+          <FlapText text={formatClockFromMinutes(trip.arriveDoor)} />
           <div className="trip__sub">
             <Icon name="leave-by" size={16} />
-            {formatDuration(totalMinutes)}
+            {formatDuration(trip.totalMinutes)}
           </div>
         </div>
       </div>

@@ -36,6 +36,10 @@ describe("TrainRow", () => {
     expect(text(legs[1])).toContain("NYP");
     // 16:27 + 32 min subway.
     expect(text(legs[2])).toContain("4:59P");
+    // The time under leave-by is the drive alone; the 20-minute buffer isn't in it.
+    expect(text(legs[0])).toContain("18M");
+    // Door to door still counts the buffer: 18 + 20 + 5h21 train + 32.
+    expect(text(legs[2])).toContain("6H 31M");
   });
 
   it("marks a trip underway once its leave-by time has passed", () => {
