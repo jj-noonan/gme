@@ -59,18 +59,18 @@ describe("nycTransitLeg", () => {
     );
   });
 
-  it("southbound: leave Penn Station when the train gets in", () => {
+  it("southbound: leave Penn Station the transfer buffer after the train gets in", () => {
     const south = row({ direction: "S", scheduledDeparture: "11:06", scheduledArrival: "16:27" });
     expect(nycTransitLeg(south, BISHOP_LOUGHLIN, day)).toEqual({
       place: BISHOP_LOUGHLIN,
       toNyp: false,
-      at: "2026-10-05T16:27",
+      at: "2026-10-05T16:37",
     });
   });
 
   it("southbound: rolls to the next day for trains that arrive after midnight", () => {
     const late = row({ direction: "S", scheduledDeparture: "20:00", scheduledArrival: "00:40" });
-    expect(nycTransitLeg(late, BISHOP_LOUGHLIN, day).at).toBe("2026-10-06T00:40");
+    expect(nycTransitLeg(late, BISHOP_LOUGHLIN, day).at).toBe("2026-10-06T00:50");
   });
 
   it("gives every stop of the same train the same leg", () => {

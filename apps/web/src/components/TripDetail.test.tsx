@@ -78,15 +78,17 @@ describe("TripDetail", () => {
       "10:56A Jones Donuts",
       "1:05P Albany-Rensselaer, NY (ALB)",
       "3:35P New York Penn (NYP)",
-      "4:07P Bishop Loughlin HS",
+      "4:17P Bishop Loughlin HS",
     ]);
-    expect(screen.getByText("Door to door 5H 11M")).toBeTruthy();
+    expect(screen.getByText("Door to door 5H 21M")).toBeTruthy();
   });
 
-  it("spells out the buffer the board leaves unexplained", () => {
+  it("spells out the buffers the board leaves unexplained", () => {
     renderDetail();
     expect(screen.getByText("20 min buffer")).toBeTruthy();
     expect(screen.getByText("parking and getting to the platform")).toBeTruthy();
+    expect(screen.getByText("10 min buffer")).toBeTruthy();
+    expect(screen.getByText("off the train and to the subway")).toBeTruthy();
   });
 
   it("compares the drive to usual", () => {
@@ -121,7 +123,9 @@ describe("TripDetail", () => {
     });
     expect(stops(container)[0]).toBe("7:33A Bishop Loughlin HS");
     expect(stops(container)[1]).toBe("8:15A New York Penn (NYP)");
-    expect(screen.getByText("10 min buffer")).toBeTruthy();
+    // Penn Station's buffer going in, and the transfer to the car getting out.
+    expect(screen.getAllByText("10 min buffer")).toHaveLength(2);
+    expect(screen.getByText("off the train and to the car")).toBeTruthy();
   });
 
   it("closes on Back and on Escape", () => {

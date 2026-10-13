@@ -1,4 +1,4 @@
-import { NYC_STATION_BUFFER_MINUTES, vtBufferMinutes } from "./geo.js";
+import { NYC_STATION_BUFFER_MINUTES, TRANSFER_BUFFER_MINUTES, vtBufferMinutes } from "./geo.js";
 import { arrivalLegMinutes, computeLeaveBy, type DoorLegs } from "./leaveBy.js";
 import { minutesBetweenClockTimes, parseHHMM } from "./recommend.js";
 import type { ScheduleRow } from "./types.js";
@@ -32,11 +32,15 @@ export interface TripTimeline {
   trainArrives: number;
   /** Time on the train, including any live delay. */
   trainMinutes: number;
+  /** Slack at the change station before the last leg. */
+  transferMinutes: number;
+  /** When the last leg starts. */
+  leaveStation: number;
   /** The last leg — from the train to the far door. */
   lastLegMinutes: number;
   /** Through the far door. */
   arriveDoor: number;
-  /** Door to door, buffer included. */
+  /** Door to door, both buffers included. */
   totalMinutes: number;
   /** The leave-by time has passed: you're on your way, or too late. */
   underway: boolean;
@@ -64,9 +68,11 @@ export function tripTimeline(
     trainDeparts: departs,
     trainArrives: wrap(departs + trainMinutes),
     trainMinutes,
+    transferMinutes: TRANSFER_BUFFER_MINUTES,
+    leaveStation: wrap(departs + trainMinutes + TRANSFER_BUFFER_MINUTES),
     lastLegMinutes,
-    arriveDoor: wrap(departs + trainMinutes + lastLegMinutes),
-    totalMinutes: leaveBy.leadMinutes + trainMinutes + lastLegMinutes,
+    arriveDoor: wrap(departs + trainMinutes + TRANSFER_BUFFER_MINUTES + lastLegMinutes),
+    totalMinutes: leaveBy.leadMinutes + trainMinutes + TRANSFER_BUFFER_MINUTES + lastLegMinutes,
     underway: leaveBy.missed,
   };
 }

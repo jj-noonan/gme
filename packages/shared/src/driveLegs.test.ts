@@ -61,18 +61,18 @@ describe("slotDepartAt", () => {
 describe("vtDriveLeg", () => {
   const day = new Date(2026, 9, 5, 12, 0);
 
-  it("northbound: station → vt-location, at the scheduled arrival", () => {
+  it("northbound: station → vt-location, the transfer buffer after the scheduled arrival", () => {
     expect(vtDriveLeg(row(), JONES, day)).toEqual({
       stationCode: "RUD",
       place: JONES,
       toStation: false,
-      departAt: "2026-10-05T20:40",
+      departAt: "2026-10-05T20:50",
     });
   });
 
   it("northbound: rolls to the next day for trains that arrive after midnight", () => {
     const late = row({ stationCode: "ALB", scheduledDeparture: "22:50", scheduledArrival: "01:56" });
-    expect(vtDriveLeg(late, JONES, day).departAt).toBe("2026-10-06T01:56");
+    expect(vtDriveLeg(late, JONES, day).departAt).toBe("2026-10-06T02:06");
   });
 
   it("southbound: vt-location → station, leaving drive + buffer before departure", () => {

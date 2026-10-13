@@ -39,6 +39,11 @@ export function comparedToUsual(minutes: number, typical: number | null): string
   return `${Math.abs(diff)} min ${diff > 0 ? "slower" : "faster"} than usual`;
 }
 
+function transferReason(row: ScheduleRow): string {
+  const off = row.mode === "flight" ? (row.direction === "N" ? "the plane" : "the shuttle") : "the train";
+  return `off ${off} and to the ${row.direction === "N" ? "car" : "subway"}`;
+}
+
 function bufferReason(row: ScheduleRow): string {
   if (row.mode === "flight") return "check-in";
   return row.direction === "N" ? "getting to the platform" : "parking and getting to the platform";
@@ -215,6 +220,14 @@ export function TripDetail({
     />
   );
 
+  const transfer = (
+    <Segment
+      dashed
+      title={`${trip.transferMinutes} min buffer`}
+      lines={[transferReason(row)]}
+    />
+  );
+
   const [startLabel, endLabel] = northbound ? [nycLabel, vtLabel] : [vtLabel, nycLabel];
 
   return (
@@ -236,6 +249,7 @@ export function TripDetail({
         <Stop time={trip.trainDeparts} place={stationLabel(row, boardingStationCode(row))} />
         {train}
         <Stop time={trip.trainArrives} place={stationLabel(row, changeStationCode(row))} />
+        {transfer}
         {northbound ? drive(trip.lastLegMinutes, false) : subway(trip.lastLegMinutes, false)}
         <Stop time={trip.arriveDoor} place={endLabel} final />
       </ol>

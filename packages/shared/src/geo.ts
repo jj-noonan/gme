@@ -36,6 +36,12 @@ export function vtBufferMinutes(row: Pick<ScheduleRow, "mode">): number {
 }
 
 /**
+ * Slack at the change station, between the train getting in and starting the
+ * last leg: off the train, out of the station, to the car or the subway.
+ */
+export const TRANSFER_BUFFER_MINUTES = 10;
+
+/**
  * Slack on top of the NYC subway estimate. Smaller than the drive-side buffer
  * because Penn Station is walk-in — you're not parking a car.
  */

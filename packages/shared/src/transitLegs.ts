@@ -1,4 +1,4 @@
-import { NYC_STATION_BUFFER_MINUTES, type Coordinate } from "./geo.js";
+import { NYC_STATION_BUFFER_MINUTES, TRANSFER_BUFFER_MINUTES, type Coordinate } from "./geo.js";
 import { parseHHMM } from "./recommend.js";
 import type { ScheduleRow } from "./types.js";
 import { formatPlace, isValidLocalTime, localTimeOn, parsePlace } from "./wire.js";
@@ -67,8 +67,8 @@ export function parseTransitLeg(text: string): TransitLeg | null {
  *
  * - Northbound: nyc-location → NYP, arriving the station buffer before the
  *   train leaves.
- * - Southbound: NYP → nyc-location, leaving when the train gets in (the next
- *   day for trains arriving after midnight). Scheduled, not delay-adjusted,
+ * - Southbound: NYP → nyc-location, leaving the transfer buffer after the
+ *   train gets in (the next day for trains arriving after midnight). Scheduled, not delay-adjusted,
  *   for the same reason as the drives: it'd re-key the lookup every minute.
  */
 export function nycTransitLeg(row: ScheduleRow, nycLocation: Coordinate, day: Date): TransitLeg {
@@ -87,6 +87,6 @@ export function nycTransitLeg(row: ScheduleRow, nycLocation: Coordinate, day: Da
   return {
     place: nycLocation,
     toNyp: false,
-    at: localTimeOn(day, arrival + (overnight ? MINUTES_PER_DAY : 0)),
+    at: localTimeOn(day, arrival + TRANSFER_BUFFER_MINUTES + (overnight ? MINUTES_PER_DAY : 0)),
   };
 }

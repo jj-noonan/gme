@@ -4,7 +4,6 @@ import {
   boardingStationCode,
   changeStationCode,
   computeLeaveBy,
-  doorArrivalMinutes,
   estimatedDoorLegs,
   leadMinutes,
   leaveByMinutes,
@@ -32,7 +31,7 @@ function legs(vtDriveMinutes: number, nycTransitMinutes: number) {
   return { vtDriveMinutes, nycTransitMinutes };
 }
 
-describe("arrivalLegMinutes / doorArrivalMinutes", () => {
+describe("arrivalLegMinutes", () => {
   it("northbound: the drive from the arrival station to the vt-location, in whole minutes", () => {
     expect(arrivalLegMinutes(row({ direction: "N", stationCode: "ALB" }), legs(112.6, 41))).toBe(113);
   });
@@ -46,16 +45,6 @@ describe("arrivalLegMinutes / doorArrivalMinutes", () => {
     expect(arrivalLegMinutes(row({ direction: "S" }), estimatedDoorLegs(113))).toBe(50);
   });
 
-  it("adds the last leg onto the train's arrival time", () => {
-    const r = row({ direction: "S", scheduledArrival: "16:27" });
-    expect(doorArrivalMinutes(r, 50)).toBe(17 * 60 + 17);
-  });
-
-  it("wraps past midnight", () => {
-    // Empire 245 reaches ALB at 01:56; a 2h drive lands at 03:56.
-    expect(doorArrivalMinutes(row({ scheduledArrival: "23:30" }), 60)).toBe(30);
-  });
-
   it("always yields whole minutes", () => {
     for (const station of STATIONS) {
       const r = row({ direction: "N", stationCode: station.code });
@@ -64,7 +53,6 @@ describe("arrivalLegMinutes / doorArrivalMinutes", () => {
         estimatedDoorLegs(straightLineDriveMinutes(DEFAULT_VT_LOCATION, station.code)),
       );
       expect(Number.isInteger(leg)).toBe(true);
-      expect(Number.isInteger(doorArrivalMinutes(r, leg))).toBe(true);
     }
   });
 });

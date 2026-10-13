@@ -1,4 +1,4 @@
-import { vtBufferMinutes, type Coordinate } from "./geo.js";
+import { TRANSFER_BUFFER_MINUTES, vtBufferMinutes, type Coordinate } from "./geo.js";
 import { straightLineDriveMinutes } from "./leaveBy.js";
 import { parseHHMM } from "./recommend.js";
 import { STATIONS } from "./stations.js";
@@ -72,8 +72,8 @@ export function slotDepartAt(departAt: string): string {
  * The VT-side drive for a row whose train runs on `day` (read off the local
  * clock, assumed Eastern like the rest of the app):
  *
- * - Northbound: station → vt-location, starting at the scheduled arrival
- *   (the next day for trains arriving after midnight). Scheduled, not
+ * - Northbound: station → vt-location, starting the transfer buffer after
+ *   the scheduled arrival (the next day for trains arriving after midnight). Scheduled, not
  *   delay-adjusted: a late train rarely changes the traffic picture, and
  *   tracking delay would re-key the lookup every minute.
  * - Southbound: vt-location → station, starting when you'd leave. That
@@ -90,7 +90,7 @@ export function vtDriveLeg(row: ScheduleRow, vtLocation: Coordinate, day: Date):
       stationCode: row.stationCode,
       place: vtLocation,
       toStation: false,
-      departAt: localTimeOn(day, arrival + (overnight ? MINUTES_PER_DAY : 0)),
+      departAt: localTimeOn(day, arrival + TRANSFER_BUFFER_MINUTES + (overnight ? MINUTES_PER_DAY : 0)),
     };
   }
 

@@ -113,15 +113,8 @@ export function computeLeaveBy(row: ScheduleRow, legs: DoorLegs, nowMinutes: num
 /**
  * The last leg: from where the train drops you to the far-end door — the
  * drive to the vt-location northbound, transit to the nyc-location
- * southbound. No buffer: buffers exist so you catch a train, not so you get
- * off one.
+ * southbound. Just the leg itself; the transfer buffer before it is separate.
  */
 export function arrivalLegMinutes(row: ScheduleRow, legs: DoorLegs): number {
   return Math.round(row.direction === "N" ? legs.vtDriveMinutes : legs.nycTransitMinutes);
-}
-
-/** Clock time you actually get to the door, as minutes since midnight. */
-export function doorArrivalMinutes(row: ScheduleRow, legMinutes: number): number {
-  const raw = Math.round(parseHHMM(row.scheduledArrival) + legMinutes);
-  return ((raw % MINUTES_PER_DAY) + MINUTES_PER_DAY) % MINUTES_PER_DAY;
 }

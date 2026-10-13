@@ -3,6 +3,7 @@ import {
   ASSUMED_NYC_TRANSIT_MINUTES,
   DEFAULT_AVG_DRIVE_MPH,
   NYC_STATION_BUFFER_MINUTES,
+  TRANSFER_BUFFER_MINUTES,
   TRIP_BUFFER_MINUTES,
   VT_RANGE_MILES,
 } from "@gme/shared";
@@ -70,8 +71,9 @@ export function InfoPanel({ onClose }: { onClose: () => void }) {
 
         <h3>Arrive</h3>
         <p>
-          When the train gets in (plus any live delay), plus the last leg. The time under it is
-          the whole trip, door to door.
+          When the train gets in (plus any live delay), plus {TRANSFER_BUFFER_MINUTES} min to get
+          off and to the car or subway, plus the last leg. The time under it is the whole trip,
+          door to door.
         </p>
 
         <h3>Live status</h3>

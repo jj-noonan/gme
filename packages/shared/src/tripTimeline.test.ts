@@ -24,7 +24,7 @@ const legs = (vtDriveMinutes: number, nycTransitMinutes: number) => ({
 });
 
 describe("tripTimeline", () => {
-  it("southbound: drive, station buffer, train, subway", () => {
+  it("southbound: drive, station buffer, train, transfer buffer, subway", () => {
     const t = tripTimeline(row(), legs(109, 32), 0, at(9, 0));
     expect(t).toEqual({
       leaveDoor: at(10, 56),
@@ -34,9 +34,11 @@ describe("tripTimeline", () => {
       trainDeparts: at(13, 5),
       trainArrives: at(15, 35),
       trainMinutes: 150,
+      transferMinutes: 10,
+      leaveStation: at(15, 45),
       lastLegMinutes: 32,
-      arriveDoor: at(16, 7),
-      totalMinutes: 109 + 20 + 150 + 32,
+      arriveDoor: at(16, 17),
+      totalMinutes: 109 + 20 + 150 + 10 + 32,
       underway: false,
     });
   });
@@ -52,7 +54,7 @@ describe("tripTimeline", () => {
     expect(t.bufferMinutes).toBe(10);
     expect(t.leaveDoor).toBe(at(7, 23));
     expect(t.lastLegMinutes).toBe(109);
-    expect(t.arriveDoor).toBe(at(12, 34));
+    expect(t.arriveDoor).toBe(at(12, 44));
   });
 
   it("flights use the airport's buffer", () => {
