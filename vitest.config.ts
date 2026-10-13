@@ -1,7 +1,6 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  esbuild: { jsx: "automatic" },
   test: {
     include: [
       "packages/**/*.test.ts",
@@ -9,7 +8,7 @@ export default defineConfig({
       "apps/web/**/*.test.tsx",
       "scripts/**/*.test.ts",
     ],
-    // Component tests render into a DOM; everything else stays on plain Node.
-    environmentMatchGlobs: [["apps/web/**/*.test.tsx", "jsdom"]],
+    // Component tests (*.test.tsx) opt into a DOM with a
+    // `// @vitest-environment jsdom` comment; everything else runs on Node.
   },
 });
