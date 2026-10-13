@@ -161,6 +161,10 @@ body {
 /* ---------- trip tile ---------- */
 
 .trip {
+  /* The whole tile links to the trip's detail page. */
+  display: block;
+  color: inherit;
+  text-decoration: none;
   background: var(--tile-bg);
   border-left: 4px solid transparent;
   padding: 0.6rem 0.75rem;
@@ -172,6 +176,16 @@ body {
 
 .trip--band {
   background: var(--tile-bg-band);
+}
+
+.trip:hover,
+.trip:focus-visible {
+  background: var(--tile-bg-active);
+  outline: none;
+}
+
+.trip:focus-visible {
+  border-left-color: var(--ink);
 }
 
 .trip--recommended {
@@ -245,15 +259,6 @@ body {
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
-  color: inherit;
-  text-decoration: none;
-}
-
-/* The name links to Amtrak's booking page; flap tiles can't underline, so
-   hover brightens them like the other links out. */
-.trip__train:hover .flap-tile__face,
-.trip__train:focus-visible .flap-tile__face {
-  color: var(--amber);
 }
 
 .trip__status {
@@ -578,22 +583,6 @@ body {
    brightens it and underlines the duration; a ring would be clipped by
    .trip__sub's overflow. The badges, being inline-flex, don't pick up the
    underline. */
-.leg-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  min-width: 0;
-  color: inherit;
-  text-decoration: none;
-}
-
-.leg-link:hover,
-.leg-link:focus-visible {
-  color: var(--amber);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 .transit-badges {
   display: inline-flex;
   align-items: center;
@@ -650,9 +639,6 @@ body {
   font-size: 10px;
   line-height: 1;
 }
-
-/* Bullets keep their colors on hover; the leg link (.leg-link) shows it's
-   hovered by brightening and underlining its duration instead. */
 
 /* ---------- confirm before leaving the board ---------- */
 

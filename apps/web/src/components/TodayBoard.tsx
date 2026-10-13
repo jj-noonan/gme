@@ -10,7 +10,7 @@ import {
 import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
-import { isTripRow, type TripRoute } from "../lib/tripRoute.js";
+import { formatTripHash, isTripRow, type TripRoute } from "../lib/tripRoute.js";
 import { hasDeparted } from "../lib/trainStatus.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { GoogleCredit } from "./GoogleCredit.js";
@@ -29,6 +29,7 @@ export function TodayBoard({
   nycLocation,
   placeLabels,
   openTrip,
+  onOpenTrip,
   onCloseTrip,
 }: {
   rows: ScheduleRow[];
@@ -40,8 +41,14 @@ export function TodayBoard({
   placeLabels: { vt: string; nyc: string };
   /** The trip whose detail page is open, if it's on this board. */
   openTrip: TripRoute | null;
+  onOpenTrip: (route: TripRoute) => void;
   onCloseTrip: () => void;
 }) {
+  const routeFor = (row: ScheduleRow): TripRoute => ({
+    tab: `${direction}_TODAY`,
+    trainNumber: row.trainNumber,
+    stationCode: row.stationCode,
+  });
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
@@ -136,9 +143,9 @@ export function TodayBoard({
             band={bands[i]}
             live
             doorLegs={doorLegs(row)}
-            vtLocation={vtLocation}
-            nycLocation={nycLocation}
             nowMinutes={nowMinutes}
+            href={formatTripHash(routeFor(row))}
+            onOpen={() => onOpenTrip(routeFor(row))}
           />
         );
       })}

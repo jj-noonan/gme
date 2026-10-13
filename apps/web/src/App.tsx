@@ -82,6 +82,7 @@ export function App() {
             nycLocation={nycLocation}
             placeLabels={placeLabels}
             openTrip={boardTrip}
+            onOpenTrip={trip.open}
             onCloseTrip={trip.close}
           />
         )}
@@ -94,6 +95,7 @@ export function App() {
             nycLocation={nycLocation}
             placeLabels={placeLabels}
             openTrip={boardTrip}
+            onOpenTrip={trip.open}
             onCloseTrip={trip.close}
           />
         )}
@@ -105,6 +107,7 @@ export function App() {
             nycLocation={nycLocation}
             placeLabels={placeLabels}
             openTrip={boardTrip}
+            onOpenTrip={trip.open}
             onCloseTrip={trip.close}
           />
         )}
@@ -116,6 +119,7 @@ export function App() {
             nycLocation={nycLocation}
             placeLabels={placeLabels}
             openTrip={boardTrip}
+            onOpenTrip={trip.open}
             onCloseTrip={trip.close}
           />
         )}

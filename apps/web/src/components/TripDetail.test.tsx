@@ -64,7 +64,7 @@ function renderDetail(props: Partial<Parameters<typeof TripDetail>[0]> = {}) {
 
 // Each place on the rail, top to bottom, as "time place".
 function stops(container: HTMLElement): string[] {
-  return [...container.querySelectorAll(".detail-stop")].map((el) =>
+  return Array.from(container.querySelectorAll(".detail-stop")).map((el) =>
     [el.querySelector(".detail-stop__time")?.textContent, el.querySelector(".detail-stop__place")?.textContent].join(" "),
   );
 }

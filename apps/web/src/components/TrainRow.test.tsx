@@ -1,6 +1,6 @@
 import type { ScheduleRow } from "@gme/shared";
-import { cleanup, render } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
 import { TrainRow } from "./TrainRow.js";
 
@@ -20,7 +20,6 @@ const LEGS: RowDoorLegs = {
   nycTransitMinutes: 32,
   nycLines: ["A", "C"],
 };
-const PLACE = { lat: 43.6, lon: -72.97 };
 
 // Split-flap text renders one tile per character; read it back as a string.
 function text(el: Element): string {
@@ -32,7 +31,7 @@ afterEach(cleanup);
 describe("TrainRow", () => {
   it("shows leave-by, the route, and the door arrival", () => {
     const { container } = render(
-      <TrainRow row={ETHAN_ALLEN} doorLegs={LEGS} vtLocation={PLACE} nycLocation={PLACE} />,
+      <TrainRow row={ETHAN_ALLEN} doorLegs={LEGS} href="#/trip" onOpen={() => {}} />,
     );
     const legs = container.querySelectorAll(".trip__leg");
     // 11:06 − 18 min drive − 20 min buffer.
@@ -52,11 +51,23 @@ describe("TrainRow", () => {
       <TrainRow
         row={ETHAN_ALLEN}
         doorLegs={LEGS}
-        vtLocation={PLACE}
-        nycLocation={PLACE}
+        href="#/trip"
+        onOpen={() => {}}
         nowMinutes={10 * 60 + 30}
       />,
     );
     expect(container.querySelector(".trip")?.classList.contains("trip--underway")).toBe(true);
+  });
+
+  it("the whole row opens its detail page, and has no links of its own", () => {
+    const onOpen = vi.fn();
+    const { container } = render(
+      <TrainRow row={ETHAN_ALLEN} doorLegs={LEGS} href="#/trip/S_TODAY/290-RUD" onOpen={onOpen} />,
+    );
+    const links = container.querySelectorAll("a");
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute("href")).toBe("#/trip/S_TODAY/290-RUD");
+    fireEvent.click(container.querySelector(".trip__legs")!);
+    expect(onOpen).toHaveBeenCalledOnce();
   });
 });
