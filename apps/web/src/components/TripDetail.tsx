@@ -7,7 +7,7 @@ import {
   type ScheduleRow,
   type TrainStatus,
 } from "@gme/shared";
-import { useEffect, useRef, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useRef, type ReactNode } from "react";
 import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
 import { formatClockFromMinutes, formatDuration } from "../lib/format.js";
 import { drivingDirectionsUrl, transitDirectionsUrl } from "../lib/googleMaps.js";
@@ -22,6 +22,9 @@ import {
 import type { IconName } from "../lib/icons.js";
 import { Icon } from "./Icon.js";
 import { TransitBadges } from "./TransitBadges.js";
+
+// Leaflet only loads once a trip is opened, so the board stays light.
+const TripMap = lazy(() => import("./TripMap.js"));
 
 /** How far from typical a drive has to be before it's worth saying. */
 const USUAL_THRESHOLD_MINUTES = 3;
@@ -390,6 +393,10 @@ export function TripDetail({
       <p className="trip-detail__total">
         <Icon name="leave-by" size={16} /> Door to door {formatDuration(trip.totalMinutes)}
       </p>
+
+      <Suspense fallback={<div className="trip-map" />}>
+        <TripMap row={row} vtLocation={vtLocation} nycLocation={nycLocation} />
+      </Suspense>
     </div>
   );
 }

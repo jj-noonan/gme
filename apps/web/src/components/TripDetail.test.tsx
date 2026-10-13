@@ -4,6 +4,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
 import { comparedToUsual, dayOffsets, TripDetail } from "./TripDetail.js";
 
+// Leaflet needs real layout; the map's shape is tested on its own (tripMap.test.ts).
+vi.mock("./TripMap.js", () => ({ default: () => <div data-testid="trip-map" /> }));
+
 const EMPIRE: ScheduleRow = {
   trainNumber: 284,
   service: "EMPIRE",
@@ -160,6 +163,11 @@ describe("TripDetail", () => {
   it("no divider for a trip within one day", () => {
     const { container } = renderDetail();
     expect(container.querySelector(".detail-day")).toBeNull();
+  });
+
+  it("shows the map under the total", async () => {
+    renderDetail();
+    expect(await screen.findByTestId("trip-map")).toBeTruthy();
   });
 
   it("titles the trip with its door-to-door time", () => {

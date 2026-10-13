@@ -784,6 +784,8 @@ body {
 .trip-detail__header {
   position: sticky;
   top: 0;
+  /* Above the rail's markers (positioned) and the map's panes as they scroll under. */
+  z-index: 1000;
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -1144,4 +1146,31 @@ body {
 
 .traffic-dot--slower {
   background: var(--traffic-slower);
+}
+
+/* ---------- trip map ---------- */
+
+.trip-map {
+  height: 280px;
+  margin-top: 1rem;
+  border: 1px solid var(--rule);
+  background: var(--tile-bg);
+}
+
+/* OSM's light tiles, turned dark: inverted, hues put back, and dimmed. Only
+   the tiles — the trip's lines and markers keep their amber. */
+.trip-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) grayscale(0.6) brightness(0.7) contrast(1.1);
+}
+
+/* Leaflet's attribution, toned to the board. */
+.trip-map .leaflet-control-attribution {
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--header-ink);
+  font-family: "Oswald", sans-serif;
+  font-size: 0.65rem;
+}
+
+.trip-map .leaflet-control-attribution a {
+  color: var(--ink-dim);
 }
