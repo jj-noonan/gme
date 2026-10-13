@@ -39,19 +39,29 @@ export function comparedToUsual(minutes: number, typical: number | null): string
   return `${Math.abs(diff)} min ${diff > 0 ? "slower" : "faster"} than usual`;
 }
 
-function transferReason(row: ScheduleRow): string {
+/** The buffer before the train, on one line: "20 min to park and get to the platform (buffer)". */
+function bufferText(row: ScheduleRow, minutes: number): string {
+  const what =
+    row.mode === "flight"
+      ? "to check in"
+      : row.direction === "N"
+        ? "to get to the platform"
+        : "to park and get to the platform";
+  return `${minutes} min ${what} (buffer)`;
+}
+
+/** The buffer after it: "10 min off the train to the subway (buffer)". */
+function transferText(row: ScheduleRow, minutes: number): string {
   const off = row.mode === "flight" ? (row.direction === "N" ? "the plane" : "the shuttle") : "the train";
-  return `off ${off} and to the ${row.direction === "N" ? "car" : "subway"}`;
+  return `${minutes} min off ${off} to the ${row.direction === "N" ? "car" : "subway"} (buffer)`;
 }
 
-function bufferReason(row: ScheduleRow): string {
-  if (row.mode === "flight") return "check-in";
-  return row.direction === "N" ? "getting to the platform" : "parking and getting to the platform";
-}
-
-/** "Coming from Montreal · last left Saratoga Springs · 2 stops away", or similar. */
-export function inboundText(progress: TrainProgress): string {
-  if (progress.startsHere) return "Starts here";
+/**
+ * "From Montreal · left Saratoga Springs on time · 2 stops away", or similar;
+ * null when you board where it starts, so there's nothing inbound to say.
+ */
+export function inboundText(progress: TrainProgress): string | null {
+  if (progress.startsHere) return null;
   const origin = progress.origin.stationName ?? progress.origin.stationCode;
   const away = progress.stopsAway === 0 ? "your stop is next" : `${progress.stopsAway} stops away`;
   if (!progress.lastDeparted) return `Starts at ${origin} · hasn't left yet`;
@@ -61,16 +71,10 @@ export function inboundText(progress: TrainProgress): string {
   return `From ${origin} · left ${last} ${timing} · ${away}`;
 }
 
-function OutLink({ link, children }: { link: LinkOut; children: ReactNode }) {
+function OutLink({ link, children, className = "detail-link" }: { link: LinkOut; children: ReactNode; className?: string }) {
   return (
-    <a
-      className="detail-link"
-      href={link.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      data-link-out={link.linkOut}
-    >
-      {children} ›
+    <a className={className} href={link.href} target="_blank" rel="noopener noreferrer" data-link-out={link.linkOut}>
+      {children}
     </a>
   );
 }
@@ -85,31 +89,21 @@ function Stop({ time, place, final }: { time: number; place: string; final?: boo
   );
 }
 
-function Segment({
-  icon,
-  title,
-  lines,
-  links,
-  dashed,
-}: {
-  icon?: ReactNode;
-  title: ReactNode;
-  lines?: (string | null)[];
-  links?: ReactNode;
-  dashed?: boolean;
-}) {
+/** One line of a leg: what it says, and the link for it at the end of the same line. */
+interface SegmentLine {
+  content: ReactNode;
+  link?: ReactNode;
+}
+
+function Segment({ lines, dashed }: { lines: (SegmentLine | null)[]; dashed?: boolean }) {
   return (
     <li className={`detail-segment${dashed ? " detail-segment--buffer" : ""}`}>
-      <div className="detail-segment__title">
-        {icon}
-        {title}
-      </div>
-      {lines?.filter(Boolean).map((line) => (
-        <div key={line} className="detail-segment__line">
-          {line}
+      {lines.filter((line): line is SegmentLine => line !== null).map((line, i) => (
+        <div key={i} className={`detail-segment__line${i === 0 ? " detail-segment__line--title" : ""}`}>
+          <span className="detail-segment__content">{line.content}</span>
+          {line.link}
         </div>
       ))}
-      {links && <div className="detail-segment__links">{links}</div>}
     </li>
   );
 }
@@ -157,76 +151,101 @@ export function TripDetail({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const drive = (minutes: number, toStation: boolean) => (
-    <Segment
-      icon={<Icon name="drive" size={16} />}
-      title={`Drive ${formatDuration(minutes)}`}
-      lines={[comparedToUsual(doorLegs.vtDriveMinutes, doorLegs.vtDriveTypicalMinutes)]}
-      links={
-        <OutLink
-          link={{
-            href: drivingDirectionsUrl(vtLocation, row.stationCode, toStation),
-            linkOut: "driving directions in Google Maps",
-          }}
-        >
-          Directions
-        </OutLink>
-      }
-    />
-  );
+  const drive = (minutes: number, toStation: boolean) => {
+    const usual = comparedToUsual(doorLegs.vtDriveMinutes, doorLegs.vtDriveTypicalMinutes);
+    return (
+      <Segment
+        lines={[
+          {
+            content: (
+              <>
+                <Icon name="drive" size={16} />
+                Drive {formatDuration(minutes)}
+              </>
+            ),
+            link: (
+              <OutLink
+                link={{
+                  href: drivingDirectionsUrl(vtLocation, row.stationCode, toStation),
+                  linkOut: "driving directions in Google Maps",
+                }}
+              >
+                Directions ›
+              </OutLink>
+            ),
+          },
+          usual ? { content: usual } : null,
+        ]}
+      />
+    );
+  };
 
-  const subway = (minutes: number, toNyp: boolean) => (
-    <Segment
-      icon={<TransitBadges lines={doorLegs.nycLines} />}
-      title={`${doorLegs.nycLines === null ? "Subway, about" : doorLegs.nycLines.length === 0 ? "Walk" : "Subway"} ${formatDuration(minutes)}`}
-      links={
-        <OutLink
-          link={{
-            href: transitDirectionsUrl(nycLocation, toNyp),
-            linkOut: "subway directions in Google Maps",
-          }}
-        >
-          Directions
-        </OutLink>
-      }
-    />
-  );
+  const subway = (minutes: number, toNyp: boolean) => {
+    const mode =
+      doorLegs.nycLines === null ? "Subway, about" : doorLegs.nycLines.length === 0 ? "Walk" : "Subway";
+    return (
+      <Segment
+        lines={[
+          {
+            content: (
+              <>
+                <TransitBadges lines={doorLegs.nycLines} />
+                {mode} {formatDuration(minutes)}
+              </>
+            ),
+            link: (
+              <OutLink
+                link={{
+                  href: transitDirectionsUrl(nycLocation, toNyp),
+                  linkOut: "subway directions in Google Maps",
+                }}
+              >
+                Directions ›
+              </OutLink>
+            ),
+          },
+        ]}
+      />
+    );
+  };
 
   const statusText = describeStatus(row, status);
   const track = boardingStop(row, status)?.track;
   const progress = trainProgress(row, status);
+  const inbound = progress && inboundText(progress);
   const train = (
     <Segment
-      icon={<Icon name={flight ? "plane" : "train"} size={16} />}
-      title={`${flight ? "Cape Air" : row.service} ${row.trainNumber} · ${formatDuration(trip.trainMinutes)}`}
       lines={[
-        live ? (flight ? "SCHEDULED" : statusText.full) + (track ? ` · TRACK ${track}` : "") : row.daysRaw,
-        progress && inboundText(progress),
+        {
+          // The name is the way to buy tickets.
+          content: (
+            <>
+              <Icon name={flight ? "plane" : "train"} size={16} />
+              <OutLink link={ticketsLink(row)} className="detail-train-link">
+                {flight ? "Cape Air" : row.service} {row.trainNumber}
+              </OutLink>
+              · {formatDuration(trip.trainMinutes)}
+            </>
+          ),
+        },
+        live
+          ? {
+              content: (
+                <>
+                  <Icon name={flight ? "scheduled" : statusText.icon} size={16} />
+                  {(flight ? "SCHEDULED" : statusText.full) + (track ? ` · TRACK ${track}` : "")}
+                </>
+              ),
+              link: !flight && <OutLink link={statusLink(row)}>Status ›</OutLink>,
+            }
+          : { content: row.daysRaw },
+        inbound ? { content: inbound } : null,
       ]}
-      links={
-        <>
-          <OutLink link={ticketsLink(row)}>Tickets</OutLink>
-          {live && !flight && <OutLink link={statusLink(row)}>Status</OutLink>}
-        </>
-      }
     />
   );
 
-  const buffer = (
-    <Segment
-      dashed
-      title={`${trip.bufferMinutes} min buffer`}
-      lines={[bufferReason(row)]}
-    />
-  );
-
-  const transfer = (
-    <Segment
-      dashed
-      title={`${trip.transferMinutes} min buffer`}
-      lines={[transferReason(row)]}
-    />
-  );
+  const buffer = <Segment dashed lines={[{ content: bufferText(row, trip.bufferMinutes) }]} />;
+  const transfer = <Segment dashed lines={[{ content: transferText(row, trip.transferMinutes) }]} />;
 
   const [startLabel, endLabel] = northbound ? [nycLabel, vtLabel] : [vtLabel, nycLabel];
 
