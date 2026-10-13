@@ -942,6 +942,7 @@ body {
 .search-bar {
   flex: 0 0 auto;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
   padding: 0.5rem;
@@ -955,7 +956,8 @@ body {
 }
 
 .search-bar__input {
-  flex: 1 1 auto;
+  /* Wide enough to stay on the first line, so the chips wrap below it on a phone. */
+  flex: 1 1 12rem;
   min-width: 0;
   padding: 0.45rem 0.6rem;
   background: var(--flap-face);
@@ -990,5 +992,45 @@ body {
 
 .search-bar__clear:hover,
 .search-bar__clear:focus-visible {
+  color: var(--amber);
+}
+
+.search-bar__chips {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Under the box on a phone: a full row of equal buttons. */
+@media (max-width: 639px) {
+  .search-bar__chips {
+    flex: 1 1 100%;
+  }
+
+  .search-chip {
+    flex: 1 1 0;
+  }
+}
+
+.search-chip {
+  padding: 0.4rem 0.7rem;
+  background: var(--flap-face);
+  color: var(--header-ink);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  font-family: "Oswald", sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.search-chip:hover,
+.search-chip:focus-visible {
+  color: var(--amber);
+}
+
+.search-chip--on {
+  background: var(--tile-bg-active);
+  border-color: var(--amber);
   color: var(--amber);
 }

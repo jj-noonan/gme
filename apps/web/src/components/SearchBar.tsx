@@ -1,4 +1,11 @@
+import { hasBucket, toggleBucket, type TimeBucket } from "../lib/search.js";
 import { Icon } from "./Icon.js";
+
+const BUCKETS: { bucket: TimeBucket; label: string }[] = [
+  { bucket: "morning", label: "Morning" },
+  { bucket: "afternoon", label: "Afternoon" },
+  { bucket: "evening", label: "Evening" },
+];
 
 const PLACEHOLDER = "Search: ethan, 284, alb, morning, arrive by 6pm, sat";
 
@@ -33,6 +40,23 @@ export function SearchBar({ query, onChange }: { query: string; onChange: (query
           ×
         </button>
       )}
+      {/* One tap instead of typing, for the question asked most on the day. */}
+      <div className="search-bar__chips" role="group" aria-label="Time of day">
+        {BUCKETS.map(({ bucket, label }) => {
+          const on = hasBucket(query, bucket);
+          return (
+            <button
+              key={bucket}
+              type="button"
+              className={`search-chip${on ? " search-chip--on" : ""}`}
+              aria-pressed={on}
+              onClick={() => onChange(toggleBucket(query, bucket))}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
