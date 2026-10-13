@@ -76,26 +76,26 @@ describe("vtDriveLeg", () => {
   });
 
   it("southbound: vt-location → station, leaving drive + buffer before departure", () => {
-    // Jones Donuts → Albany is ~110 min straight-line, + 15 buffer = 125 min before 10:00.
+    // Jones Donuts → Albany is ~110 min straight-line, + 20 buffer = 130 min before 10:00.
     const south = row({ direction: "S", stationCode: "ALB", scheduledDeparture: "10:00" });
     expect(vtDriveLeg(south, JONES, day)).toEqual({
       stationCode: "ALB",
       place: JONES,
       toStation: true,
-      departAt: "2026-10-05T07:55",
+      departAt: "2026-10-05T07:50",
     });
   });
 
   it("southbound flights: leave in time for the airport's longer buffer", () => {
     const flight = row({ direction: "S", stationCode: "LEB", scheduledDeparture: "07:22", mode: "flight" });
     const train = { ...flight, mode: undefined };
-    // Same drive either way; the flight's 15 extra buffer minutes move the leave time earlier.
+    // Same drive either way; the flight's 10 extra buffer minutes move the leave time earlier.
     const minutes = (leg: { departAt: string }) => Number(leg.departAt.slice(11, 13)) * 60 + Number(leg.departAt.slice(14));
-    expect(minutes(vtDriveLeg(train, JONES, day)) - minutes(vtDriveLeg(flight, JONES, day))).toBe(15);
+    expect(minutes(vtDriveLeg(train, JONES, day)) - minutes(vtDriveLeg(flight, JONES, day))).toBe(10);
   });
 
   it("southbound: rolls back to the previous evening for an early-morning train", () => {
     const early = row({ direction: "S", stationCode: "ALB", scheduledDeparture: "00:30" });
-    expect(vtDriveLeg(early, JONES, day).departAt).toBe("2026-10-04T22:25");
+    expect(vtDriveLeg(early, JONES, day).departAt).toBe("2026-10-04T22:20");
   });
 });

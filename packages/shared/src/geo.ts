@@ -24,8 +24,8 @@ export function isInBounds(point: Coordinate, bounds: Bounds): boolean {
 /** Assumed flat transit time from anywhere in NYC to Penn Station, until this is worth making real. */
 export const ASSUMED_NYC_TRANSIT_MINUTES = 50;
 
-/** Door-to-door buffer baked into every trip time, matching the original hand-built sheet. */
-export const TRIP_BUFFER_MINUTES = 15;
+/** Slack before a southbound train at a VT/NY station: parking and getting to the platform. */
+export const TRIP_BUFFER_MINUTES = 20;
 
 /** Slack before a Cape Air flight at Lebanon: check-in closes ahead of departure. */
 export const AIRPORT_BUFFER_MINUTES = 30;
