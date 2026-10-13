@@ -765,3 +765,188 @@ body {
   text-transform: uppercase;
   cursor: pointer;
 }
+
+/* ---------- trip detail ---------- */
+
+/* Over the board rather than instead of it, so closing returns to the same
+   scroll position with every row's data still loaded. */
+.trip-detail {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--board-bg);
+  padding: 0 1rem calc(1.5rem + env(safe-area-inset-bottom));
+  font-family: "Oswald", sans-serif;
+  color: var(--ink);
+}
+
+.trip-detail > * {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+.trip-detail__header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  background: var(--board-bg);
+  border-bottom: 1px solid var(--rule);
+}
+
+.trip-detail__back {
+  flex: 0 0 auto;
+  padding: 0.4rem 0.6rem;
+  background: var(--tile-bg);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  font: inherit;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.trip-detail__title {
+  margin: 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.trip-detail__when {
+  margin-left: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--header-ink);
+}
+
+/* The rail: one line down the left, a dot at each place you pass through. */
+.detail-timeline {
+  --rail-x: 0.45rem;
+  list-style: none;
+  margin: 1rem auto 0;
+  padding: 0;
+  position: relative;
+}
+
+.detail-stop,
+.detail-segment {
+  position: relative;
+  padding-left: 2rem;
+}
+
+.detail-segment::before,
+.detail-stop::before {
+  content: "";
+  position: absolute;
+  left: var(--rail-x);
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid var(--ink-dim);
+}
+
+.detail-segment--buffer::before {
+  border-left-style: dashed;
+  border-left-color: var(--header-ink);
+}
+
+.detail-stop:first-child::before {
+  top: 50%;
+}
+
+.detail-stop--final::before {
+  bottom: 50%;
+}
+
+.detail-stop {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-block: 0.35rem;
+}
+
+.detail-stop__dot {
+  position: absolute;
+  left: calc(var(--rail-x) - 0.4rem + 1px);
+  top: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  margin-top: -0.4rem;
+  border-radius: 50%;
+  background: var(--board-bg);
+  border: 2px solid var(--amber);
+}
+
+.detail-stop--final .detail-stop__dot {
+  background: var(--amber);
+}
+
+.detail-stop__time {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 1.05rem;
+  color: var(--amber);
+  min-width: 4.5rem;
+}
+
+.detail-stop__place {
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+}
+
+.detail-segment {
+  padding-block: 0.6rem 0.9rem;
+  margin-left: 0;
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+}
+
+.detail-segment__title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--ink);
+}
+
+.detail-segment--buffer .detail-segment__title {
+  color: var(--header-ink);
+}
+
+.detail-segment__line {
+  margin-top: 0.15rem;
+}
+
+.detail-segment__links {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.4rem;
+}
+
+.detail-link {
+  color: var(--amber);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.detail-link:hover,
+.detail-link:focus-visible {
+  text-decoration: underline;
+}
+
+.trip-detail__total {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rule);
+  color: var(--ink);
+  letter-spacing: 0.04em;
+}

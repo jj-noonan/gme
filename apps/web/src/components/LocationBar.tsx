@@ -2,7 +2,7 @@ import type { Direction } from "@gme/shared";
 import { useEffect, useState } from "react";
 import type { PlaceState, PlaceStatus } from "../hooks/usePlace.js";
 import type { IconName } from "../lib/icons.js";
-import { DEFAULT_PLACES, settingFromText, type PlaceArea } from "../lib/places.js";
+import { DEFAULT_PLACES, placeLabel, settingFromText, type PlaceArea } from "../lib/places.js";
 import { Icon } from "./Icon.js";
 
 const AREA_ICONS: Record<PlaceArea, IconName> = { vt: "vermont", nyc: "new-york" };
@@ -13,14 +13,7 @@ const AWAY_NOTE = "Too far away to use current location.";
 
 /** The text a box shows for its current setting. */
 function displayText(area: PlaceArea, place: PlaceState): string {
-  switch (place.setting.kind) {
-    case "default":
-      return DEFAULT_PLACES[area].label;
-    case "current":
-      return "Current location";
-    case "address":
-      return place.setting.text;
-  }
+  return placeLabel(area, place.setting);
 }
 
 /** A short note under the box, or null when there's nothing worth saying. */

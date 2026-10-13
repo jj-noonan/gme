@@ -10,10 +10,12 @@ import {
 import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
+import { isTripRow, type TripRoute } from "../lib/tripRoute.js";
 import { hasDeparted } from "../lib/trainStatus.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { GoogleCredit } from "./GoogleCredit.js";
 import { TrainRow } from "./TrainRow.js";
+import { TripDetail } from "./TripDetail.js";
 
 function statusFor(statuses: TrainStatus[], trainNumber: number): TrainStatus | undefined {
   return statuses.find((s) => s.trainNumber === trainNumber);
@@ -25,12 +27,20 @@ export function TodayBoard({
   statuses,
   vtLocation,
   nycLocation,
+  placeLabels,
+  openTrip,
+  onCloseTrip,
 }: {
   rows: ScheduleRow[];
   direction: Direction;
   statuses: TrainStatus[];
   vtLocation: Coordinate;
   nycLocation: Coordinate;
+  /** What to call the two ends on the detail page. */
+  placeLabels: { vt: string; nyc: string };
+  /** The trip whose detail page is open, if it's on this board. */
+  openTrip: TripRoute | null;
+  onCloseTrip: () => void;
 }) {
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -73,12 +83,34 @@ export function TodayBoard({
       !hasDeparted(r, r.mode === "flight" ? undefined : statusFor(statuses, r.trainNumber), nowMinutes),
   );
 
+  // Found among all of today's rows, so a shared link still opens after the
+  // train has gone.
+  const detailRow = todaysRows.find((r) => isTripRow(openTrip, r));
+  const detail = detailRow && (
+    <TripDetail
+      row={detailRow}
+      status={detailRow.mode === "flight" ? undefined : statusFor(statuses, detailRow.trainNumber)}
+      doorLegs={doorLegs(detailRow)}
+      vtLocation={vtLocation}
+      nycLocation={nycLocation}
+      vtLabel={placeLabels.vt}
+      nycLabel={placeLabels.nyc}
+      nowMinutes={nowMinutes}
+      onClose={onCloseTrip}
+    />
+  );
+
   if (todaysRows.length === 0) {
     return <p className="board-empty">No trains running today.</p>;
   }
 
   if (upcomingRows.length === 0) {
-    return <p className="board-empty">No more trains today.</p>;
+    return (
+      <>
+        <p className="board-empty">No more trains today.</p>
+        {detail}
+      </>
+    );
   }
 
   const bands = computeRowBands(upcomingRows);
@@ -111,6 +143,7 @@ export function TodayBoard({
         );
       })}
       <GoogleCredit show={upcomingRows.some((r) => doorLegs(r).nycLines !== null)} />
+      {detail}
     </div>
   );
 }

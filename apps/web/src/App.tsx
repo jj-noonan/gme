@@ -9,7 +9,9 @@ import { TodayBoard } from "./components/TodayBoard.js";
 import { usePlace } from "./hooks/usePlace.js";
 import { useSchedule } from "./hooks/useSchedule.js";
 import { useTrainStatuses } from "./hooks/useTrainStatuses.js";
+import { useTripRoute } from "./hooks/useTripRoute.js";
 import { useUserLocation } from "./hooks/useUserLocation.js";
+import { placeLabel } from "./lib/places.js";
 
 export function App() {
   const { rows, error: scheduleError } = useSchedule();
@@ -23,6 +25,16 @@ export function App() {
   const [userPickedTab, setUserPickedTab] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const closeInfo = useCallback(() => setShowInfo(false), []);
+  const trip = useTripRoute();
+  const placeLabels = { vt: placeLabel("vt", vt.setting), nyc: placeLabel("nyc", nyc.setting) };
+
+  // A trip link opens on the board it came from.
+  useEffect(() => {
+    if (!trip.route) return;
+    setUserPickedTab(true);
+    setActiveTab(trip.route.tab);
+  }, [trip.route]);
+  const boardTrip = trip.route?.tab === activeTab ? trip.route : null;
 
   // Once we know the region, default to the appropriate tab — unless the
   // rider has already picked one themselves. Today when you're at one end
@@ -68,6 +80,9 @@ export function App() {
             statuses={statuses}
             vtLocation={vtLocation}
             nycLocation={nycLocation}
+            placeLabels={placeLabels}
+            openTrip={boardTrip}
+            onCloseTrip={trip.close}
           />
         )}
         {rows && activeTab === "S_TODAY" && (
@@ -77,6 +92,9 @@ export function App() {
             statuses={statuses}
             vtLocation={vtLocation}
             nycLocation={nycLocation}
+            placeLabels={placeLabels}
+            openTrip={boardTrip}
+            onCloseTrip={trip.close}
           />
         )}
         {rows && activeTab === "N_TIMETABLE" && (
@@ -85,6 +103,9 @@ export function App() {
             direction="N"
             vtLocation={vtLocation}
             nycLocation={nycLocation}
+            placeLabels={placeLabels}
+            openTrip={boardTrip}
+            onCloseTrip={trip.close}
           />
         )}
         {rows && activeTab === "S_TIMETABLE" && (
@@ -93,6 +114,9 @@ export function App() {
             direction="S"
             vtLocation={vtLocation}
             nycLocation={nycLocation}
+            placeLabels={placeLabels}
+            openTrip={boardTrip}
+            onCloseTrip={trip.close}
           />
         )}
       </main>
