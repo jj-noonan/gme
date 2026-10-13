@@ -99,8 +99,8 @@ describe("leadMinutes", () => {
     expect(leadMinutes("N", legs(90, 41.6))).toBe(52);
   });
 
-  it("southbound: drive time plus buffer, ignoring transit (drive + 15)", () => {
-    expect(leadMinutes("S", legs(18, 41))).toBe(33);
+  it("southbound: drive time plus buffer, ignoring transit (drive + 20)", () => {
+    expect(leadMinutes("S", legs(18, 41))).toBe(38);
   });
 });
 
@@ -132,8 +132,8 @@ describe("computeLeaveBy", () => {
       estimatedDoorLegs(19),
       8 * 60,
     );
-    expect(result.leadMinutes).toBe(34);
-    expect(result.minutes).toBe(10 * 60 + 37);
+    expect(result.leadMinutes).toBe(39);
+    expect(result.minutes).toBe(10 * 60 + 32);
   });
 
   it("always yields whole minutes, even though drive estimates are fractional", () => {
@@ -149,7 +149,7 @@ describe("computeLeaveBy", () => {
     }
   });
 
-  it("southbound flights: the airport's 30-minute buffer instead of the station's 15", () => {
+  it("southbound flights: the airport's 30-minute buffer instead of the station's 20", () => {
     const flight = row({
       direction: "S",
       stationCode: "LEB",
