@@ -32,6 +32,8 @@ export interface ScheduleRow {
 
 export interface StationStatus {
   stationCode: string;
+  /** Amtrak's name for the stop, e.g. "Saratoga Springs"; null from older payloads. */
+  stationName: string | null;
   /** ISO timestamp as scheduled. */
   scheduledDeparture: string | null;
   /** ISO timestamp: actual once past, estimated while upcoming. */

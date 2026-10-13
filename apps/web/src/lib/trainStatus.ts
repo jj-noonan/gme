@@ -1,4 +1,10 @@
-import { boardingStationCode, parseHHMM, type ScheduleRow, type StationStatus, type TrainStatus } from "@gme/shared";
+import {
+  boardingStationCode,
+  parseHHMM,
+  type ScheduleRow,
+  type StationStatus,
+  type TrainStatus,
+} from "@gme/shared";
 import { formatClockFromMinutes } from "./format.js";
 import type { IconName } from "./icons.js";
 
@@ -17,6 +23,41 @@ export function liveDelayMinutes(row: ScheduleRow, status: TrainStatus | undefin
   if (!status || status.stale || !status.isTracked) return 0;
   const delay = boardingStop(row, status)?.delayMinutes;
   return delay != null && Number.isFinite(delay) ? delay : 0;
+}
+
+/**
+ * Where the train is on its way to you, from its live stop list: where it
+ * started, the last stop it left, and how many stops until yours. Like an
+ * airline's "inbound flight" — whether it's running late before it reaches
+ * you. Null without usable live data, or once it's left your stop.
+ */
+export interface TrainProgress {
+  origin: StationStatus;
+  /** You board at the train's first stop, so there's nothing inbound to follow. */
+  startsHere: boolean;
+  /** The most recent stop it's left; null if it hasn't set off. */
+  lastDeparted: StationStatus | null;
+  /** Stops left before yours (0 = yours is next). */
+  stopsAway: number;
+}
+
+export function trainProgress(
+  row: ScheduleRow,
+  status: TrainStatus | undefined,
+): TrainProgress | null {
+  if (!status || status.stale || !status.isTracked) return null;
+  const stops = status.perStation;
+  const boardingIndex = stops.findIndex((s) => s.stationCode === boardingStationCode(row));
+  if (boardingIndex < 0 || stops[boardingIndex].stopStatus === "Departed") return null;
+
+  const before = stops.slice(0, boardingIndex);
+  const departed = before.filter((s) => s.stopStatus === "Departed");
+  return {
+    origin: stops[0],
+    startsHere: boardingIndex === 0,
+    lastDeparted: departed.at(-1) ?? null,
+    stopsAway: before.length - departed.length,
+  };
 }
 
 /**

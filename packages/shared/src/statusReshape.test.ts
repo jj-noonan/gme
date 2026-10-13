@@ -42,6 +42,7 @@ describe("reshapeAmtrakerResponse", () => {
           trainNum: "69",
           stations: [
             stop("NYP", {
+              name: "New York Penn",
               schDep: "2026-09-19T08:15:00-04:00",
               dep: "2026-09-19T08:27:00-04:00",
               status: "Departed",
@@ -54,6 +55,7 @@ describe("reshapeAmtrakerResponse", () => {
     const [status] = reshapeAmtrakerResponse(response, [69], false);
     expect(status.perStation[0]).toMatchObject({
       stationCode: "NYP",
+      stationName: "New York Penn",
       delayMinutes: 12,
       stopStatus: "Departed",
       track: "7",

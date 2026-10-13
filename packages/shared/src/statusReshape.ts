@@ -11,6 +11,7 @@ import type { StationStatus, TrainStatus } from "./types.js";
  */
 export interface AmtrakerStationStop {
   code: string;
+  name?: string | null;
   schArr: string | null;
   schDep: string | null;
   arr: string | null;
@@ -46,6 +47,7 @@ function toStationStatus(stop: AmtrakerStationStop): StationStatus {
 
   return {
     stationCode: stop.code,
+    stationName: stop.name || null,
     scheduledDeparture: stop.schDep ?? stop.schArr ?? null,
     expectedDeparture: stop.dep ?? stop.arr ?? null,
     delayMinutes,
