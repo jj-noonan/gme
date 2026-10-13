@@ -18,6 +18,18 @@ export const DEFAULT_PLACES: Record<PlaceArea, { label: string; coordinate: Coor
   nyc: { label: "Bishop Loughlin HS", coordinate: DEFAULT_NYC_LOCATION },
 };
 
+/** What to call one end, for its current setting. */
+export function placeLabel(area: PlaceArea, setting: PlaceSetting): string {
+  switch (setting.kind) {
+    case "default":
+      return DEFAULT_PLACES[area].label;
+    case "current":
+      return "Current location";
+    case "address":
+      return setting.text;
+  }
+}
+
 const STORAGE_KEYS: Record<PlaceArea, string> = {
   vt: "gme.vt-location",
   nyc: "gme.nyc-location",

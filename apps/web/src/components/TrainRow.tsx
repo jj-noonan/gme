@@ -8,17 +8,12 @@ import {
 } from "@gme/shared";
 import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
 import { formatClock, formatClockFromMinutes, formatDuration } from "../lib/format.js";
+import { statusLink, ticketsLink } from "../lib/links.js";
 import { abbreviateService, describeStatus, liveDelayMinutes } from "../lib/trainStatus.js";
 import { DriveLink } from "./DriveLink.js";
 import { FlapText } from "./FlapText.js";
 import { Icon } from "./Icon.js";
 import { TransitLink } from "./TransitLink.js";
-
-// Amtrak's booking form lives on its home page; there's no documented (or,
-// in testing, working) way to pre-fill it from a link.
-const AMTRAK_BOOKING_URL = "https://www.amtrak.com/home.html";
-// Cape Air sells the Penn Station shuttle and flight together as ZYP ↔ LEB.
-const CAPE_AIR_BOOKING_URL = "https://www.capeair.com/";
 
 export function TrainRow({
   row,
@@ -69,6 +64,9 @@ export function TrainRow({
     </DriveLink>
   );
 
+  const tickets = ticketsLink(row);
+  const statusPage = statusLink(row);
+
   const classes = [
     "trip",
     highlighted && "trip--recommended",
@@ -114,18 +112,12 @@ export function TrainRow({
       </div>
 
       <div className="trip__meta">
-        {/* Amtrak has no link that pre-fills a search, so the confirm sheet
-            says what to search for instead. */}
         <a
           className="trip__train"
-          href={flight ? CAPE_AIR_BOOKING_URL : AMTRAK_BOOKING_URL}
+          href={tickets.href}
           target="_blank"
           rel="noopener noreferrer"
-          data-link-out={
-            flight
-              ? `Cape Air to buy tickets (search ${northbound ? "Penn Sta (ZYP) to Lebanon (LEB)" : "Lebanon (LEB) to Penn Sta (ZYP)"})`
-              : `Amtrak to buy tickets (search ${boardingStationCode(row)} to ${changeStationCode(row)})`
-          }
+          data-link-out={tickets.linkOut}
           title={flight ? "Buy tickets on Cape Air" : "Buy tickets on Amtrak"}
         >
           <span className="only-wide">
@@ -149,10 +141,10 @@ export function TrainRow({
         {live && !flight && (
           <a
             className="trip__status"
-            href={`https://amtraker.com/trains/${row.trainNumber}`}
+            href={statusPage.href}
             target="_blank"
             rel="noopener noreferrer"
-            data-link-out={`live status for train ${row.trainNumber} on Amtraker`}
+            data-link-out={statusPage.linkOut}
           >
             <Icon name={statusText.icon} size={16} />
             <span className="status-full">

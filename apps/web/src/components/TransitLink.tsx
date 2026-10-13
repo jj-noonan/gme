@@ -24,6 +24,20 @@ function LineBadge({ name }: { name: string }) {
   );
 }
 
+/** The NYC leg's lines as badges, the train icon while it's still the flat estimate, or WALK. */
+export function TransitBadges({ lines }: { lines: string[] | null }) {
+  if (lines === null) return <Icon name="train" size={16} />;
+  return (
+    <span className="transit-badges">
+      {lines.length > 0 ? (
+        lines.map((line, i) => <LineBadge key={i} name={line} />)
+      ) : (
+        <span className="line-badge line-badge--walk">WALK</span>
+      )}
+    </span>
+  );
+}
+
 /**
  * The NYC leg — its lines as badges (or the train icon while it's still the
  * flat estimate) plus whatever's passed as children, the duration — as one
@@ -53,17 +67,7 @@ export function TransitLink({
       aria-label={`${route}Open subway directions in Google Maps`}
       title="Open in Google Maps"
     >
-      {lines === null ? (
-        <Icon name="train" size={16} />
-      ) : (
-        <span className="transit-badges">
-          {lines.length > 0 ? (
-            lines.map((line, i) => <LineBadge key={i} name={line} />)
-          ) : (
-            <span className="line-badge line-badge--walk">WALK</span>
-          )}
-        </span>
-      )}
+      <TransitBadges lines={lines} />
       {children}
     </a>
   );
