@@ -85,10 +85,8 @@ describe("TripDetail", () => {
 
   it("spells out the buffers the board leaves unexplained", () => {
     renderDetail();
-    expect(screen.getByText("20 min buffer")).toBeTruthy();
-    expect(screen.getByText("parking and getting to the platform")).toBeTruthy();
-    expect(screen.getByText("10 min buffer")).toBeTruthy();
-    expect(screen.getByText("off the train and to the subway")).toBeTruthy();
+    expect(screen.getByText("20 min to park and get to the platform (buffer)")).toBeTruthy();
+    expect(screen.getByText("10 min off the train to the subway (buffer)")).toBeTruthy();
   });
 
   it("compares the drive to usual", () => {
@@ -99,7 +97,10 @@ describe("TripDetail", () => {
 
   it("shows live status, track, and where the train is coming from", () => {
     const { container } = renderDetail({ status: LATE });
-    expect(screen.getByText("+12 MIN (ETD 1:17P) · TRACK 2")).toBeTruthy();
+    const statusLine = screen.getByText("+12 MIN (ETD 1:17P) · TRACK 2");
+    // With its status icon in front, and the Status link at the end of the same line.
+    expect(statusLine.querySelector("svg")).toBeTruthy();
+    expect(statusLine.parentElement?.textContent).toContain("Status ›");
     expect(screen.getByText("From Niagara Falls · left Schenectady 12 min late · your stop is next")).toBeTruthy();
     // A late train pushes back everything after it.
     expect(stops(container)[2]).toBe("3:47P New York Penn (NYP)");
@@ -108,7 +109,8 @@ describe("TripDetail", () => {
   it("names links by what they're for", () => {
     renderDetail();
     const links = screen.getAllByRole("link").map((a) => a.textContent);
-    expect(links).toEqual(["Directions ›", "Tickets ›", "Status ›", "Directions ›"]);
+    // The train's name is the tickets link.
+    expect(links).toEqual(["Directions ›", "EMPIRE 284", "Status ›", "Directions ›"]);
   });
 
   it("on the timetable: the days it runs, and no live status link", () => {
@@ -124,8 +126,14 @@ describe("TripDetail", () => {
     expect(stops(container)[0]).toBe("7:33A Bishop Loughlin HS");
     expect(stops(container)[1]).toBe("8:15A New York Penn (NYP)");
     // Penn Station's buffer going in, and the transfer to the car getting out.
-    expect(screen.getAllByText("10 min buffer")).toHaveLength(2);
-    expect(screen.getByText("off the train and to the car")).toBeTruthy();
+    expect(screen.getByText("10 min to get to the platform (buffer)")).toBeTruthy();
+    expect(screen.getByText("10 min off the train to the car (buffer)")).toBeTruthy();
+  });
+
+  it("says nothing about where the train comes from when you board where it starts", () => {
+    const fromHere: TrainStatus = { ...LATE, perStation: LATE.perStation.slice(2) };
+    renderDetail({ status: fromHere });
+    expect(screen.queryByText(/Starts|From /)).toBeNull();
   });
 
   it("closes on Back and on Escape", () => {

@@ -894,25 +894,46 @@ body {
   letter-spacing: 0.03em;
 }
 
-.detail-segment__title {
+/* Each line of a leg: what it says on the left, its link at the right end. */
+.detail-segment__line {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.2rem;
+}
+
+.detail-segment__line--title {
+  margin-top: 0;
   color: var(--ink);
 }
 
-.detail-segment--buffer .detail-segment__title {
+.detail-segment--buffer .detail-segment__line {
   color: var(--header-ink);
 }
 
-.detail-segment__line {
-  margin-top: 0.15rem;
+.detail-segment__content {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
 }
 
-.detail-segment__links {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.4rem;
+.detail-link {
+  flex: 0 0 auto;
+}
+
+/* The train's name buys tickets: a link, but it reads as the name first. */
+.detail-train-link {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
+.detail-train-link:hover,
+.detail-train-link:focus-visible {
+  color: var(--amber);
+  text-decoration-style: solid;
 }
 
 .detail-link {
