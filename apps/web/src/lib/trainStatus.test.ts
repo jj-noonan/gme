@@ -1,6 +1,7 @@
 import type { ScheduleRow, TrainStatus } from "@gme/shared";
 import { describe, expect, it } from "vitest";
-import { abbreviateService, describeStatus, hasDeparted } from "./trainStatus.js";
+import type { StationStatus } from "@gme/shared";
+import { abbreviateService, describeStatus, hasDeparted, trainProgress } from "./trainStatus.js";
 
 const ROW: ScheduleRow = {
   trainNumber: 290,
@@ -20,6 +21,7 @@ function statusWith(delayMinutes: number | null, stopStatus: string | null = "En
     perStation: [
       {
         stationCode: "RUD",
+        stationName: "Rutland",
         scheduledDeparture: null,
         expectedDeparture: null,
         delayMinutes,
@@ -96,5 +98,60 @@ describe("hasDeparted", () => {
 
   it("goes as soon as the live status says the train has left", () => {
     expect(hasDeparted(ROW, statusWith(12, "Departed"), at(11, 0))).toBe(true);
+  });
+});
+
+describe("trainProgress", () => {
+  function stopAt(stationCode: string, stopStatus: string): StationStatus {
+    return {
+      stationCode,
+      stationName: stationCode,
+      scheduledDeparture: null,
+      expectedDeparture: null,
+      delayMinutes: null,
+      stopStatus,
+      track: null,
+    };
+  }
+  const running = (...stops: StationStatus[]): TrainStatus => ({
+    trainNumber: 290,
+    isTracked: true,
+    stale: false,
+    perStation: stops,
+  });
+
+  it("follows the train in from its origin to your stop", () => {
+    const progress = trainProgress(
+      ROW,
+      running(
+        stopAt("BTN", "Departed"),
+        stopAt("MBY", "Departed"),
+        stopAt("RUD", "Enroute"),
+        stopAt("NYP", "Enroute"),
+      ),
+    );
+    expect(progress).toMatchObject({ startsHere: false, stopsAway: 0 });
+    expect(progress?.origin.stationCode).toBe("BTN");
+    expect(progress?.lastDeparted?.stationCode).toBe("MBY");
+  });
+
+  it("counts the stops still to go, and nothing departed before it sets off", () => {
+    const progress = trainProgress(
+      ROW,
+      running(stopAt("BTN", "Enroute"), stopAt("MBY", "Enroute"), stopAt("RUD", "Enroute")),
+    );
+    expect(progress?.lastDeparted).toBeNull();
+    expect(progress?.stopsAway).toBe(2);
+  });
+
+  it("knows when you board where the train starts", () => {
+    const progress = trainProgress(ROW, running(stopAt("RUD", "Station"), stopAt("NYP", "Enroute")));
+    expect(progress?.startsHere).toBe(true);
+  });
+
+  it("is null without live data or once it's left your stop", () => {
+    expect(trainProgress(ROW, undefined)).toBeNull();
+    expect(trainProgress(ROW, { ...running(stopAt("RUD", "Enroute")), stale: true })).toBeNull();
+    expect(trainProgress(ROW, running(stopAt("RUD", "Departed")))).toBeNull();
   });
 });
