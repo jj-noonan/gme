@@ -97,9 +97,9 @@ const server = createServer(async (req, res) => {
     }
 
     try {
-      const minutes = await getDriveMinutes(legs as DriveLeg[]);
+      const { minutes, typical } = await getDriveMinutes(legs as DriveLeg[]);
       res.writeHead(200, { ...headers, "Content-Type": "application/json" });
-      res.end(JSON.stringify({ minutes, generatedAt: new Date().toISOString() }));
+      res.end(JSON.stringify({ minutes, typical, generatedAt: new Date().toISOString() }));
     } catch (error) {
       console.error("Unexpected error serving /drive:", error);
       res.writeHead(500, { ...headers, "Content-Type": "application/json" });

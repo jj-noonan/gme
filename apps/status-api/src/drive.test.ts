@@ -7,9 +7,9 @@ const NOON_EASTERN = new Date("2026-10-05T16:00:00Z");
 
 const JONES = { lat: 43.609, lon: -72.978 };
 
-function mapboxReturning(seconds: number) {
+function mapboxReturning(seconds: number, typicalSeconds?: number) {
   return vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
-    Response.json({ code: "Ok", routes: [{ duration: seconds }] }),
+    Response.json({ code: "Ok", routes: [{ duration: seconds, duration_typical: typicalSeconds }] }),
   );
 }
 
@@ -33,7 +33,12 @@ beforeEach(() => {
 describe("getDriveMinutes", () => {
   it("answers each leg in minutes, keyed by the leg as requested", async () => {
     const result = await getDriveMinutes([leg()], deps(mapboxReturning(5400)));
-    expect(result).toEqual({ "ALB>43.609,-72.978@2026-10-05T18:07": 90 });
+    expect(result).toEqual({ minutes: { "ALB>43.609,-72.978@2026-10-05T18:07": 90 }, typical: {} });
+  });
+
+  it("passes along Mapbox's typical time for the same slot", async () => {
+    const result = await getDriveMinutes([leg()], deps(mapboxReturning(5400, 4920)));
+    expect(result.typical).toEqual({ "ALB>43.609,-72.978@2026-10-05T18:07": 82 });
   });
 
   it("routes station → place heading home, at the slotted future time", async () => {
@@ -62,7 +67,7 @@ describe("getDriveMinutes", () => {
     const result = await getDriveMinutes(legs, deps(fetchImpl));
     await getDriveMinutes(legs, deps(fetchImpl));
     expect(fetchImpl).toHaveBeenCalledTimes(1);
-    expect(Object.keys(result)).toHaveLength(2);
+    expect(Object.keys(result.minutes)).toHaveLength(2);
   });
 
   it("doesn't share a call between the two directions", async () => {
@@ -73,12 +78,12 @@ describe("getDriveMinutes", () => {
 
   it("leaves out legs Mapbox can't answer", async () => {
     const fetchImpl = vi.fn(async () => new Response("nope", { status: 500 }));
-    expect(await getDriveMinutes([leg()], deps(fetchImpl))).toEqual({});
+    expect(await getDriveMinutes([leg()], deps(fetchImpl))).toEqual({ minutes: {}, typical: {} });
   });
 
   it("answers nothing, without calling out, when no token is configured", async () => {
     const fetchImpl = mapboxReturning(600);
-    expect(await getDriveMinutes([leg()], deps(fetchImpl, ""))).toEqual({});
+    expect(await getDriveMinutes([leg()], deps(fetchImpl, ""))).toEqual({ minutes: {}, typical: {} });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 });

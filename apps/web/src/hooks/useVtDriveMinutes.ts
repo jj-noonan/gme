@@ -7,6 +7,12 @@ import {
 } from "@gme/shared";
 import { useDriveMinutes } from "./useDriveMinutes.js";
 
+export interface VtDrive {
+  minutes: number;
+  /** Typical minutes at that time of day; null while estimated or unknown. */
+  typicalMinutes: number | null;
+}
+
 /**
  * Each row's VT-side drive (vt-location → station southbound, station →
  * vt-location northbound), for the train running on `dayFor(row)`: routed
@@ -16,7 +22,7 @@ export function useVtDriveMinutes(
   rows: ScheduleRow[],
   vtLocation: Coordinate,
   dayFor: (row: ScheduleRow) => Date,
-): (row: ScheduleRow) => number {
+): (row: ScheduleRow) => VtDrive {
   // Rebuilt every render, but cheap; useDriveMinutes only refetches when the
   // legs' wire form changes.
   const legs = rows.map((row) => vtDriveLeg(row, vtLocation, dayFor(row)));
@@ -25,7 +31,10 @@ export function useVtDriveMinutes(
 
   return (row) => {
     const key = keys.get(row);
-    const minutes = key === undefined ? undefined : routed[key];
-    return minutes ?? straightLineDriveMinutes(vtLocation, row.stationCode);
+    const minutes = key === undefined ? undefined : routed.minutes[key];
+    if (minutes === undefined) {
+      return { minutes: straightLineDriveMinutes(vtLocation, row.stationCode), typicalMinutes: null };
+    }
+    return { minutes, typicalMinutes: routed.typical[key!] ?? null };
   };
 }
