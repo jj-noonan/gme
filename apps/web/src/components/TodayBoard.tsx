@@ -1,5 +1,4 @@
 import {
-  computeLeaveBy,
   matchesDay,
   pickNorthboundRecommendation,
   pickSouthboundRecommendation,
@@ -11,6 +10,7 @@ import {
 import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
+import { hasDeparted } from "../lib/trainStatus.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { GoogleCredit } from "./GoogleCredit.js";
 import { TrainRow } from "./TrainRow.js";
@@ -65,13 +65,12 @@ export function TodayBoard({
     return rec ? { trainNumber: rec.row.trainNumber, stationCode: rec.row.stationCode } : null;
   }, [todaysRows, direction, doorLegs, nowMinutes]);
 
-  // Show only trips you could still actually make: a train you can no longer
-  // reach in time is no more useful than one that already left. This filters
-  // strictly more than "hasn't departed yet" — southbound leads are long
-  // (a ~2h drive to Albany), so those drop off well before departure.
-  // The Timetable tabs remain the full reference view.
+  // Keep each trip up until its train leaves the station, so one you're
+  // already on your way to stays on the board (styled as underway once its
+  // leave-by time passes). The Timetable tabs remain the full reference view.
   const upcomingRows = todaysRows.filter(
-    (r) => !computeLeaveBy(r, doorLegs(r), nowMinutes).missed,
+    (r) =>
+      !hasDeparted(r, r.mode === "flight" ? undefined : statusFor(statuses, r.trainNumber), nowMinutes),
   );
 
   if (todaysRows.length === 0) {
