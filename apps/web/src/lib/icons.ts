@@ -24,6 +24,10 @@ export const ICONS = {
   // Cape Air rows, in place of arrow-right. Nose points right.
   plane: "<path d=\"M21 12c0-1-1-1.5-2-1.5h-4L10 3H8l2.5 7.5H6L4 8H2.5L4 12l-1.5 4H4l2-2.5h4.5L8 21h2l5-7.5h4c1 0 2-.5 2-1.5z\"/>",
   // Also drawn to match the handoff, for the search box.
+  // Drawn to match too, for the detail page's All / Prev / Next.
+  "chevron-left": "<path d=\"M15 5l-7 7 7 7\"/>",
+  "chevron-right": "<path d=\"M9 5l7 7-7 7\"/>",
+  "chevrons-left": "<path d=\"M12 5l-7 7 7 7\"/><path d=\"M19 5l-7 7 7 7\"/>",
   search: "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M21 21l-5-5\"/>",
 } as const;
 

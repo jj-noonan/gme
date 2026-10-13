@@ -92,6 +92,7 @@ export function App() {
             query={query}
             searchTerms={searchTerms}
             onOpenTrip={trip.open}
+            onSwitchTrip={trip.replace}
             onCloseTrip={trip.close}
           />
         )}
@@ -107,6 +108,7 @@ export function App() {
             query={query}
             searchTerms={searchTerms}
             onOpenTrip={trip.open}
+            onSwitchTrip={trip.replace}
             onCloseTrip={trip.close}
           />
         )}
@@ -121,6 +123,7 @@ export function App() {
             query={query}
             searchTerms={searchTerms}
             onOpenTrip={trip.open}
+            onSwitchTrip={trip.replace}
             onCloseTrip={trip.close}
           />
         )}
@@ -135,6 +138,7 @@ export function App() {
             query={query}
             searchTerms={searchTerms}
             onOpenTrip={trip.open}
+            onSwitchTrip={trip.replace}
             onCloseTrip={trip.close}
           />
         )}

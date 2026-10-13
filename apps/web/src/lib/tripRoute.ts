@@ -34,3 +34,13 @@ export function isTripRow(route: TripRoute | null, row: ScheduleRow): boolean {
     route !== null && route.trainNumber === row.trainNumber && route.stationCode === row.stationCode
   );
 }
+
+/** The trips either side of the open one in the list it was opened from. */
+export function neighbors(
+  rows: ScheduleRow[],
+  route: TripRoute | null,
+): { prev: ScheduleRow | null; next: ScheduleRow | null } {
+  const i = rows.findIndex((row) => isTripRow(route, row));
+  if (i < 0) return { prev: null, next: null };
+  return { prev: rows[i - 1] ?? null, next: rows[i + 1] ?? null };
+}

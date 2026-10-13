@@ -10,7 +10,7 @@ import {
 import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
-import { formatTripHash, isTripRow, type TripRoute } from "../lib/tripRoute.js";
+import { formatTripHash, isTripRow, neighbors, type TripRoute } from "../lib/tripRoute.js";
 import { matchesSearch, searchableTrip, type SearchTerm } from "../lib/search.js";
 import { hasDeparted, liveDelayMinutes } from "../lib/trainStatus.js";
 import { BoardHeader } from "./BoardHeader.js";
@@ -33,6 +33,7 @@ export function TodayBoard({
   query,
   searchTerms,
   onOpenTrip,
+  onSwitchTrip,
   onCloseTrip,
 }: {
   rows: ScheduleRow[];
@@ -48,6 +49,8 @@ export function TodayBoard({
   query: string;
   searchTerms: SearchTerm[];
   onOpenTrip: (route: TripRoute) => void;
+  /** Step to another trip from the detail page. */
+  onSwitchTrip: (route: TripRoute) => void;
   onCloseTrip: () => void;
 }) {
   const routeFor = (row: ScheduleRow): TripRoute => ({
@@ -101,6 +104,8 @@ export function TodayBoard({
   // Found among all of today's rows, so a shared link still opens after the
   // train has gone.
   const detailRow = todaysRows.find((r) => isTripRow(openTrip, r));
+  // Prev / Next step through the list as it stands, search and all.
+  const { prev, next } = neighbors(shownRows, openTrip);
   const detail = detailRow && (
     <TripDetail
       row={detailRow}
@@ -112,6 +117,8 @@ export function TodayBoard({
       nycLabel={placeLabels.nyc}
       nowMinutes={nowMinutes}
       onClose={onCloseTrip}
+      onPrev={prev ? () => onSwitchTrip(routeFor(prev)) : undefined}
+      onNext={next ? () => onSwitchTrip(routeFor(next)) : undefined}
     />
   );
 
