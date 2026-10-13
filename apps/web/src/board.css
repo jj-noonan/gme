@@ -113,7 +113,9 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-  padding: 0.5rem;
+  /* No top padding: the sticky column header pins to the padding edge, and
+     rows would show through the gap between it and the search bar. */
+  padding: 0 0.5rem 0.5rem;
 }
 
 .board-empty,
