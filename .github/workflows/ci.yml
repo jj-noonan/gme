@@ -1,0 +1,21 @@
+name: CI
+
+# Tests and builds every pull request, so a broken build is caught before
+# merge rather than by the deploy. Required to pass on main.
+on:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build:web
+      # status-api has no build step of its own; typecheck it here.
+      - run: npx tsc -p apps/status-api --noEmit
