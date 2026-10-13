@@ -19,6 +19,7 @@ import {
   trainProgress,
   type TrainProgress,
 } from "../lib/trainStatus.js";
+import type { IconName } from "../lib/icons.js";
 import { Icon } from "./Icon.js";
 import { TransitBadges } from "./TransitBadges.js";
 
@@ -86,10 +87,46 @@ function OutLink({ link, children, className = "detail-link" }: { link: LinkOut;
   );
 }
 
-function Stop({ time, place, final }: { time: number; place: string; final?: boolean }) {
+/**
+ * Which day each of `times` (minutes since midnight, in trip order) falls
+ * on, counting from the first: each time earlier than the one before it has
+ * crossed midnight.
+ */
+export function dayOffsets(times: number[]): number[] {
+  let day = 0;
+  return times.map((time, i) => {
+    if (i > 0 && time < times[i - 1]) day++;
+    return day;
+  });
+}
+
+const DAY_LABEL = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" });
+
+/** Where the trip crosses midnight, like an airline's "arrives next day". */
+function DayBreak({ label }: { label: string }) {
+  return (
+    <li className="detail-day" aria-label={`Continues ${label}`}>
+      <span className="detail-day__label">{label}</span>
+    </li>
+  );
+}
+
+function Stop({
+  time,
+  place,
+  icon,
+  final,
+}: {
+  time: number;
+  place: string;
+  icon: IconName;
+  final?: boolean;
+}) {
   return (
     <li className={`detail-stop${final ? " detail-stop--final" : ""}`}>
-      <span className="detail-stop__dot" aria-hidden="true" />
+      <span className="detail-stop__marker" aria-hidden="true">
+        <Icon name={icon} size={16} />
+      </span>
       <span className="detail-stop__time">{formatClockFromMinutes(time)}</span>
       <span className="detail-stop__place">{place}</span>
     </li>
@@ -264,6 +301,21 @@ export function TripDetail({
   const transfer = <Segment dashed lines={[{ content: transferText(row, trip.transferMinutes) }]} />;
 
   const [startLabel, endLabel] = northbound ? [nycLabel, vtLabel] : [vtLabel, nycLabel];
+  const [startIcon, endIcon]: IconName[] = northbound ? ["new-york", "vermont"] : ["vermont", "new-york"];
+  // Cape Air's VT end is an airport.
+  const stationIcon: IconName = flight ? "plane" : "station";
+
+  // A divider before any stop that's on a later day than the one before it.
+  // Today, they're dated around the train's departure, which is today; the
+  // timetable just says "next day".
+  const days = dayOffsets([trip.leaveDoor, trip.trainDeparts, trip.trainArrives, trip.arriveDoor]);
+  const dayBreak = (stop: number) => {
+    if (stop === 0 || days[stop] === days[stop - 1]) return null;
+    if (!live) return <DayBreak label="Next day" />;
+    const date = new Date();
+    date.setDate(date.getDate() + days[stop] - days[1]);
+    return <DayBreak label={DAY_LABEL.format(date)} />;
+  };
 
   return (
     <div className="trip-detail" role="dialog" aria-modal="true" aria-labelledby="trip-detail-title">
@@ -278,15 +330,27 @@ export function TripDetail({
       </header>
 
       <ol className="detail-timeline">
-        <Stop time={trip.leaveDoor} place={startLabel} />
+        {dayBreak(0)}
+        <Stop time={trip.leaveDoor} place={startLabel} icon={startIcon} />
         {northbound ? subway(trip.firstLegMinutes, true) : drive(trip.firstLegMinutes, true)}
         {buffer}
-        <Stop time={trip.trainDeparts} place={stationLabel(row, boardingStationCode(row))} />
+        {dayBreak(1)}
+        <Stop
+          time={trip.trainDeparts}
+          place={stationLabel(row, boardingStationCode(row))}
+          icon={northbound ? "station" : stationIcon}
+        />
         {train}
-        <Stop time={trip.trainArrives} place={stationLabel(row, changeStationCode(row))} />
+        {dayBreak(2)}
+        <Stop
+          time={trip.trainArrives}
+          place={stationLabel(row, changeStationCode(row))}
+          icon={northbound ? stationIcon : "station"}
+        />
         {transfer}
         {northbound ? drive(trip.lastLegMinutes, false) : subway(trip.lastLegMinutes, false)}
-        <Stop time={trip.arriveDoor} place={endLabel} final />
+        {dayBreak(3)}
+        <Stop time={trip.arriveDoor} place={endLabel} icon={endIcon} final />
       </ol>
 
       <p className="trip-detail__total">
