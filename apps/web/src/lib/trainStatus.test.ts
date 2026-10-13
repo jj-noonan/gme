@@ -1,6 +1,6 @@
 import type { ScheduleRow, TrainStatus } from "@gme/shared";
 import { describe, expect, it } from "vitest";
-import { abbreviateService, describeStatus } from "./trainStatus.js";
+import { abbreviateService, describeStatus, hasDeparted } from "./trainStatus.js";
 
 const ROW: ScheduleRow = {
   trainNumber: 290,
@@ -78,5 +78,23 @@ describe("abbreviateService", () => {
     expect(abbreviateService("ETHAN ALLEN")).toBe("ETHN ALN");
     expect(abbreviateService("ADIRONDACK")).toBe("ADK");
     expect(abbreviateService("EMPIRE")).toBe("EMPIRE");
+  });
+});
+
+describe("hasDeparted", () => {
+  const at = (h: number, m: number) => h * 60 + m;
+
+  it("stays up through the scheduled departure minute", () => {
+    expect(hasDeparted(ROW, undefined, at(11, 6))).toBe(false);
+    expect(hasDeparted(ROW, undefined, at(11, 7))).toBe(true);
+  });
+
+  it("waits out a live delay", () => {
+    expect(hasDeparted(ROW, statusWith(12), at(11, 15))).toBe(false);
+    expect(hasDeparted(ROW, statusWith(12), at(11, 19))).toBe(true);
+  });
+
+  it("goes as soon as the live status says the train has left", () => {
+    expect(hasDeparted(ROW, statusWith(12, "Departed"), at(11, 0))).toBe(true);
   });
 });

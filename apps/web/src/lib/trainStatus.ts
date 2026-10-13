@@ -19,6 +19,20 @@ export function liveDelayMinutes(row: ScheduleRow, status: TrainStatus | undefin
   return delay != null && Number.isFinite(delay) ? delay : 0;
 }
 
+/**
+ * Whether this row's train has left the boarding station: the live status
+ * says so, or the (delay-adjusted) departure time has passed. Flights have no
+ * live status and go on the schedule.
+ */
+export function hasDeparted(
+  row: ScheduleRow,
+  status: TrainStatus | undefined,
+  nowMinutes: number,
+): boolean {
+  if (boardingStop(row, status)?.stopStatus === "Departed") return true;
+  return parseHHMM(row.scheduledDeparture) + liveDelayMinutes(row, status) < nowMinutes;
+}
+
 export interface StatusText {
   icon: IconName;
   /** e.g. "+12 MIN (ETD 11:18A)". */

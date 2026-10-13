@@ -53,7 +53,7 @@ export function TrainRow({
   /** For the drive's and the badges' Google Maps links. */
   vtLocation: Coordinate;
   nycLocation: Coordinate;
-  /** Omit on the timetable tabs — nothing is "missed" on a reference schedule. */
+  /** Omit on the timetable tabs — nothing is underway on a reference schedule. */
   nowMinutes?: number;
 }) {
   const statusText = describeStatus(row, status);
@@ -91,7 +91,8 @@ export function TrainRow({
     "trip",
     highlighted && "trip--recommended",
     band && "trip--band",
-    leaveBy.missed && "trip--missed",
+    // Past its leave-by time but the train hasn't left: you're on your way (or late).
+    leaveBy.missed && "trip--underway",
   ]
     .filter(Boolean)
     .join(" ");
