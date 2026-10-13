@@ -42,7 +42,8 @@ export function InfoPanel({ onClose }: { onClose: () => void }) {
 
         <p>
           Each row is a door-to-door trip: from your start location, to the train, and on to your
-          end location. The locations are the boxes at the bottom.
+          end location. The locations are the boxes at the bottom. Tap a row for the step-by-step
+          trip, with directions, tickets, and live status.
         </p>
 
         <h3>Leave by</h3>
@@ -105,8 +106,8 @@ export function InfoPanel({ onClose }: { onClose: () => void }) {
 
         <h3>Caveats</h3>
         <p>
-          Drive and subway links open Google Maps planned for now, not for the train's time.
-          The train's name opens Amtrak to buy tickets, but can't fill in the search for you.
+          Directions open Google Maps planned for now, not for the train's time. Tickets opens
+          Amtrak (or Cape Air), but can't fill in the search for you.
           Schedules are a snapshot of Amtrak's timetable. "Today" uses this device's clock,
           assumed to be Eastern time.
         </p>

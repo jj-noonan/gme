@@ -1,6 +1,4 @@
-import type { Coordinate } from "@gme/shared";
-import type { CSSProperties, ReactNode } from "react";
-import { transitDirectionsUrl } from "../lib/googleMaps.js";
+import type { CSSProperties } from "react";
 import { SUBWAY_LINES, subwayLine } from "../lib/subwayLines.js";
 import { Icon } from "./Icon.js";
 
@@ -35,40 +33,5 @@ export function TransitBadges({ lines }: { lines: string[] | null }) {
         <span className="line-badge line-badge--walk">WALK</span>
       )}
     </span>
-  );
-}
-
-/**
- * The NYC leg — its lines as badges (or the train icon while it's still the
- * flat estimate) plus whatever's passed as children, the duration — as one
- * link to the same trip in Google Maps.
- */
-export function TransitLink({
-  lines,
-  nycLocation,
-  toNyp,
-  children,
-}: {
-  /** Lines ridden, in order; null until the trip's been looked up. */
-  lines: string[] | null;
-  nycLocation: Coordinate;
-  toNyp: boolean;
-  children: ReactNode;
-}) {
-  const route =
-    lines === null ? "" : lines.length > 0 ? `Subway route: ${lines.join(", then ")}. ` : "Walk. ";
-  return (
-    <a
-      className="leg-link"
-      href={transitDirectionsUrl(nycLocation, toNyp)}
-      target="_blank"
-      rel="noopener noreferrer"
-      data-link-out="subway directions in Google Maps"
-      aria-label={`${route}Open subway directions in Google Maps`}
-      title="Open in Google Maps"
-    >
-      <TransitBadges lines={lines} />
-      {children}
-    </a>
   );
 }

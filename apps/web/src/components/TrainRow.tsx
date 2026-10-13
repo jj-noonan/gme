@@ -2,18 +2,15 @@ import {
   boardingStationCode,
   changeStationCode,
   tripTimeline,
-  type Coordinate,
   type ScheduleRow,
   type TrainStatus,
 } from "@gme/shared";
 import type { RowDoorLegs } from "../hooks/useDoorLegs.js";
 import { formatClock, formatClockFromMinutes, formatDuration } from "../lib/format.js";
-import { statusLink, ticketsLink } from "../lib/links.js";
 import { abbreviateService, describeStatus, liveDelayMinutes } from "../lib/trainStatus.js";
-import { DriveLink } from "./DriveLink.js";
 import { FlapText } from "./FlapText.js";
 import { Icon } from "./Icon.js";
-import { TransitLink } from "./TransitLink.js";
+import { TransitBadges } from "./TransitBadges.js";
 
 export function TrainRow({
   row,
@@ -23,9 +20,9 @@ export function TrainRow({
   live,
   band,
   doorLegs,
-  vtLocation,
-  nycLocation,
   nowMinutes,
+  href,
+  onOpen,
 }: {
   row: ScheduleRow;
   status?: TrainStatus;
@@ -36,11 +33,11 @@ export function TrainRow({
   band?: boolean;
   /** The row's door-side legs: the VT drive and the NYC transit trip. */
   doorLegs: RowDoorLegs;
-  /** For the drive's and the badges' Google Maps links. */
-  vtLocation: Coordinate;
-  nycLocation: Coordinate;
   /** Omit on the timetable tabs — nothing is underway on a reference schedule. */
   nowMinutes?: number;
+  /** The trip's detail page; the whole row links there. */
+  href: string;
+  onOpen: () => void;
 }) {
   const statusText = describeStatus(row, status);
   const trip = tripTimeline(row, doorLegs, liveDelayMinutes(row, status), nowMinutes ?? -Infinity);
@@ -52,20 +49,20 @@ export function TrainRow({
   // Cape Air sells its Penn Station shuttle as "ZYP"; show that on flight
   // rows (the subway leg still runs to Penn Station either way).
   const routeCode = (code: string) => (flight && code === "NYP" ? "ZYP" : code);
-  // Each leg — its icon or badges and its duration — links to that leg in Google Maps.
+  // Each leg is its icon or badges and its duration; the links to Maps and
+  // the rest live on the detail page.
   const nycLeg = (minutes: number) => (
-    <TransitLink lines={doorLegs.nycLines} nycLocation={nycLocation} toNyp={northbound}>
+    <>
+      <TransitBadges lines={doorLegs.nycLines} />
       {formatDuration(minutes)}
-    </TransitLink>
+    </>
   );
   const vtLeg = (minutes: number) => (
-    <DriveLink vtLocation={vtLocation} stationCode={row.stationCode} toStation={!northbound}>
+    <>
+      <Icon name="drive" size={16} />
       {formatDuration(minutes)}
-    </DriveLink>
+    </>
   );
-
-  const tickets = ticketsLink(row);
-  const statusPage = statusLink(row);
 
   const classes = [
     "trip",
@@ -78,7 +75,16 @@ export function TrainRow({
     .join(" ");
 
   return (
-    <article className={classes}>
+    <a
+      className={classes}
+      href={href}
+      onClick={(e) => {
+        // Modifier clicks open the detail page in a new tab, as a link should.
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        e.preventDefault();
+        onOpen();
+      }}
+    >
       <div className="trip__legs">
         {/* Leave the door, and how long it takes to get to the train. The
             station buffer is the unexplained gap; the detail page spells it out. */}
@@ -112,21 +118,14 @@ export function TrainRow({
       </div>
 
       <div className="trip__meta">
-        <a
-          className="trip__train"
-          href={tickets.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          data-link-out={tickets.linkOut}
-          title={flight ? "Buy tickets on Cape Air" : "Buy tickets on Amtrak"}
-        >
+        <span className="trip__train">
           <span className="only-wide">
             <FlapText text={`${row.service} ${row.trainNumber}`} />
           </span>
           <span className="only-narrow">
             <FlapText text={`${abbreviateService(row.service)} ${row.trainNumber}`} />
           </span>
-        </a>
+        </span>
         <span className="trip__times">
           {formatClock(row.scheduledDeparture)} / {formatClock(row.scheduledArrival)}
         </span>
@@ -139,13 +138,7 @@ export function TrainRow({
           </span>
         )}
         {live && !flight && (
-          <a
-            className="trip__status"
-            href={statusPage.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-link-out={statusPage.linkOut}
-          >
+          <span className="trip__status">
             <Icon name={statusText.icon} size={16} />
             <span className="status-full">
               <FlapText text={statusText.full} />
@@ -153,9 +146,9 @@ export function TrainRow({
             <span className="status-short">
               <FlapText text={statusText.short} />
             </span>
-          </a>
+          </span>
         )}
       </div>
-    </article>
+    </a>
   );
 }

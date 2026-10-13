@@ -2,7 +2,7 @@ import { nextRunningDay, type Coordinate, type Direction, type ScheduleRow } fro
 import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
-import { isTripRow, type TripRoute } from "../lib/tripRoute.js";
+import { formatTripHash, isTripRow, type TripRoute } from "../lib/tripRoute.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { GoogleCredit } from "./GoogleCredit.js";
 import { TrainRow } from "./TrainRow.js";
@@ -15,6 +15,7 @@ export function TimetableBoard({
   nycLocation,
   placeLabels,
   openTrip,
+  onOpenTrip,
   onCloseTrip,
 }: {
   rows: ScheduleRow[];
@@ -25,8 +26,14 @@ export function TimetableBoard({
   placeLabels: { vt: string; nyc: string };
   /** The trip whose detail page is open, if it's on this board. */
   openTrip: TripRoute | null;
+  onOpenTrip: (route: TripRoute) => void;
   onCloseTrip: () => void;
 }) {
+  const routeFor = (row: ScheduleRow): TripRoute => ({
+    tab: `${direction}_TIMETABLE`,
+    trainNumber: row.trainNumber,
+    stationCode: row.stationCode,
+  });
   const sorted = useMemo(
     () =>
       rows
@@ -55,8 +62,8 @@ export function TimetableBoard({
           showDays
           band={bands[i]}
           doorLegs={doorLegs(row)}
-          vtLocation={vtLocation}
-          nycLocation={nycLocation}
+          href={formatTripHash(routeFor(row))}
+          onOpen={() => onOpenTrip(routeFor(row))}
         />
       ))}
       <GoogleCredit show={sorted.some((r) => doorLegs(r).nycLines !== null)} />

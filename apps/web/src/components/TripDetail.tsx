@@ -20,7 +20,7 @@ import {
   type TrainProgress,
 } from "../lib/trainStatus.js";
 import { Icon } from "./Icon.js";
-import { TransitBadges } from "./TransitLink.js";
+import { TransitBadges } from "./TransitBadges.js";
 
 /** How far from typical a drive has to be before it's worth saying. */
 const USUAL_THRESHOLD_MINUTES = 3;
