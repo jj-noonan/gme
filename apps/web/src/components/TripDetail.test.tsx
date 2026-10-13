@@ -92,7 +92,8 @@ describe("TripDetail", () => {
   it("compares the drive to usual", () => {
     renderDetail();
     expect(screen.getByText("Drive 1H 49M")).toBeTruthy();
-    expect(screen.getByText("8 min slower than usual")).toBeTruthy();
+    const usual = screen.getByText("8 min slower than usual");
+    expect(usual.querySelector(".traffic-dot--slower")).toBeTruthy();
   });
 
   it("shows live status, track, and where the train is coming from", () => {
@@ -148,7 +149,8 @@ describe("TripDetail", () => {
 describe("comparedToUsual", () => {
   it("only mentions a real difference", () => {
     expect(comparedToUsual(100, null)).toBeNull();
-    expect(comparedToUsual(102, 100)).toBe("about usual");
-    expect(comparedToUsual(92, 100)).toBe("8 min faster than usual");
+    expect(comparedToUsual(102, 100)).toEqual({ text: "about usual", tone: "usual" });
+    expect(comparedToUsual(92, 100)).toEqual({ text: "8 min faster than usual", tone: "faster" });
+    expect(comparedToUsual(108, 100)).toEqual({ text: "8 min slower than usual", tone: "slower" });
   });
 });

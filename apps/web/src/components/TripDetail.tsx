@@ -31,12 +31,19 @@ function stationLabel(row: ScheduleRow, code: string): string {
   return station ? `${station.name} (${code})` : code;
 }
 
-/** "8 min slower than usual", "about usual", or null with nothing to compare to. */
-export function comparedToUsual(minutes: number, typical: number | null): string | null {
+export interface ComparedToUsual {
+  /** "8 min slower than usual", "about usual". */
+  text: string;
+  tone: "faster" | "usual" | "slower";
+}
+
+/** How the drive compares to typical traffic; null with nothing to compare to. */
+export function comparedToUsual(minutes: number, typical: number | null): ComparedToUsual | null {
   if (typical === null) return null;
   const diff = Math.round(minutes - typical);
-  if (Math.abs(diff) < USUAL_THRESHOLD_MINUTES) return "about usual";
-  return `${Math.abs(diff)} min ${diff > 0 ? "slower" : "faster"} than usual`;
+  if (Math.abs(diff) < USUAL_THRESHOLD_MINUTES) return { text: "about usual", tone: "usual" };
+  const tone = diff > 0 ? "slower" : "faster";
+  return { text: `${Math.abs(diff)} min ${tone} than usual`, tone };
 }
 
 /** The buffer before the train, on one line: "20 min to park and get to the platform (buffer)". */
@@ -174,7 +181,16 @@ export function TripDetail({
               </OutLink>
             ),
           },
-          usual ? { content: usual } : null,
+          usual
+            ? {
+                content: (
+                  <>
+                    <span className={`traffic-dot traffic-dot--${usual.tone}`} aria-hidden="true" />
+                    {usual.text}
+                  </>
+                ),
+              }
+            : null,
         ]}
       />
     );
