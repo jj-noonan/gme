@@ -17,16 +17,23 @@ export interface DriveDeps {
 
 const defaultDeps: DriveDeps = { token: MAPBOX_TOKEN, fetchImpl: fetch, now: () => new Date() };
 
+/** A routed drive: with the traffic expected, and with typical traffic for that time. */
+interface DriveTime {
+  minutes: number;
+  /** Mapbox's typical duration for that slot; null when it doesn't have one. */
+  typicalMinutes: number | null;
+}
+
 // Keyed by the slotted leg, so every row in the same quarter hour shares one call.
-const cache = new Map<string, { minutes: number; expiresAt: number }>();
-const inFlight = new Map<string, Promise<number | null>>();
+const cache = new Map<string, DriveTime & { expiresAt: number }>();
+const inFlight = new Map<string, Promise<DriveTime | null>>();
 
 export function clearDriveCache(): void {
   cache.clear();
   inFlight.clear();
 }
 
-async function fetchDriveMinutes(leg: DriveLeg, deps: DriveDeps): Promise<number | null> {
+async function fetchDriveTime(leg: DriveLeg, deps: DriveDeps): Promise<DriveTime | null> {
   const station = STATIONS.find((s) => s.code === leg.stationCode);
   if (!station) return null;
 
@@ -44,12 +51,20 @@ async function fetchDriveMinutes(leg: DriveLeg, deps: DriveDeps): Promise<number
   });
   if (!response.ok) throw new Error(`Mapbox responded ${response.status}`);
 
-  const body = (await response.json()) as { code?: string; routes?: { duration?: number }[] };
-  const seconds = body.routes?.[0]?.duration;
+  const body = (await response.json()) as {
+    code?: string;
+    routes?: { duration?: number; duration_typical?: number }[];
+  };
+  const route = body.routes?.[0];
+  const seconds = route?.duration;
   if (body.code !== "Ok" || typeof seconds !== "number" || !Number.isFinite(seconds)) {
     throw new Error(`Mapbox returned no usable route (code ${body.code})`);
   }
-  return seconds / 60;
+  const typical = route?.duration_typical;
+  return {
+    minutes: seconds / 60,
+    typicalMinutes: typeof typical === "number" && Number.isFinite(typical) ? typical / 60 : null,
+  };
 }
 
 function cacheTtlMs(leg: DriveLeg, deps: DriveDeps): number {
@@ -65,19 +80,19 @@ function pruneCache(): void {
   }
 }
 
-async function lookupSlot(leg: DriveLeg, deps: DriveDeps): Promise<number | null> {
+async function lookupSlot(leg: DriveLeg, deps: DriveDeps): Promise<DriveTime | null> {
   const key = formatDriveLeg(leg);
   const cached = cache.get(key);
-  if (cached && Date.now() < cached.expiresAt) return cached.minutes;
+  if (cached && Date.now() < cached.expiresAt) return cached;
 
   const pending = inFlight.get(key);
   if (pending) return pending;
 
   pruneCache();
-  const request = fetchDriveMinutes(leg, deps)
-    .then((minutes) => {
-      if (minutes != null) cache.set(key, { minutes, expiresAt: Date.now() + cacheTtlMs(leg, deps) });
-      return minutes;
+  const request = fetchDriveTime(leg, deps)
+    .then((time) => {
+      if (time != null) cache.set(key, { ...time, expiresAt: Date.now() + cacheTtlMs(leg, deps) });
+      return time;
     })
     .catch((error: unknown) => {
       // A miss just means the web app keeps its own estimate for this row.
@@ -89,24 +104,36 @@ async function lookupSlot(leg: DriveLeg, deps: DriveDeps): Promise<number | null
   return request;
 }
 
+export interface DriveTimes {
+  /** Traffic-aware minutes per leg. */
+  minutes: Record<string, number>;
+  /** Typical minutes for the same slot, for legs Mapbox has one for. */
+  typical: Record<string, number>;
+}
+
 /**
- * Traffic-aware drive minutes for each leg, keyed by the leg's wire form as
- * requested. Legs that can't be answered are left out.
+ * Traffic-aware drive minutes for each leg, plus the typical time where
+ * known, keyed by the leg's wire form as requested. Legs that can't be
+ * answered are left out.
  */
 export async function getDriveMinutes(
   legs: DriveLeg[],
   deps: DriveDeps = defaultDeps,
-): Promise<Record<string, number>> {
-  if (!deps.token) return {};
+): Promise<DriveTimes> {
+  const times: DriveTimes = { minutes: {}, typical: {} };
+  if (!deps.token) return times;
 
   const results = await Promise.all(
     legs.map(async (leg) => {
-      const minutes = await lookupSlot({ ...leg, departAt: slotDepartAt(leg.departAt) }, deps);
-      return [formatDriveLeg(leg), minutes] as const;
+      const time = await lookupSlot({ ...leg, departAt: slotDepartAt(leg.departAt) }, deps);
+      return [formatDriveLeg(leg), time] as const;
     }),
   );
 
-  return Object.fromEntries(
-    results.filter((entry): entry is readonly [string, number] => entry[1] != null),
-  );
+  for (const [key, time] of results) {
+    if (!time) continue;
+    times.minutes[key] = time.minutes;
+    if (time.typicalMinutes != null) times.typical[key] = time.typicalMinutes;
+  }
+  return times;
 }

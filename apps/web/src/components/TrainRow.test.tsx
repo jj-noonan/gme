@@ -14,7 +14,12 @@ const ETHAN_ALLEN: ScheduleRow = {
   scheduledArrival: "16:27",
 };
 
-const LEGS: RowDoorLegs = { vtDriveMinutes: 18, nycTransitMinutes: 32, nycLines: ["A", "C"] };
+const LEGS: RowDoorLegs = {
+  vtDriveMinutes: 18,
+  vtDriveTypicalMinutes: null,
+  nycTransitMinutes: 32,
+  nycLines: ["A", "C"],
+};
 const PLACE = { lat: 43.6, lon: -72.97 };
 
 // Split-flap text renders one tile per character; read it back as a string.

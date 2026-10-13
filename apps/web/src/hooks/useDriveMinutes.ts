@@ -3,13 +3,22 @@ import { useEffect, useMemo, useState } from "react";
 import { DRIVE_POLL_INTERVAL_MS } from "../lib/config.js";
 import { fetchStatusApi } from "../lib/statusApi.js";
 
+export interface DriveTimes {
+  /** Traffic-aware minutes. */
+  minutes: Record<string, number>;
+  /** Typical minutes for the same time, where known. */
+  typical: Record<string, number>;
+}
+
+const NONE: DriveTimes = { minutes: {}, typical: {} };
+
 /**
- * Traffic-aware drive minutes for `legs`, keyed by `formatDriveLeg`. Empty
- * until (or unless) status-api answers; callers fall back to the
- * straight-line estimate for anything missing.
+ * Traffic-aware drive minutes for `legs`, keyed by `formatDriveLeg`, with the
+ * typical time alongside. Empty until (or unless) status-api answers; callers
+ * fall back to the straight-line estimate for anything missing.
  */
-export function useDriveMinutes(legs: DriveLeg[]): Record<string, number> {
-  const [minutes, setMinutes] = useState<Record<string, number>>({});
+export function useDriveMinutes(legs: DriveLeg[]): DriveTimes {
+  const [times, setTimes] = useState<DriveTimes>(NONE);
 
   // A stable string, so the effect only refires when the set of legs changes.
   const legsParam = useMemo(() => [...new Set(legs.map(formatDriveLeg))].join(";"), [legs]);
@@ -19,11 +28,11 @@ export function useDriveMinutes(legs: DriveLeg[]): Record<string, number> {
 
     let cancelled = false;
     const fetchMinutes = () => {
-      fetchStatusApi<{ minutes: Record<string, number> }>(
+      fetchStatusApi<{ minutes: Record<string, number>; typical?: Record<string, number> }>(
         `/drive?legs=${encodeURIComponent(legsParam)}`,
       )
         .then((data) => {
-          if (!cancelled) setMinutes(data.minutes);
+          if (!cancelled) setTimes({ minutes: data.minutes, typical: data.typical ?? {} });
         })
         .catch(() => {
           // Keep whatever we last had; with nothing, rows use the straight-line estimate.
@@ -38,5 +47,5 @@ export function useDriveMinutes(legs: DriveLeg[]): Record<string, number> {
     };
   }, [legsParam]);
 
-  return minutes;
+  return times;
 }
