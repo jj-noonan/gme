@@ -162,12 +162,33 @@ describe("TripDetail", () => {
     expect(container.querySelector(".detail-day")).toBeNull();
   });
 
-  it("closes on Back and on Escape", () => {
+  it("titles the trip with its door-to-door time", () => {
+    renderDetail();
+    expect(screen.getByRole("heading").textContent).toBe("EMPIRE 284(5H 21M)Today");
+  });
+
+  it("closes on All and on Escape", () => {
     const onClose = vi.fn();
     renderDetail({ onClose });
-    fireEvent.click(screen.getByText("‹ Back"));
+    fireEvent.click(screen.getByText("All"));
     fireEvent.keyDown(document, { key: "Escape" });
     expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
+  it("steps to the previous and next trips, by button or arrow key", () => {
+    const onPrev = vi.fn();
+    const onNext = vi.fn();
+    renderDetail({ onPrev, onNext });
+    fireEvent.click(screen.getByLabelText("Previous trip"));
+    fireEvent.keyDown(document, { key: "ArrowRight" });
+    expect(onPrev).toHaveBeenCalledOnce();
+    expect(onNext).toHaveBeenCalledOnce();
+  });
+
+  it("disables Prev / Next at the ends of the list", () => {
+    renderDetail({ onNext: () => {} });
+    expect((screen.getByLabelText("Previous trip") as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByLabelText("Next trip") as HTMLButtonElement).disabled).toBe(false);
   });
 });
 

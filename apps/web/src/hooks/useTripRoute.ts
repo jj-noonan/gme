@@ -9,6 +9,8 @@ let openedHere = false;
 export function useTripRoute(): {
   route: TripRoute | null;
   open: (route: TripRoute) => void;
+  /** Switch to another trip in place (Prev / Next), without a history entry per step. */
+  replace: (route: TripRoute) => void;
   close: () => void;
 } {
   const [route, setRoute] = useState(() => parseTripHash(window.location.hash));
@@ -28,6 +30,11 @@ export function useTripRoute(): {
     window.location.hash = formatTripHash(next);
   }, []);
 
+  const replace = useCallback((next: TripRoute) => {
+    window.history.replaceState(window.history.state, "", formatTripHash(next));
+    setRoute(next);
+  }, []);
+
   const close = useCallback(() => {
     if (openedHere) {
       openedHere = false;
@@ -39,5 +46,5 @@ export function useTripRoute(): {
     setRoute(null);
   }, []);
 
-  return { route, open, close };
+  return { route, open, replace, close };
 }

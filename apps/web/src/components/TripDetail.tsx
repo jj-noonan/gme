@@ -167,6 +167,8 @@ export function TripDetail({
   nycLabel,
   nowMinutes,
   onClose,
+  onPrev,
+  onNext,
 }: {
   row: ScheduleRow;
   /** Live status; omit on the timetable, which has none. */
@@ -179,6 +181,9 @@ export function TripDetail({
   /** Omit on the timetable — nothing is underway on a reference schedule. */
   nowMinutes?: number;
   onClose: () => void;
+  /** The trips either side in the list; omitted at either end. */
+  onPrev?: () => void;
+  onNext?: () => void;
 }) {
   const live = nowMinutes !== undefined;
   const flight = row.mode === "flight";
@@ -188,12 +193,17 @@ export function TripDetail({
 
   useEffect(() => {
     backButton.current?.focus();
+  }, []);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowLeft") onPrev?.();
+      else if (e.key === "ArrowRight") onNext?.();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  }, [onClose, onPrev, onNext]);
 
   const drive = (minutes: number, toStation: boolean) => {
     const usual = comparedToUsual(doorLegs.vtDriveMinutes, doorLegs.vtDriveTypicalMinutes);
@@ -320,13 +330,37 @@ export function TripDetail({
   return (
     <div className="trip-detail" role="dialog" aria-modal="true" aria-labelledby="trip-detail-title">
       <header className="trip-detail__header">
-        <button ref={backButton} type="button" className="trip-detail__back" onClick={onClose}>
-          ‹ Back
+        <button ref={backButton} type="button" className="trip-detail__nav" onClick={onClose}>
+          <Icon name="chevrons-left" size={16} />
+          All
         </button>
         <h2 id="trip-detail-title" className="trip-detail__title">
           {flight ? "Cape Air" : row.service} {row.trainNumber}
+          <span className="trip-detail__total-time">({formatDuration(trip.totalMinutes)})</span>
           <span className="trip-detail__when">{live ? "Today" : row.daysRaw}</span>
         </h2>
+        <div className="trip-detail__step">
+          <button
+            type="button"
+            className="trip-detail__nav"
+            onClick={onPrev}
+            disabled={!onPrev}
+            aria-label="Previous trip"
+          >
+            <Icon name="chevron-left" size={16} />
+            <span className="only-wide">Prev</span>
+          </button>
+          <button
+            type="button"
+            className="trip-detail__nav"
+            onClick={onNext}
+            disabled={!onNext}
+            aria-label="Next trip"
+          >
+            <span className="only-wide">Next</span>
+            <Icon name="chevron-right" size={16} />
+          </button>
+        </div>
       </header>
 
       <ol className="detail-timeline">

@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
 import { matchesSearch, searchableTrip, type SearchTerm } from "../lib/search.js";
-import { formatTripHash, isTripRow, type TripRoute } from "../lib/tripRoute.js";
+import { formatTripHash, isTripRow, neighbors, type TripRoute } from "../lib/tripRoute.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { GoogleCredit } from "./GoogleCredit.js";
 import { TrainRow } from "./TrainRow.js";
@@ -19,6 +19,7 @@ export function TimetableBoard({
   query,
   searchTerms,
   onOpenTrip,
+  onSwitchTrip,
   onCloseTrip,
 }: {
   rows: ScheduleRow[];
@@ -33,6 +34,8 @@ export function TimetableBoard({
   query: string;
   searchTerms: SearchTerm[];
   onOpenTrip: (route: TripRoute) => void;
+  /** Step to another trip from the detail page. */
+  onSwitchTrip: (route: TripRoute) => void;
   onCloseTrip: () => void;
 }) {
   const routeFor = (row: ScheduleRow): TripRoute => ({
@@ -59,6 +62,8 @@ export function TimetableBoard({
   const detailRow = sorted.find((r) => isTripRow(openTrip, r));
   const shownRows = sorted.filter((r) => matchesSearch(searchTerms, searchableTrip(r, doorLegs(r), 0)));
   const bands = computeRowBands(shownRows);
+  // Prev / Next step through the list as it stands, search and all.
+  const { prev, next } = neighbors(shownRows, openTrip);
 
   return (
     <div className="board-list">
@@ -85,6 +90,8 @@ export function TimetableBoard({
           vtLabel={placeLabels.vt}
           nycLabel={placeLabels.nyc}
           onClose={onCloseTrip}
+          onPrev={prev ? () => onSwitchTrip(routeFor(prev)) : undefined}
+          onNext={next ? () => onSwitchTrip(routeFor(next)) : undefined}
         />
       )}
     </div>

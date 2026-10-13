@@ -786,15 +786,18 @@ body {
   top: 0;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.6rem;
   padding: 0.75rem 0;
   background: var(--board-bg);
   border-bottom: 1px solid var(--rule);
 }
 
-.trip-detail__back {
+.trip-detail__nav {
   flex: 0 0 auto;
-  padding: 0.4rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 0.55rem;
   background: var(--tile-bg);
   color: var(--ink);
   border: 1px solid var(--rule);
@@ -805,12 +808,37 @@ body {
   cursor: pointer;
 }
 
+.trip-detail__nav:hover:not(:disabled),
+.trip-detail__nav:focus-visible {
+  color: var(--amber);
+  border-color: var(--ink-dim);
+}
+
+.trip-detail__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
 .trip-detail__title {
+  flex: 1 1 auto;
+  min-width: 0;
   margin: 0;
   font-size: 1.1rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--amber);
+}
+
+.trip-detail__total-time {
+  margin-left: 0.4rem;
+  color: var(--ink);
+}
+
+/* Prev and Next, together at the right. */
+.trip-detail__step {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 0.4rem;
 }
 
 .trip-detail__when {
