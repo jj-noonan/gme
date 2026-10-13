@@ -1,6 +1,6 @@
 import type { ScheduleRow } from "@gme/shared";
 import { describe, expect, it } from "vitest";
-import { matchesSearch, parseQuery, parseTime, type SearchableTrip } from "./search.js";
+import { matchesSearch, parseQuery, parseTime, toggleBucket, type SearchableTrip } from "./search.js";
 
 const at = (h: number, m = 0) => h * 60 + m;
 
@@ -113,5 +113,17 @@ describe("search", () => {
   it("ignores an unfinished time while you're still typing", () => {
     expect(search("after")).toEqual([284, 290, 1080]);
     expect(search("ethan arrive before")).toEqual([290]);
+  });
+});
+
+describe("toggleBucket", () => {
+  it("adds a time of day to what's typed, and takes it away again", () => {
+    expect(toggleBucket("", "morning")).toBe("morning");
+    expect(toggleBucket("ethan", "morning")).toBe("ethan morning");
+    expect(toggleBucket("ethan morning", "morning")).toBe("ethan");
+  });
+
+  it("swaps one time of day for another", () => {
+    expect(toggleBucket("alb Evening", "afternoon")).toBe("alb afternoon");
   });
 });

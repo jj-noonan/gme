@@ -206,3 +206,20 @@ export function searchableTrip(row: ScheduleRow, legs: DoorLegs, delayMinutes: n
   const trip = tripTimeline(row, legs, delayMinutes, -Infinity);
   return { row, leaveDoor: trip.leaveDoor, arriveDoor: trip.arriveDoor };
 }
+
+/** Whether `query` already narrows to `bucket`. */
+export function hasBucket(query: string, bucket: TimeBucket): boolean {
+  return parseQuery(query).some((t) => t.kind === "bucket" && t.bucket === bucket);
+}
+
+/**
+ * The query with `bucket` switched on or off — for one-tap time-of-day
+ * buttons. Turning one on drops any other, since a trip is only ever in one.
+ */
+export function toggleBucket(query: string, bucket: TimeBucket): string {
+  const on = hasBucket(query, bucket);
+  const kept = query
+    .split(/\s+/)
+    .filter((word) => word && !(word.toLowerCase() in BUCKET_WORDS));
+  return (on ? kept : [...kept, bucket]).join(" ");
+}

@@ -23,6 +23,21 @@ describe("SearchBar", () => {
   });
 });
 
+describe("time-of-day buttons", () => {
+  it("toggle their word in the query, and show when it's on", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<SearchBar query="ethan" onChange={onChange} />);
+    fireEvent.click(screen.getByText("Morning"));
+    expect(onChange).toHaveBeenLastCalledWith("ethan morning");
+
+    rerender(<SearchBar query="ethan morning" onChange={onChange} />);
+    expect(screen.getByText("Morning").getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("Evening").getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(screen.getByText("Morning"));
+    expect(onChange).toHaveBeenLastCalledWith("ethan");
+  });
+});
+
 describe("useSearchQuery", () => {
   it("keeps the query in the URL, alongside an open trip", () => {
     window.history.replaceState(null, "", "/?q=alb#/trip/S_TODAY/284-ALB");
