@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useSearchQuery } from "../hooks/useSearchQuery.js";
