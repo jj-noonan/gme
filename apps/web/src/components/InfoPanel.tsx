@@ -49,7 +49,7 @@ export function InfoPanel({ onClose }: { onClose: () => void }) {
         <p>
           Train departure, minus getting to the station, minus a buffer: {TRIP_BUFFER_MINUTES} min
           at VT/NY stations (parking), {NYC_STATION_BUFFER_MINUTES} min at Penn Station. The time
-          under it is the whole gap, buffer included.
+          under it is just the drive or subway ride; the buffer is the rest of the gap.
         </p>
 
         <h3>VT side: driving</h3>
