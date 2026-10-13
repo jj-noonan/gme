@@ -2,6 +2,7 @@ import { nextRunningDay, type Coordinate, type Direction, type ScheduleRow } fro
 import { useMemo } from "react";
 import { useDoorLegs } from "../hooks/useDoorLegs.js";
 import { computeRowBands } from "../lib/rowBands.js";
+import { matchesSearch, searchableTrip, type SearchTerm } from "../lib/search.js";
 import { formatTripHash, isTripRow, type TripRoute } from "../lib/tripRoute.js";
 import { BoardHeader } from "./BoardHeader.js";
 import { GoogleCredit } from "./GoogleCredit.js";
@@ -15,6 +16,8 @@ export function TimetableBoard({
   nycLocation,
   placeLabels,
   openTrip,
+  query,
+  searchTerms,
   onOpenTrip,
   onCloseTrip,
 }: {
@@ -26,6 +29,9 @@ export function TimetableBoard({
   placeLabels: { vt: string; nyc: string };
   /** The trip whose detail page is open, if it's on this board. */
   openTrip: TripRoute | null;
+  /** The search box's text, and what it parsed to; only matching trips show. */
+  query: string;
+  searchTerms: SearchTerm[];
   onOpenTrip: (route: TripRoute) => void;
   onCloseTrip: () => void;
 }) {
@@ -41,7 +47,7 @@ export function TimetableBoard({
         .sort((a, b) => a.scheduledDeparture.localeCompare(b.scheduledDeparture)),
     [rows, direction],
   );
-  const bands = computeRowBands(sorted);
+
 
   // A timetable row has no date, so each door leg is planned for the next
   // day that train runs: typical traffic and that day's subway schedule.
@@ -51,11 +57,14 @@ export function TimetableBoard({
   );
 
   const detailRow = sorted.find((r) => isTripRow(openTrip, r));
+  const shownRows = sorted.filter((r) => matchesSearch(searchTerms, searchableTrip(r, doorLegs(r), 0)));
+  const bands = computeRowBands(shownRows);
 
   return (
     <div className="board-list">
       <BoardHeader />
-      {sorted.map((row, i) => (
+      {shownRows.length === 0 && <p className="board-empty">No trips match “{query.trim()}”.</p>}
+      {shownRows.map((row, i) => (
         <TrainRow
           key={`${row.trainNumber}-${row.stationCode}-${i}`}
           row={row}
@@ -66,7 +75,7 @@ export function TimetableBoard({
           onOpen={() => onOpenTrip(routeFor(row))}
         />
       ))}
-      <GoogleCredit show={sorted.some((r) => doorLegs(r).nycLines !== null)} />
+      <GoogleCredit show={shownRows.some((r) => doorLegs(r).nycLines !== null)} />
       {detailRow && (
         <TripDetail
           row={detailRow}
